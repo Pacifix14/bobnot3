@@ -6028,8 +6028,18 @@ export namespace Prisma {
 
   export type AggregateFolder = {
     _count: FolderCountAggregateOutputType | null
+    _avg: FolderAvgAggregateOutputType | null
+    _sum: FolderSumAggregateOutputType | null
     _min: FolderMinAggregateOutputType | null
     _max: FolderMaxAggregateOutputType | null
+  }
+
+  export type FolderAvgAggregateOutputType = {
+    order: number | null
+  }
+
+  export type FolderSumAggregateOutputType = {
+    order: number | null
   }
 
   export type FolderMinAggregateOutputType = {
@@ -6039,6 +6049,7 @@ export namespace Prisma {
     updatedAt: Date | null
     workspaceId: string | null
     parentId: string | null
+    order: number | null
   }
 
   export type FolderMaxAggregateOutputType = {
@@ -6048,6 +6059,7 @@ export namespace Prisma {
     updatedAt: Date | null
     workspaceId: string | null
     parentId: string | null
+    order: number | null
   }
 
   export type FolderCountAggregateOutputType = {
@@ -6057,9 +6069,18 @@ export namespace Prisma {
     updatedAt: number
     workspaceId: number
     parentId: number
+    order: number
     _all: number
   }
 
+
+  export type FolderAvgAggregateInputType = {
+    order?: true
+  }
+
+  export type FolderSumAggregateInputType = {
+    order?: true
+  }
 
   export type FolderMinAggregateInputType = {
     id?: true
@@ -6068,6 +6089,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     parentId?: true
+    order?: true
   }
 
   export type FolderMaxAggregateInputType = {
@@ -6077,6 +6099,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     parentId?: true
+    order?: true
   }
 
   export type FolderCountAggregateInputType = {
@@ -6086,6 +6109,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     parentId?: true
+    order?: true
     _all?: true
   }
 
@@ -6127,6 +6151,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: FolderAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FolderSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: FolderMinAggregateInputType
@@ -6157,6 +6193,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: FolderCountAggregateInputType | true
+    _avg?: FolderAvgAggregateInputType
+    _sum?: FolderSumAggregateInputType
     _min?: FolderMinAggregateInputType
     _max?: FolderMaxAggregateInputType
   }
@@ -6168,7 +6206,10 @@ export namespace Prisma {
     updatedAt: Date
     workspaceId: string
     parentId: string | null
+    order: number
     _count: FolderCountAggregateOutputType | null
+    _avg: FolderAvgAggregateOutputType | null
+    _sum: FolderSumAggregateOutputType | null
     _min: FolderMinAggregateOutputType | null
     _max: FolderMaxAggregateOutputType | null
   }
@@ -6194,6 +6235,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     parentId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     parent?: boolean | Folder$parentArgs<ExtArgs>
     children?: boolean | Folder$childrenArgs<ExtArgs>
@@ -6208,6 +6250,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     parentId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     parent?: boolean | Folder$parentArgs<ExtArgs>
   }, ExtArgs["result"]["folder"]>
@@ -6219,6 +6262,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     parentId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     parent?: boolean | Folder$parentArgs<ExtArgs>
   }, ExtArgs["result"]["folder"]>
@@ -6230,9 +6274,10 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     parentId?: boolean
+    order?: boolean
   }
 
-  export type FolderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "workspaceId" | "parentId", ExtArgs["result"]["folder"]>
+  export type FolderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "workspaceId" | "parentId" | "order", ExtArgs["result"]["folder"]>
   export type FolderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     parent?: boolean | Folder$parentArgs<ExtArgs>
@@ -6264,6 +6309,7 @@ export namespace Prisma {
       updatedAt: Date
       workspaceId: string
       parentId: string | null
+      order: number
     }, ExtArgs["result"]["folder"]>
     composites: {}
   }
@@ -6697,6 +6743,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Folder", 'DateTime'>
     readonly workspaceId: FieldRef<"Folder", 'String'>
     readonly parentId: FieldRef<"Folder", 'String'>
+    readonly order: FieldRef<"Folder", 'Int'>
   }
     
 
@@ -7184,8 +7231,18 @@ export namespace Prisma {
 
   export type AggregatePage = {
     _count: PageCountAggregateOutputType | null
+    _avg: PageAvgAggregateOutputType | null
+    _sum: PageSumAggregateOutputType | null
     _min: PageMinAggregateOutputType | null
     _max: PageMaxAggregateOutputType | null
+  }
+
+  export type PageAvgAggregateOutputType = {
+    order: number | null
+  }
+
+  export type PageSumAggregateOutputType = {
+    order: number | null
   }
 
   export type PageMinAggregateOutputType = {
@@ -7195,6 +7252,7 @@ export namespace Prisma {
     updatedAt: Date | null
     workspaceId: string | null
     folderId: string | null
+    order: number | null
   }
 
   export type PageMaxAggregateOutputType = {
@@ -7204,6 +7262,7 @@ export namespace Prisma {
     updatedAt: Date | null
     workspaceId: string | null
     folderId: string | null
+    order: number | null
   }
 
   export type PageCountAggregateOutputType = {
@@ -7214,9 +7273,18 @@ export namespace Prisma {
     updatedAt: number
     workspaceId: number
     folderId: number
+    order: number
     _all: number
   }
 
+
+  export type PageAvgAggregateInputType = {
+    order?: true
+  }
+
+  export type PageSumAggregateInputType = {
+    order?: true
+  }
 
   export type PageMinAggregateInputType = {
     id?: true
@@ -7225,6 +7293,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     folderId?: true
+    order?: true
   }
 
   export type PageMaxAggregateInputType = {
@@ -7234,6 +7303,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     folderId?: true
+    order?: true
   }
 
   export type PageCountAggregateInputType = {
@@ -7244,6 +7314,7 @@ export namespace Prisma {
     updatedAt?: true
     workspaceId?: true
     folderId?: true
+    order?: true
     _all?: true
   }
 
@@ -7285,6 +7356,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: PageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: PageMinAggregateInputType
@@ -7315,6 +7398,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: PageCountAggregateInputType | true
+    _avg?: PageAvgAggregateInputType
+    _sum?: PageSumAggregateInputType
     _min?: PageMinAggregateInputType
     _max?: PageMaxAggregateInputType
   }
@@ -7327,7 +7412,10 @@ export namespace Prisma {
     updatedAt: Date
     workspaceId: string
     folderId: string | null
+    order: number
     _count: PageCountAggregateOutputType | null
+    _avg: PageAvgAggregateOutputType | null
+    _sum: PageSumAggregateOutputType | null
     _min: PageMinAggregateOutputType | null
     _max: PageMaxAggregateOutputType | null
   }
@@ -7354,6 +7442,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     folderId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
   }, ExtArgs["result"]["page"]>
@@ -7366,6 +7455,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     folderId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
   }, ExtArgs["result"]["page"]>
@@ -7378,6 +7468,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     folderId?: boolean
+    order?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
   }, ExtArgs["result"]["page"]>
@@ -7390,9 +7481,10 @@ export namespace Prisma {
     updatedAt?: boolean
     workspaceId?: boolean
     folderId?: boolean
+    order?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId" | "order", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
@@ -7420,6 +7512,7 @@ export namespace Prisma {
       updatedAt: Date
       workspaceId: string
       folderId: string | null
+      order: number
     }, ExtArgs["result"]["page"]>
     composites: {}
   }
@@ -7852,6 +7945,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Page", 'DateTime'>
     readonly workspaceId: FieldRef<"Page", 'String'>
     readonly folderId: FieldRef<"Page", 'String'>
+    readonly order: FieldRef<"Page", 'Int'>
   }
     
 
@@ -9325,7 +9419,8 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     workspaceId: 'workspaceId',
-    parentId: 'parentId'
+    parentId: 'parentId',
+    order: 'order'
   };
 
   export type FolderScalarFieldEnum = (typeof FolderScalarFieldEnum)[keyof typeof FolderScalarFieldEnum]
@@ -9338,7 +9433,8 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     workspaceId: 'workspaceId',
-    folderId: 'folderId'
+    folderId: 'folderId',
+    order: 'order'
   };
 
   export type PageScalarFieldEnum = (typeof PageScalarFieldEnum)[keyof typeof PageScalarFieldEnum]
@@ -9752,6 +9848,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     workspaceId?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
+    order?: IntFilter<"Folder"> | number
     workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
     parent?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     children?: FolderListRelationFilter
@@ -9765,6 +9862,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     parentId?: SortOrderInput | SortOrder
+    order?: SortOrder
     workspace?: WorkspaceOrderByWithRelationInput
     parent?: FolderOrderByWithRelationInput
     children?: FolderOrderByRelationAggregateInput
@@ -9781,6 +9879,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     workspaceId?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
+    order?: IntFilter<"Folder"> | number
     workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
     parent?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     children?: FolderListRelationFilter
@@ -9794,9 +9893,12 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     parentId?: SortOrderInput | SortOrder
+    order?: SortOrder
     _count?: FolderCountOrderByAggregateInput
+    _avg?: FolderAvgOrderByAggregateInput
     _max?: FolderMaxOrderByAggregateInput
     _min?: FolderMinOrderByAggregateInput
+    _sum?: FolderSumOrderByAggregateInput
   }
 
   export type FolderScalarWhereWithAggregatesInput = {
@@ -9809,6 +9911,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Folder"> | Date | string
     workspaceId?: StringWithAggregatesFilter<"Folder"> | string
     parentId?: StringNullableWithAggregatesFilter<"Folder"> | string | null
+    order?: IntWithAggregatesFilter<"Folder"> | number
   }
 
   export type PageWhereInput = {
@@ -9822,6 +9925,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Page"> | Date | string
     workspaceId?: StringFilter<"Page"> | string
     folderId?: StringNullableFilter<"Page"> | string | null
+    order?: IntFilter<"Page"> | number
     workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
   }
@@ -9834,6 +9938,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     folderId?: SortOrderInput | SortOrder
+    order?: SortOrder
     workspace?: WorkspaceOrderByWithRelationInput
     folder?: FolderOrderByWithRelationInput
   }
@@ -9849,6 +9954,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Page"> | Date | string
     workspaceId?: StringFilter<"Page"> | string
     folderId?: StringNullableFilter<"Page"> | string | null
+    order?: IntFilter<"Page"> | number
     workspace?: XOR<WorkspaceScalarRelationFilter, WorkspaceWhereInput>
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
   }, "id">
@@ -9861,9 +9967,12 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     folderId?: SortOrderInput | SortOrder
+    order?: SortOrder
     _count?: PageCountOrderByAggregateInput
+    _avg?: PageAvgOrderByAggregateInput
     _max?: PageMaxOrderByAggregateInput
     _min?: PageMinOrderByAggregateInput
+    _sum?: PageSumOrderByAggregateInput
   }
 
   export type PageScalarWhereWithAggregatesInput = {
@@ -9877,6 +9986,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
     workspaceId?: StringWithAggregatesFilter<"Page"> | string
     folderId?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    order?: IntWithAggregatesFilter<"Page"> | number
   }
 
   export type VerificationTokenWhereInput = {
@@ -10217,6 +10327,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutFoldersInput
     parent?: FolderCreateNestedOneWithoutChildrenInput
     children?: FolderCreateNestedManyWithoutParentInput
@@ -10230,6 +10341,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     parentId?: string | null
+    order?: number
     children?: FolderUncheckedCreateNestedManyWithoutParentInput
     pages?: PageUncheckedCreateNestedManyWithoutFolderInput
   }
@@ -10239,6 +10351,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutFoldersNestedInput
     parent?: FolderUpdateOneWithoutChildrenNestedInput
     children?: FolderUpdateManyWithoutParentNestedInput
@@ -10252,6 +10365,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     children?: FolderUncheckedUpdateManyWithoutParentNestedInput
     pages?: PageUncheckedUpdateManyWithoutFolderNestedInput
   }
@@ -10263,6 +10377,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     parentId?: string | null
+    order?: number
   }
 
   export type FolderUpdateManyMutationInput = {
@@ -10270,6 +10385,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type FolderUncheckedUpdateManyInput = {
@@ -10279,6 +10395,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageCreateInput = {
@@ -10287,6 +10404,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutPagesInput
     folder?: FolderCreateNestedOneWithoutPagesInput
   }
@@ -10299,6 +10417,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     folderId?: string | null
+    order?: number
   }
 
   export type PageUpdateInput = {
@@ -10307,6 +10426,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutPagesNestedInput
     folder?: FolderUpdateOneWithoutPagesNestedInput
   }
@@ -10319,6 +10439,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageCreateManyInput = {
@@ -10329,6 +10450,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     folderId?: string | null
+    order?: number
   }
 
   export type PageUpdateManyMutationInput = {
@@ -10337,6 +10459,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageUncheckedUpdateManyInput = {
@@ -10347,6 +10470,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type VerificationTokenCreateInput = {
@@ -10726,6 +10850,17 @@ export namespace Prisma {
     ownerId?: SortOrder
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type WorkspaceScalarRelationFilter = {
     is?: WorkspaceWhereInput
     isNot?: WorkspaceWhereInput
@@ -10743,6 +10878,11 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     parentId?: SortOrder
+    order?: SortOrder
+  }
+
+  export type FolderAvgOrderByAggregateInput = {
+    order?: SortOrder
   }
 
   export type FolderMaxOrderByAggregateInput = {
@@ -10752,6 +10892,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     parentId?: SortOrder
+    order?: SortOrder
   }
 
   export type FolderMinOrderByAggregateInput = {
@@ -10761,6 +10902,27 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     parentId?: SortOrder
+    order?: SortOrder
+  }
+
+  export type FolderSumOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -10794,6 +10956,11 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     folderId?: SortOrder
+    order?: SortOrder
+  }
+
+  export type PageAvgOrderByAggregateInput = {
+    order?: SortOrder
   }
 
   export type PageMaxOrderByAggregateInput = {
@@ -10803,6 +10970,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     folderId?: SortOrder
+    order?: SortOrder
   }
 
   export type PageMinOrderByAggregateInput = {
@@ -10812,6 +10980,11 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspaceId?: SortOrder
     folderId?: SortOrder
+    order?: SortOrder
+  }
+
+  export type PageSumOrderByAggregateInput = {
+    order?: SortOrder
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -11179,6 +11352,14 @@ export namespace Prisma {
     connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
   }
 
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type WorkspaceUpdateOneRequiredWithoutFoldersNestedInput = {
     create?: XOR<WorkspaceCreateWithoutFoldersInput, WorkspaceUncheckedCreateWithoutFoldersInput>
     connectOrCreate?: WorkspaceCreateOrConnectWithoutFoldersInput
@@ -11442,6 +11623,33 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -11787,6 +11995,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     parent?: FolderCreateNestedOneWithoutChildrenInput
     children?: FolderCreateNestedManyWithoutParentInput
     pages?: PageCreateNestedManyWithoutFolderInput
@@ -11798,6 +12007,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     parentId?: string | null
+    order?: number
     children?: FolderUncheckedCreateNestedManyWithoutParentInput
     pages?: PageUncheckedCreateNestedManyWithoutFolderInput
   }
@@ -11818,6 +12028,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     folder?: FolderCreateNestedOneWithoutPagesInput
   }
 
@@ -11828,6 +12039,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     folderId?: string | null
+    order?: number
   }
 
   export type PageCreateOrConnectWithoutWorkspaceInput = {
@@ -11897,6 +12109,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     workspaceId?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
+    order?: IntFilter<"Folder"> | number
   }
 
   export type PageUpsertWithWhereUniqueWithoutWorkspaceInput = {
@@ -11926,6 +12139,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Page"> | Date | string
     workspaceId?: StringFilter<"Page"> | string
     folderId?: StringNullableFilter<"Page"> | string | null
+    order?: IntFilter<"Page"> | number
   }
 
   export type WorkspaceCreateWithoutFoldersInput = {
@@ -11956,6 +12170,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutFoldersInput
     parent?: FolderCreateNestedOneWithoutChildrenInput
     pages?: PageCreateNestedManyWithoutFolderInput
@@ -11968,6 +12183,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     parentId?: string | null
+    order?: number
     pages?: PageUncheckedCreateNestedManyWithoutFolderInput
   }
 
@@ -11981,6 +12197,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutFoldersInput
     children?: FolderCreateNestedManyWithoutParentInput
     pages?: PageCreateNestedManyWithoutFolderInput
@@ -11992,6 +12209,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     workspaceId: string
+    order?: number
     children?: FolderUncheckedCreateNestedManyWithoutParentInput
     pages?: PageUncheckedCreateNestedManyWithoutFolderInput
   }
@@ -12012,6 +12230,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutPagesInput
   }
 
@@ -12022,6 +12241,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     workspaceId: string
+    order?: number
   }
 
   export type PageCreateOrConnectWithoutFolderInput = {
@@ -12079,6 +12299,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutFoldersNestedInput
     parent?: FolderUpdateOneWithoutChildrenNestedInput
     pages?: PageUpdateManyWithoutFolderNestedInput
@@ -12091,6 +12312,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     pages?: PageUncheckedUpdateManyWithoutFolderNestedInput
   }
 
@@ -12154,6 +12376,7 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    order?: number
     workspace: WorkspaceCreateNestedOneWithoutFoldersInput
     parent?: FolderCreateNestedOneWithoutChildrenInput
     children?: FolderCreateNestedManyWithoutParentInput
@@ -12166,6 +12389,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspaceId: string
     parentId?: string | null
+    order?: number
     children?: FolderUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -12219,6 +12443,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutFoldersNestedInput
     parent?: FolderUpdateOneWithoutChildrenNestedInput
     children?: FolderUpdateManyWithoutParentNestedInput
@@ -12231,6 +12456,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     children?: FolderUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -12356,6 +12582,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     parentId?: string | null
+    order?: number
   }
 
   export type PageCreateManyWorkspaceInput = {
@@ -12365,6 +12592,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     folderId?: string | null
+    order?: number
   }
 
   export type FolderUpdateWithoutWorkspaceInput = {
@@ -12372,6 +12600,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     parent?: FolderUpdateOneWithoutChildrenNestedInput
     children?: FolderUpdateManyWithoutParentNestedInput
     pages?: PageUpdateManyWithoutFolderNestedInput
@@ -12383,6 +12612,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     children?: FolderUncheckedUpdateManyWithoutParentNestedInput
     pages?: PageUncheckedUpdateManyWithoutFolderNestedInput
   }
@@ -12393,6 +12623,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageUpdateWithoutWorkspaceInput = {
@@ -12401,6 +12632,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     folder?: FolderUpdateOneWithoutPagesNestedInput
   }
 
@@ -12411,6 +12643,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -12420,6 +12653,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type FolderCreateManyParentInput = {
@@ -12428,6 +12662,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     workspaceId: string
+    order?: number
   }
 
   export type PageCreateManyFolderInput = {
@@ -12437,6 +12672,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     workspaceId: string
+    order?: number
   }
 
   export type FolderUpdateWithoutParentInput = {
@@ -12444,6 +12680,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutFoldersNestedInput
     children?: FolderUpdateManyWithoutParentNestedInput
     pages?: PageUpdateManyWithoutFolderNestedInput
@@ -12455,6 +12692,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
     children?: FolderUncheckedUpdateManyWithoutParentNestedInput
     pages?: PageUncheckedUpdateManyWithoutFolderNestedInput
   }
@@ -12465,6 +12703,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageUpdateWithoutFolderInput = {
@@ -12473,6 +12712,7 @@ export namespace Prisma {
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: IntFieldUpdateOperationsInput | number
     workspace?: WorkspaceUpdateOneRequiredWithoutPagesNestedInput
   }
 
@@ -12483,6 +12723,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type PageUncheckedUpdateManyWithoutFolderInput = {
@@ -12492,6 +12733,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspaceId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
 

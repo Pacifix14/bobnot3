@@ -5,6 +5,13 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { GalleryVerticalEnd } from "lucide-react";
+import { Inter } from "next/font/google";
+import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export default async function WorkspaceLayout({
   children,
@@ -31,13 +38,17 @@ export default async function WorkspaceLayout({
   // Fetch all folders and pages to build the tree
   const allFolders = await db.folder.findMany({
     where: { workspaceId: workspaceId },
-    include: { pages: true },
-    orderBy: { createdAt: 'asc' }
+    include: { 
+      pages: {
+        orderBy: { order: 'asc' }
+      } 
+    },
+    orderBy: { order: 'asc' }
   });
   
   const rootPages = await db.page.findMany({
     where: { workspaceId: workspaceId, folderId: null },
-    orderBy: { createdAt: 'asc' }
+    orderBy: { order: 'asc' }
   });
 
   // Build tree in memory
@@ -106,26 +117,26 @@ export default async function WorkspaceLayout({
     },
   ];
 
+  // Default breadcrumb items
+  const breadcrumbItems = [
+    { label: workspace.name, href: `/dashboard/${workspaceId}` },
+  ];
+
   return (
-    <SidebarProvider>
-      <AppSidebar 
-        workspaceId={workspaceId} 
-        items={treeItems} 
-        user={user}
-        workspaces={workspaces}
-      />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="font-medium">
-             {workspace.name}
+    <div className={`${inter.variable} font-sans`}>
+      <SidebarProvider>
+        <AppSidebar 
+          workspaceId={workspaceId} 
+          items={treeItems} 
+          user={user}
+          workspaces={workspaces}
+        />
+        <SidebarInset>
+          <div className="flex-1 overflow-hidden">
+            {children}
           </div>
-        </header>
-        <div className="flex-1 overflow-auto p-4">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }

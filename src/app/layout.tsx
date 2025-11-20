@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Newsreader } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { LiveblocksProviderWrapper } from "@/components/liveblocks-provider";
@@ -12,23 +12,17 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  style: "italic", // Newsreader is often used in italic for that "literary" feel, but let's load both normal and italic if possible, or just variable.
-  // Variable fonts usually support axes.
+  variable: "--font-bricolage",
+  // Bricolage is variable, supports axes.
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${newsreader.variable}`}>
+    <html lang="en" className={`${bricolage.variable}`}>
       <body>
         <TRPCReactProvider>
           <LiveblocksProviderWrapper>

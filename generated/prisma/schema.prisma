@@ -81,6 +81,8 @@ model Folder {
   children Folder[] @relation("FolderToFolder")
 
   pages Page[]
+
+  order Int @default(0)
 }
 
 model Page {
@@ -95,6 +97,8 @@ model Page {
 
   folderId String?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  order Int @default(0)
 }
 
 model VerificationToken {

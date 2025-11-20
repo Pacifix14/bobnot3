@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "Cascadia Code", "Cascadia Mono", ui-monospace, "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --font-serif: var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 @theme inline {
@@ -49,90 +49,84 @@
 
 :root {
   --radius: 0.5rem;
-  /* Warm Alabaster Background */
-  --background: oklch(0.98 0.01 85);
-  /* Soft Warm Black */
-  --foreground: oklch(0.2 0.02 30);
 
-  /* Cards same as BG but slightly distinct if needed, or white */
+  /* "Resend" Vibe: Cool, crisp, technical but approachable */
+  /* Light Mode: Slightly cool white, not stark */
+  --background: oklch(0.985 0.002 240);
+  --foreground: oklch(0.12 0.01 240);
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 30);
+  --card-foreground: oklch(0.12 0.01 240);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 30);
+  --popover-foreground: oklch(0.12 0.01 240);
 
-  /* Deep Warm Charcoal/Brown for Primary */
-  --primary: oklch(0.35 0.04 25);
-  --primary-foreground: oklch(0.98 0.01 85);
+  /* Primary: Deep Obsidian/Midnight */
+  --primary: oklch(0.12 0.02 240);
+  --primary-foreground: oklch(0.98 0.002 240);
 
-  /* Soft Beige/Greige for Secondary */
-  --secondary: oklch(0.95 0.01 85);
-  --secondary-foreground: oklch(0.35 0.04 25);
+  /* Secondary: Subtle cool gray */
+  --secondary: oklch(0.96 0.005 240);
+  --secondary-foreground: oklch(0.12 0.01 240);
 
-  --muted: oklch(0.95 0.01 85);
-  --muted-foreground: oklch(0.5 0.02 30);
+  --muted: oklch(0.96 0.005 240);
+  --muted-foreground: oklch(0.45 0.02 240);
 
-  /* Muted Terracotta Accent */
-  --accent: oklch(0.95 0.02 85);
-  --accent-foreground: oklch(0.35 0.04 25);
+  --accent: oklch(0.95 0.01 240);
+  --accent-foreground: oklch(0.12 0.01 240);
 
   --destructive: oklch(0.6 0.15 25);
   --destructive-foreground: oklch(0.98 0.01 85);
 
-  --border: oklch(0.9 0.01 85);
-  --input: oklch(0.9 0.01 85);
-  --ring: oklch(0.35 0.04 25);
+  --border: oklch(0.92 0.005 240);
+  --input: oklch(0.92 0.005 240);
+  --ring: oklch(0.12 0.02 240);
 
   --chart-1: oklch(0.65 0.15 50);
-  /* Terracotta */
   --chart-2: oklch(0.6 0.1 150);
-  /* Sage */
   --chart-3: oklch(0.5 0.1 250);
-  /* Slate Blue */
   --chart-4: oklch(0.8 0.1 80);
-  /* Gold */
   --chart-5: oklch(0.7 0.15 30);
-  /* Rust */
 
-  --sidebar: oklch(0.97 0.01 85);
-  --sidebar-foreground: oklch(0.3 0.02 30);
-  --sidebar-primary: oklch(0.35 0.04 25);
-  --sidebar-primary-foreground: oklch(0.98 0.01 85);
-  --sidebar-accent: oklch(0.94 0.01 85);
-  --sidebar-accent-foreground: oklch(0.35 0.04 25);
-  --sidebar-border: oklch(0.9 0.01 85);
-  --sidebar-ring: oklch(0.35 0.04 25);
+  --sidebar: oklch(0.98 0.002 240);
+  --sidebar-foreground: oklch(0.12 0.01 240);
+  --sidebar-primary: oklch(0.12 0.02 240);
+  --sidebar-primary-foreground: oklch(0.98 0.002 240);
+  --sidebar-accent: oklch(0.95 0.01 240);
+  --sidebar-accent-foreground: oklch(0.12 0.01 240);
+  --sidebar-border: oklch(0.92 0.005 240);
+  --sidebar-ring: oklch(0.12 0.02 240);
 }
 
 .dark {
-  /* Deep Warm Grey/Charcoal */
-  --background: oklch(0.15 0.01 30);
-  --foreground: oklch(0.95 0.01 85);
+  /* Dark Mode: Deep Void Blue/Black, not just gray */
+  --background: oklch(0.08 0.02 240);
+  --foreground: oklch(0.98 0.005 240);
 
-  --card: oklch(0.18 0.01 30);
-  --card-foreground: oklch(0.95 0.01 85);
+  --card: oklch(0.12 0.02 240);
+  --card-foreground: oklch(0.98 0.005 240);
 
-  --popover: oklch(0.18 0.01 30);
-  --popover-foreground: oklch(0.95 0.01 85);
+  --popover: oklch(0.12 0.02 240);
+  --popover-foreground: oklch(0.98 0.005 240);
 
-  --primary: oklch(0.9 0.02 85);
-  --primary-foreground: oklch(0.15 0.01 30);
+  --primary: oklch(0.98 0.005 240);
+  --primary-foreground: oklch(0.08 0.02 240);
 
-  --secondary: oklch(0.25 0.01 30);
-  --secondary-foreground: oklch(0.9 0.02 85);
+  --secondary: oklch(0.18 0.02 240);
+  --secondary-foreground: oklch(0.98 0.005 240);
 
-  --muted: oklch(0.25 0.01 30);
-  --muted-foreground: oklch(0.7 0.01 85);
+  --muted: oklch(0.18 0.02 240);
+  --muted-foreground: oklch(0.65 0.02 240);
 
-  --accent: oklch(0.25 0.01 30);
-  --accent-foreground: oklch(0.9 0.02 85);
+  --accent: oklch(0.18 0.02 240);
+  --accent-foreground: oklch(0.98 0.005 240);
 
   --destructive: oklch(0.4 0.15 25);
-  --destructive-foreground: oklch(0.95 0.01 85);
+  --destructive-foreground: oklch(0.98 0.01 85);
 
-  --border: oklch(0.25 0.01 30);
-  --input: oklch(0.25 0.01 30);
-  --ring: oklch(0.8 0.02 85);
+  --border: oklch(0.22 0.02 240);
+  --input: oklch(0.22 0.02 240);
+  --ring: oklch(0.8 0.02 240);
 
   --chart-1: oklch(0.65 0.15 50);
   --chart-2: oklch(0.6 0.1 150);
@@ -140,14 +134,14 @@
   --chart-4: oklch(0.8 0.1 80);
   --chart-5: oklch(0.7 0.15 30);
 
-  --sidebar: oklch(0.13 0.01 30);
-  --sidebar-foreground: oklch(0.9 0.01 85);
-  --sidebar-primary: oklch(0.9 0.02 85);
-  --sidebar-primary-foreground: oklch(0.15 0.01 30);
-  --sidebar-accent: oklch(0.2 0.01 30);
-  --sidebar-accent-foreground: oklch(0.9 0.02 85);
-  --sidebar-border: oklch(0.25 0.01 30);
-  --sidebar-ring: oklch(0.8 0.02 85);
+  --sidebar: oklch(0.06 0.02 240);
+  --sidebar-foreground: oklch(0.98 0.005 240);
+  --sidebar-primary: oklch(0.98 0.005 240);
+  --sidebar-primary-foreground: oklch(0.08 0.02 240);
+  --sidebar-accent: oklch(0.15 0.02 240);
+  --sidebar-accent-foreground: oklch(0.98 0.005 240);
+  --sidebar-border: oklch(0.22 0.02 240);
+  --sidebar-ring: oklch(0.8 0.02 240);
 }
 
 @layer base {
@@ -157,11 +151,28 @@
 
   body {
     @apply bg-background text-foreground;
+    font-weight: 300;
+    /* Subtle dot grid pattern with a slight radial fade */
+    background-image:
+      radial-gradient(circle at center, transparent 0%, var(--color-background) 100%),
+      radial-gradient(var(--color-border) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px;
+    background-position: center, 0 0;
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight;
   }
 }
 
 /* Force transparent background for BlockNote */
-.bn-editor, 
+.bn-editor,
 .bn-container,
 div[data-id="blocknote-editor"] {
   background-color: transparent !important;
