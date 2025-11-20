@@ -2,11 +2,14 @@
 
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
+import { useIsEditorReady } from "@liveblocks/react-blocknote";
 import { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Import BlockNote styles
 import "@blocknote/core/fonts/inter.css";
@@ -28,6 +31,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   }), []);
   
   const editor = useCreateBlockNoteWithLiveblocks(editorOptions);
+  const isReady = useIsEditorReady();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToDatabase = useCallback(async (content: Block[]) => {
@@ -69,8 +73,14 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, [editor, saveToDatabase, onStatusChange]);
 
-  if (!editor) {
-    return <div>Loading editor...</div>;
+  if (!editor || !isReady) {
+    return (
+      <div className="pl-[54px] pr-6 space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    );
   }
 
   return (
@@ -81,6 +91,21 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   );
 });
 
+function EditorSkeleton() {
+  return (
+    <div className="max-w-5xl mx-auto space-y-8 relative">
+      <div className="pl-[54px] pr-6">
+        <Skeleton className="h-12 w-1/2" />
+      </div>
+      <div className="pl-[54px] pr-6 space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    </div>
+  );
+}
+
 function BlockNoteEditorInner({ 
   pageId, 
   title: initialTitle 
@@ -88,6 +113,7 @@ function BlockNoteEditorInner({
   pageId: string, 
   title: string 
 }) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -106,11 +132,12 @@ function BlockNoteEditorInner({
         body: JSON.stringify({ title: newTitle }),
       });
       setStatus("saved");
+      router.refresh();
     } catch (error) {
       console.error("Failed to save title", error);
       setStatus("unsaved");
     }
-  }, [pageId]);
+  }, [pageId, router]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -166,7 +193,7 @@ export function Editor({
 }) {
   return (
     <RoomProvider id={`page-${pageId}`} initialPresence={{}}>
-      <ClientSideSuspense fallback={<div>Loading...</div>}>
+      <ClientSideSuspense fallback={<EditorSkeleton />}>
         {() => (
           <BlockNoteEditorInner 
             pageId={pageId}
