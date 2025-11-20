@@ -1,9 +1,8 @@
 "use client";
-"use client";
 
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
@@ -11,6 +10,74 @@ import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 // Import BlockNote styles
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
+
+// Memoized Editor Component to prevent re-renders
+const BlockNoteEditor = memo(function BlockNoteEditor({ 
+  pageId, 
+  onStatusChange 
+}: { 
+  pageId: string, 
+  onStatusChange: (status: "saved" | "saving" | "unsaved") => void 
+}) {
+  // Create BlockNote editor with Liveblocks collaboration
+  // The options object must be stable to prevent editor recreation
+  const editorOptions = useMemo(() => ({
+    // Don't pass initialContent - Liveblocks manages the document state
+  }), []);
+  
+  const editor = useCreateBlockNoteWithLiveblocks(editorOptions);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const saveToDatabase = useCallback(async (content: any) => {
+    onStatusChange("saving");
+    try {
+      await fetch(`/api/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      onStatusChange("saved");
+    } catch (error) {
+      console.error("Failed to save content", error);
+      onStatusChange("unsaved");
+    }
+  }, [pageId, onStatusChange]);
+
+  // Handle editor changes
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleChange = () => {
+      onStatusChange("unsaved");
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveToDatabase(editor.document);
+      }, 1000);
+    };
+
+    // Subscribe to updates
+    const unsubscribe = editor.onChange(handleChange);
+    return () => {
+      unsubscribe();
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [editor, saveToDatabase, onStatusChange]);
+
+  if (!editor) {
+    return <div>Loading editor...</div>;
+  }
+
+  return (
+    <BlockNoteView 
+      editor={editor} 
+      theme="light" 
+    />
+  );
+});
 
 function BlockNoteEditorInner({ 
   pageId, 
@@ -21,73 +88,49 @@ function BlockNoteEditorInner({
 }) {
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Stable callback for status updates
+  const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
+    setStatus(newStatus);
+  }, []);
 
-  // Create BlockNote editor with Liveblocks collaboration
-  const editor = useCreateBlockNoteWithLiveblocks({
-    // Don't pass initialContent - Liveblocks manages the document state
-  });
-
-  // Debounced save to database
-  const saveToDatabase = useCallback(async (content: any, currentTitle: string) => {
+  const saveTitle = useCallback(async (newTitle: string) => {
     setStatus("saving");
     try {
       await fetch(`/api/pages/${pageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          content, 
-          title: currentTitle 
-        }),
+        body: JSON.stringify({ title: newTitle }),
       });
       setStatus("saved");
     } catch (error) {
-      console.error("Failed to save", error);
+      console.error("Failed to save title", error);
       setStatus("unsaved");
     }
   }, [pageId]);
 
-  // Listen for editor changes
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleChange = () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      setStatus("unsaved");
-      saveTimeoutRef.current = setTimeout(() => {
-        saveToDatabase(editor.document, title);
-      }, 1000);
-    };
-
-    editor.onChange(handleChange);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [editor, saveToDatabase, title]);
-
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
     setStatus("unsaved");
-    saveTimeoutRef.current = setTimeout(() => {
-      if (editor) {
-        saveToDatabase(editor.document, newTitle);
-      }
+    
+    if (saveTitleTimeoutRef.current) {
+      clearTimeout(saveTitleTimeoutRef.current);
+    }
+    saveTitleTimeoutRef.current = setTimeout(() => {
+      saveTitle(newTitle);
     }, 1000);
   };
 
-  if (!editor) {
-    return <div>Loading editor...</div>;
-  }
+  // Cleanup title timeout
+  useEffect(() => {
+    return () => {
+      if (saveTitleTimeoutRef.current) {
+        clearTimeout(saveTitleTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 relative">
@@ -106,7 +149,7 @@ function BlockNoteEditorInner({
           {status === "unsaved" && "Unsaved"}
         </div>
       </div>
-      <BlockNoteView editor={editor} theme="light" />
+      <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
     </div>
   );
 }

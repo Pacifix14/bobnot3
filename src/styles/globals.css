@@ -159,3 +159,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Force transparent background for BlockNote */
+.bn-editor, 
+.bn-container,
+div[data-id="blocknote-editor"] {
+  background-color: transparent !important;
+}
+
+/* Explicitly force text color to match foreground if needed */
+.bn-editor,
+.bn-editor * {
+  color: var(--foreground);
+}
