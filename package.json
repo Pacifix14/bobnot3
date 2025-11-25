@@ -112,7 +112,10 @@
     "typescript-eslint": "^8.27.0"
   },
   "overrides": {
-    "@auth/core": "0.41.1"
+    "@auth/core": "0.41.1",
+    "next-auth": {
+      "nodemailer": "$nodemailer"
+    }
   },
   "ct3aMetadata": {
     "initVersion": "7.40.0"
