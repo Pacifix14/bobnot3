@@ -9,10 +9,10 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 
-export function DashboardBreadcrumb({ 
-  items 
-}: { 
-  items: { label: string; href?: string; active?: boolean }[] 
+export function DashboardBreadcrumb({
+  items
+}: {
+  items: { label: string; href?: string }[]
 }) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -23,7 +23,7 @@ export function DashboardBreadcrumb({
           {items.map((item, index) => (
             <div key={index} className="flex items-center">
               <BreadcrumbItem className="hidden md:block">
-                {item.href && !item.active ? (
+                {item.href ? (
                   <BreadcrumbLink href={item.href}>
                     {item.label}
                   </BreadcrumbLink>

@@ -41,7 +41,6 @@ export default async function PageLayout({
 
   breadcrumbItems.push({
     label: page.title || "Untitled",
-    active: true,
   });
 
   return (
