@@ -82,7 +82,6 @@
     "lucide-react": "^0.554.0",
     "next": "^15.2.3",
     "next-auth": "5.0.0-beta.30",
-    "nodemailer": "^7.0.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
@@ -112,10 +111,7 @@
     "typescript-eslint": "^8.27.0"
   },
   "overrides": {
-    "@auth/core": "0.41.1",
-    "next-auth": {
-      "nodemailer": "$nodemailer"
-    }
+    "@auth/core": "0.41.1"
   },
   "ct3aMetadata": {
     "initVersion": "7.40.0"
