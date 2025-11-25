@@ -391,7 +391,7 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="mx-2 my-2" />
+        <SidebarSeparator className="mx-2 my-2 mt-auto" />
         <SidebarGroup>
             <SidebarGroupLabel className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -427,11 +427,6 @@ export function AppSidebar({
                     )}
                 </SidebarMenu>
             </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-auto group-data-[collapsible=icon]:hidden">
-          <SidebarGroupContent>
-          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
