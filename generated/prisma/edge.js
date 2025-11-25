@@ -206,7 +206,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\developer\\bobnot3\\generated\\prisma",
+      "value": "/home/eant/dev/bobnot3/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -215,12 +215,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "debian-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\developer\\bobnot3\\prisma\\schema.prisma",
+    "sourceFilePath": "/home/eant/dev/bobnot3/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
