@@ -49,7 +49,7 @@ export default async function WorkspaceLayout({
   let contextWorkspaceId = urlWorkspaceId;
   
   if (!isUrlOwner && userWorkspaces.length > 0) {
-      contextWorkspaceId = userWorkspaces[0].id;
+      contextWorkspaceId = userWorkspaces[0]!.id;
   }
 
   // Is user owner of the CONTEXT workspace?
