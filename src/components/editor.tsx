@@ -28,6 +28,11 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   onStatusChange: (status: "saved" | "saving" | "unsaved") => void 
 }) {
   const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { showToast } = useToast();
   
   // Create BlockNote editor with Liveblocks collaboration
@@ -188,7 +193,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   return (
     <BlockNoteView 
       editor={editor} 
-      theme={resolvedTheme === "dark" ? "dark" : "light"} 
+      theme={mounted ? (resolvedTheme === "dark" ? "dark" : "light") : "light"} 
     />
   );
 });
