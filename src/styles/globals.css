@@ -258,39 +258,30 @@ div[data-id="blocknote-editor"] {
   z-index: 2 !important;
 }
 
-/* Action buttons in header - download, menu, copy */
-.bn-editor [data-content-type="codeBlock"]::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0.75rem !important;
-  right: 1rem !important;
-  width: 4rem !important;
-  height: 1.25rem !important;
-  background: 
-    /* Copy icon - nicer design */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
-    /* Menu icon - greyed out */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
-    /* Download icon - greyed out */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center !important;
-  background-size: 16px 16px, 16px 16px, 16px 16px !important;
-  cursor: pointer !important;
-  opacity: 0.8 !important;
-  transition: all 0.2s ease !important;
-  z-index: 3 !important;
+/* Simplified button styling - inline styles handle most of it */
+.bn-editor [data-content-type="codeBlock"] .copy-btn:hover {
+  opacity: 1 !important;
+  background-color: var(--muted) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Hover effect - only copy icon gets darker */
-.bn-editor [data-content-type="codeBlock"]:hover::after {
-  opacity: 1 !important;
-  background: 
-    /* Copy icon - darker on hover */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
-    /* Menu icon - stays greyed */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
-    /* Download icon - stays greyed */
-    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center !important;
-  background-size: 16px 16px, 16px 16px, 16px 16px !important;
+.bn-editor [data-content-type="codeBlock"] .copy-btn:active {
+  transform: scale(0.95) !important;
+  background-color: var(--primary) !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .copy-btn.copied {
+  background-color: #22c55e !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='20,6 9,17 4,12'/%3e%3c/svg%3e") !important;
+  transform: scale(1.1) !important;
+  animation: copy-success 0.3s ease-out !important;
+}
+
+@keyframes copy-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1.1); }
 }
 
 /* Removed tick CSS - using toast notification instead */

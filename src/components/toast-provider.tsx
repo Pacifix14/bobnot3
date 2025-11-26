@@ -46,17 +46,27 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-0 right-0 z-50 p-4 space-y-2">
-        {toasts.map((toast, index) => (
-          <div key={toast.id} style={{ transform: `translateY(${index * 70}px)` }}>
-            <Toast
-              message={toast.message}
-              isVisible={toast.isVisible}
-              type={toast.type}
-              onClose={() => removeToast(toast.id)}
-            />
-          </div>
-        ))}
+      <div className="fixed top-0 left-0 right-0 z-50 p-4 pointer-events-none">
+        <div className="flex flex-col items-center space-y-4">
+          {toasts.map((toast, index) => (
+            <div 
+              key={toast.id} 
+              className="pointer-events-auto"
+              style={{ 
+                transform: `translateY(${index * 70}px) translateZ(0)`,
+                transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                willChange: 'transform'
+              }}
+            >
+              <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                type={toast.type}
+                onClose={() => removeToast(toast.id)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </ToastContext.Provider>
   );

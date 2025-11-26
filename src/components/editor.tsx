@@ -121,6 +121,60 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, []);
 
+  // Add action buttons to code blocks using CSS approach
+  useEffect(() => {
+    if (!editor) return;
+
+    // Add dynamic styling for code block buttons
+    const styleElement = document.createElement('style');
+    styleElement.id = 'code-block-buttons-style';
+    styleElement.textContent = `
+      .bn-editor [data-content-type="codeBlock"] {
+        position: relative;
+      }
+      
+      .bn-editor [data-content-type="codeBlock"]::after {
+        content: "";
+        position: absolute;
+        top: 0.75rem;
+        right: 1rem;
+        width: 4rem;
+        height: 1.25rem;
+        background: 
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center;
+        background-size: 16px 16px, 16px 16px, 16px 16px;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+      
+      .bn-editor [data-content-type="codeBlock"]:hover::after {
+        opacity: 1;
+        background: 
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
+          url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center;
+        background-size: 16px 16px, 16px 16px, 16px 16px;
+      }
+    `;
+    
+    // Add the style to the document head
+    if (!document.getElementById('code-block-buttons-style')) {
+      document.head.appendChild(styleElement);
+    }
+    
+    return () => {
+      // Clean up the style element
+      const existingStyle = document.getElementById('code-block-buttons-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, [editor]);
+
   if (!editor || !isReady) {
     return (
       <div className="pl-[54px] pr-6 space-y-4">
