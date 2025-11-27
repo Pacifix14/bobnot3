@@ -44,11 +44,19 @@ export default async function WorkspaceLayout({
 
   // Determine Context Workspace
   // If I am the owner of the URL workspace, show it.
-  // If I am NOT the owner, check if I have access to any pages in this workspace as a collaborator
+  // If I am NOT the owner, ALWAYS use my own workspace as context (even for shared pages)
   let contextWorkspaceId = urlWorkspaceId;
   
   if (!isUrlOwner) {
-    // Check if user has access to any pages in this workspace as a collaborator
+    // For non-owners, always use their own workspace as context
+    if (userWorkspaces.length > 0) {
+      contextWorkspaceId = userWorkspaces[0]!.id;
+    } else {
+      // If user has no workspaces, redirect to dashboard to create one
+      redirect("/dashboard");
+    }
+    
+    // Verify they actually have access to the shared page (security check)
     const hasSharedAccess = await db.page.findFirst({
       where: {
         workspaceId: urlWorkspaceId,
@@ -58,11 +66,10 @@ export default async function WorkspaceLayout({
       }
     });
 
-    // If no shared access and user has their own workspaces, redirect to their workspace
-    if (!hasSharedAccess && userWorkspaces.length > 0) {
-      contextWorkspaceId = userWorkspaces[0]!.id;
+    // If no shared access, redirect to their workspace
+    if (!hasSharedAccess) {
+      redirect(`/dashboard/${contextWorkspaceId}`);
     }
-    // If they have shared access, keep the original workspace context
   }
 
   // Is user owner of the CONTEXT workspace?
