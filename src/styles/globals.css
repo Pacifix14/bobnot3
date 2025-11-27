@@ -321,20 +321,68 @@ div[data-id="blocknote-editor"] {
 /* Render the label above the caret */
 .collaboration-cursor__label,
 .collaboration-carets__label {
-  border-radius: 3px 3px 3px 0;
-  color: #fff; /* Use white text for better contrast on colored backgrounds */
-  font-size: 12px;
+  border-radius: 6px 6px 6px 0;
+  color: #ffffff !important; /* Use white text for better contrast */
+  font-size: 11px;
   font-style: normal;
   font-weight: 600;
   left: -1px;
-  line-height: normal;
-  padding: 0.1rem 0.3rem;
+  line-height: 1.3;
+  padding: 0.3rem 0.6rem !important; /* Generous padding for better coverage */
   position: absolute;
-  top: -1.4em;
+  top: -1.8em; /* Adjusted for increased padding */
   user-select: none;
   white-space: nowrap;
-  z-index: 10; /* Ensure label is above content */
+  z-index: 10;
+  min-width: fit-content;
+  box-sizing: border-box;
+  display: inline-block;
+  text-align: center;
+  /* Enhance readability with subtle shadow */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   /* Background color is set inline by the element */
+}
+
+/* Ensure the cursor label background covers long names */
+.collaboration-cursor__label::before,
+.collaboration-carets__label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: inherit;
+  border-radius: inherit;
+  z-index: -1;
+}
+
+/* Additional styling for better visibility and coverage */
+.collaboration-cursor__label,
+.collaboration-carets__label {
+  letter-spacing: 0.02em; /* Slight letter spacing for better readability */
+  max-width: 120px; /* Prevent extremely long names from breaking layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Subtle border for better definition */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  /* Slight shadow for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure colors work well in dark mode */
+.dark .collaboration-cursor__label,
+.dark .collaboration-carets__label {
+  /* Maintain white text in dark mode for consistency */
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Handle very long usernames gracefully */
+.collaboration-cursor__label[title],
+.collaboration-carets__label[title] {
+  cursor: help; /* Show that there's more info on hover */
 }
 
 /* Override selection background color if it's too aggressive */

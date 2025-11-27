@@ -16,6 +16,13 @@ export default function PageLayout({
   const workspaceId = params.workspaceId as string;
   const pageId = params.pageId as string;
 
+  // First, get user's workspaces to determine if they own the current workspace
+  const { data: userWorkspaces } = api.workspace.getUserWorkspaces.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   const { data: page, isLoading: pageLoading, error: pageError } = api.page.getPage.useQuery(
     { pageId },
     {
@@ -25,28 +32,49 @@ export default function PageLayout({
     }
   );
 
+  // Check if user owns this workspace
+  const isWorkspaceOwner = userWorkspaces?.some(w => w.id === workspaceId) ?? false;
+
+  // Only try to get full workspace data if user owns the workspace
   const { data: workspace, isLoading: workspaceLoading, error: workspaceError } = api.workspace.getWorkspace.useQuery(
     { workspaceId },
     {
+      enabled: isWorkspaceOwner, // Only query if user owns the workspace
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: false,
     }
   );
 
+  // For non-owners, get basic workspace info (for shared pages)
+  const { data: workspaceInfo } = api.workspace.getWorkspaceInfo.useQuery(
+    { workspaceId },
+    {
+      enabled: !isWorkspaceOwner && !!userWorkspaces, // Only query if not owner and we know user's workspaces
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  );
+
   // Handle errors and redirects
   useEffect(() => {
-    if (workspaceError) {
+    if (pageError) {
+      if (pageError.data?.code === "NOT_FOUND") {
+        // Page not found, redirect to workspace
+        router.push(`/dashboard/${workspaceId}`);
+      } else if (pageError.data?.code === "FORBIDDEN") {
+        // Access denied to page, redirect to dashboard
+        router.push("/dashboard");
+      }
+    }
+    // Handle workspace errors only for owners
+    if (workspaceError && isWorkspaceOwner) {
       if (workspaceError.data?.code === "NOT_FOUND" || workspaceError.data?.code === "FORBIDDEN") {
         router.push("/dashboard");
       }
     }
-    if (pageError) {
-      if (pageError.data?.code === "NOT_FOUND" || pageError.data?.code === "FORBIDDEN") {
-        router.push(`/dashboard/${workspaceId}`);
-      }
-    }
-  }, [workspaceError, pageError, router, workspaceId]);
+  }, [workspaceError, pageError, router, workspaceId, page]);
 
   if (pageLoading || workspaceLoading) {
     return (
@@ -68,18 +96,28 @@ export default function PageLayout({
     );
   }
 
-  if (!page || !workspace) {
+  if (!page) {
     return null; // Will redirect via useEffect
   }
 
-  const breadcrumbItems: { label: string; href?: string }[] = [
-    { label: workspace.name, href: `/dashboard/${workspaceId}` },
-  ];
+  // Build breadcrumbs - use workspace data if available, otherwise use fallback info
+  const breadcrumbItems: { label: string; href?: string }[] = [];
+  
+  if (workspace) {
+    // We have full workspace access (owner scenario)
+    breadcrumbItems.push({ label: workspace.name, href: `/dashboard/${workspaceId}` });
+  } else if (workspaceInfo) {
+    // Shared page scenario - use basic workspace info, but no link
+    breadcrumbItems.push({ label: workspaceInfo.name });
+  } else if (page.workspace) {
+    // Final fallback - use workspace name from page data
+    breadcrumbItems.push({ label: page.workspace.name });
+  }
 
   if (page.folder) {
     breadcrumbItems.push({
       label: page.folder.name,
-      href: `/dashboard/${workspaceId}/folder/${page.folder.id}`,
+      href: workspace ? `/dashboard/${workspaceId}/folder/${page.folder.id}` : undefined,
     });
   }
 

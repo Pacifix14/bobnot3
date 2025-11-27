@@ -7,14 +7,18 @@ const liveblocks = new Liveblocks({
 });
 
 const COLORS = [
-    "#FF5733", // Red
-    "#33FF57", // Green
-    "#3357FF", // Blue
-    "#F1C40F", // Yellow
-    "#9B59B6", // Purple
-    "#E67E22", // Orange
-    "#1ABC9C", // Teal
-    "#E91E63", // Pink
+    "#6366f1", // Soft Indigo
+    "#8b5cf6", // Soft Purple  
+    "#06b6d4", // Soft Cyan
+    "#10b981", // Soft Emerald
+    "#f59e0b", // Soft Amber
+    "#ef4444", // Soft Red
+    "#ec4899", // Soft Pink
+    "#84cc16", // Soft Lime
+    "#6b7280", // Soft Gray
+    "#14b8a6", // Soft Teal
+    "#f97316", // Soft Orange
+    "#3b82f6", // Soft Blue
 ];
 
 function getUserColor(id: string) {

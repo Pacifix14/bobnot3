@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const workspaceRouter = createTRPCRouter({
-    // Get workspace data with caching
+    // Get workspace data with caching (owner only)
     getWorkspace: protectedProcedure
         .input(z.object({ workspaceId: z.string() }))
         .query(async ({ ctx, input }) => {
@@ -39,6 +39,41 @@ export const workspaceRouter = createTRPCRouter({
             }
 
             return workspace;
+        }),
+
+    // Get basic workspace info (for shared pages)
+    getWorkspaceInfo: protectedProcedure
+        .input(z.object({ workspaceId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const workspace = await ctx.db.workspace.findUnique({
+                where: { id: input.workspaceId },
+                select: { id: true, name: true, ownerId: true }
+            });
+
+            if (!workspace) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+            }
+
+            // Check if user has access to this workspace (owner or has shared pages)
+            const isOwner = workspace.ownerId === ctx.session.user.id;
+            
+            if (!isOwner) {
+                // Check if user has access to any pages in this workspace
+                const hasSharedAccess = await ctx.db.page.findFirst({
+                    where: {
+                        workspaceId: input.workspaceId,
+                        collaborators: {
+                            some: { id: ctx.session.user.id }
+                        }
+                    }
+                });
+
+                if (!hasSharedAccess) {
+                    throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+                }
+            }
+
+            return { id: workspace.id, name: workspace.name };
         }),
 
     // Get user's workspaces with caching

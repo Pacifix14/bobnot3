@@ -44,11 +44,25 @@ export default async function WorkspaceLayout({
 
   // Determine Context Workspace
   // If I am the owner of the URL workspace, show it.
-  // If I am NOT the owner (viewing shared page), show MY primary workspace instead.
+  // If I am NOT the owner, check if I have access to any pages in this workspace as a collaborator
   let contextWorkspaceId = urlWorkspaceId;
   
-  if (!isUrlOwner && userWorkspaces.length > 0) {
+  if (!isUrlOwner) {
+    // Check if user has access to any pages in this workspace as a collaborator
+    const hasSharedAccess = await db.page.findFirst({
+      where: {
+        workspaceId: urlWorkspaceId,
+        collaborators: {
+          some: { id: session.user.id }
+        }
+      }
+    });
+
+    // If no shared access and user has their own workspaces, redirect to their workspace
+    if (!hasSharedAccess && userWorkspaces.length > 0) {
       contextWorkspaceId = userWorkspaces[0]!.id;
+    }
+    // If they have shared access, keep the original workspace context
   }
 
   // Is user owner of the CONTEXT workspace?
