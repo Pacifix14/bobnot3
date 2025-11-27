@@ -30,7 +30,7 @@ export default async function PageEditor({
   }
 
   return (
-    <div className="py-12 px-8 h-full">
+    <div className="py-12 px-8 min-h-full">
       <Editor pageId={page.id} title={page.title} />
     </div>
   );

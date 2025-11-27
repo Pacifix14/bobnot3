@@ -48,7 +48,7 @@ export default async function PageLayout({
   return (
     <>
       <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="h-[calc(100vh-4rem)] overflow-y-auto">
         {children}
       </div>
     </>
