@@ -222,3 +222,292 @@ div[data-id="blocknote-editor"] {
   background-color: var(--sidebar-accent); /* Use a theme color for consistency */
   color: inherit;
 }
+
+/* Code Block Styling for BlockNote - Exact pink reference structure */
+.bn-editor [data-content-type="codeBlock"] {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  margin: 1rem 0 !important;
+  font-family: var(--font-sans) !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+  position: relative !important;
+}
+
+/* Header compartment with language and actions */
+.bn-editor [data-content-type="codeBlock"]::before {
+  content: "Code Block" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2.75rem !important;
+  background-color: var(--muted) !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 0.875rem 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  color: var(--muted-foreground) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  text-transform: lowercase !important;
+  z-index: 2 !important;
+}
+
+/* Simplified button styling - inline styles handle most of it */
+.bn-editor [data-content-type="codeBlock"] .copy-btn:hover {
+  opacity: 1 !important;
+  background-color: var(--muted) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .copy-btn:active {
+  transform: scale(0.95) !important;
+  background-color: var(--primary) !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .copy-btn.copied {
+  background-color: #22c55e !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='20,6 9,17 4,12'/%3e%3c/svg%3e") !important;
+  transform: scale(1.1) !important;
+  animation: copy-success 0.3s ease-out !important;
+}
+
+@keyframes copy-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1.1); }
+}
+
+/* Removed tick CSS - using toast notification instead */
+
+.bn-editor [data-content-type="codeBlock"] select {
+  background-color: transparent !important;
+  color: var(--muted-foreground) !important;
+  border: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0 !important;
+  outline: none !important;
+}
+
+/* Code content area */
+.bn-editor [data-content-type="codeBlock"] pre {
+  background-color: transparent !important;
+  color: var(--card-foreground) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 1.25rem !important;
+  padding-top: 4rem !important; /* Account for header height */
+  margin: 0 !important;
+  overflow-x: auto !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  font-weight: 400 !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: inherit !important;
+  color: inherit !important;
+}
+
+/* Syntax highlighting colors for light theme */
+.bn-editor [data-content-type="codeBlock"] .token.keyword {
+  color: #d73a49 !important; /* Red for keywords like const, new, if */
+  font-weight: 600 !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.string {
+  color: #032f62 !important; /* Blue for strings */
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.number {
+  color: #005cc5 !important; /* Blue for numbers */
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.function {
+  color: #6f42c1 !important; /* Purple for functions */
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.comment {
+  color: #6a737d !important; /* Gray for comments */
+  font-style: italic !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.operator {
+  color: #d73a49 !important; /* Red for operators */
+}
+
+.bn-editor [data-content-type="codeBlock"] .token.punctuation {
+  color: #24292e !important; /* Dark gray for punctuation */
+}
+
+/* Syntax highlighting colors for dark theme */
+.dark .bn-editor [data-content-type="codeBlock"] .token.keyword {
+  color: #ff7b72 !important; /* Light red for keywords */
+  font-weight: 600 !important;
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.string {
+  color: #a5d6ff !important; /* Light blue for strings */
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.number {
+  color: #79c0ff !important; /* Light blue for numbers */
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.function {
+  color: #d2a8ff !important; /* Light purple for functions */
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.comment {
+  color: #8b949e !important; /* Light gray for comments */
+  font-style: italic !important;
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.operator {
+  color: #ff7b72 !important; /* Light red for operators */
+}
+
+.dark .bn-editor [data-content-type="codeBlock"] .token.punctuation {
+  color: #e6edf3 !important; /* Light gray for punctuation */
+}
+
+/* Inline code styling */
+.bn-editor code:not(pre code) {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: 4px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875em !important;
+  font-weight: 500 !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Dark mode adjustments */
+.dark .bn-editor [data-content-type="codeBlock"] {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 1px 3px 0 rgb(255 255 255 / 0.05), 0 1px 2px -1px rgb(255 255 255 / 0.05) !important;
+}
+
+.dark .bn-editor code:not(pre code) {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+/* Dark mode adjustments for code block icons */
+.dark .bn-editor [data-content-type="codeBlock"]::after {
+  background: 
+    /* Copy icon - lighter for dark mode */
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
+    /* Menu icon - darker grey for dark mode */
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
+    /* Download icon - darker grey for dark mode */
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center !important;
+  background-size: 16px 16px, 16px 16px, 16px 16px !important;
+}
+
+.dark .bn-editor [data-content-type="codeBlock"]:hover::after {
+  background: 
+    /* Copy icon - brighter on hover in dark mode */
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
+    /* Menu and download stay the same */
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cline x1='3' y1='6' x2='21' y2='6'/%3e%3cline x1='3' y1='12' x2='21' y2='12'/%3e%3cline x1='3' y1='18' x2='21' y2='18'/%3e%3c/svg%3e") no-repeat center center,
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3e%3cpolyline points='7,10 12,15 17,10'/%3e%3cline x1='12' y1='15' x2='12' y2='3'/%3e%3c/svg%3e") no-repeat left center !important;
+  background-size: 16px 16px, 16px 16px, 16px 16px !important;
+}
+
+/* Removed dark mode tick CSS - using toast notification instead */
+
+/* Copy button styling for code blocks */
+.bn-editor [data-content-type="codeBlock"] .bn-code-block-copy-button {
+  background-color: transparent !important;
+  color: var(--muted-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  transition: all 0.2s ease !important;
+  opacity: 0.7 !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .bn-code-block-copy-button:hover {
+  background-color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+/* Line numbers styling (if supported) */
+.bn-editor [data-content-type="codeBlock"] .line-numbers {
+  color: var(--muted-foreground) !important;
+  opacity: 0.6 !important;
+  user-select: none !important;
+  padding-right: 1rem !important;
+  border-right: 1px solid var(--border) !important;
+  margin-right: 1rem !important;
+}
+
+/* Scrollbar styling for code blocks */
+.bn-editor [data-content-type="codeBlock"] pre::-webkit-scrollbar {
+  height: 8px !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] pre::-webkit-scrollbar-track {
+  background: var(--muted) !important;
+  border-radius: 4px !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] pre::-webkit-scrollbar-thumb {
+  background: var(--border) !important;
+  border-radius: 4px !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] pre::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground) !important;
+}
+
+/* Enhanced focus states */
+.bn-editor [data-content-type="codeBlock"]:focus-within {
+  border-color: var(--ring) !important;
+  box-shadow: 0 0 0 2px var(--ring) !important;
+}
+
+/* Better spacing for nested elements */
+.bn-editor [data-content-type="codeBlock"] * {
+  line-height: inherit !important;
+}
+
+/* Improve readability with better letter spacing */
+.bn-editor [data-content-type="codeBlock"] pre {
+  letter-spacing: 0.025em !important;
+}
+
+/* Copy button click area - invisible overlay for better UX */
+.bn-editor [data-content-type="codeBlock"] .copy-button-area {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  cursor: pointer !important;
+  z-index: 4 !important;
+  border-radius: 4px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.bn-editor [data-content-type="codeBlock"] .copy-button-area:hover {
+  background-color: var(--muted) !important;
+}

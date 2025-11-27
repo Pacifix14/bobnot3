@@ -5,6 +5,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Inter } from "next/font/google";
 
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
