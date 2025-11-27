@@ -3,6 +3,8 @@ import { db } from "@/server/db";
 import { redirect } from "next/navigation";
 import { Editor } from "@/components/editor";
 
+export const dynamic = 'force-dynamic';
+
 export default async function PageEditor({
   params,
 }: {

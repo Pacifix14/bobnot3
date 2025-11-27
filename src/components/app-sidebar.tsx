@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -151,7 +151,7 @@ export function AppSidebar({
     })
   );
 
-  const flatten = (
+  const flatten = useCallback((
     items: TreeItem[],
     parentId: string | null = null,
     depth = 0
@@ -163,7 +163,7 @@ export function AppSidebar({
         ...flatten(item.children ?? [], item.id, depth + 1),
       ];
     }, []);
-  };
+  }, []);
 
   const flattenedItems = useMemo(() => flatten(items), [items, flatten]);
   const activeItem = activeId ? flattenedItems.find((i) => i.id === activeId) : null;
@@ -210,7 +210,7 @@ export function AppSidebar({
     // Note: We need to find both. The recursive function above stops if both found? 
     // Actually, we can just traverse fully or until both found.
     
-    const findBoth = (list: TreeItem[], pid: string | null) => {
+    const findBoth = (list: TreeItem[], _pid: string | null) => {
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
             if (!item) continue;

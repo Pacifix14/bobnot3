@@ -27,7 +27,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   pageId: string, 
   onStatusChange: (status: "saved" | "saving" | "unsaved") => void 
 }) {
-  const { theme, resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
 
   // Add copy functionality for code blocks
   useEffect(() => {
-    const handleCopyClick = async (event: MouseEvent) => {
+    const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const codeBlock = target.closest('[data-content-type="codeBlock"]');
       
@@ -104,17 +104,20 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         
         // Get the code content
         const preElement = codeBlock.querySelector('pre');
-        const codeContent = preElement?.textContent || '';
+        const codeContent = preElement?.textContent ?? '';
         
-        try {
-          await navigator.clipboard.writeText(codeContent);
-          
-          // Show success toast
-          showToast("Code copied to clipboard!", "success");
-        } catch (err) {
-          console.error('Failed to copy code:', err);
-          showToast("Failed to copy code", "error");
-        }
+        // Handle async clipboard operation
+        void (async () => {
+          try {
+            await navigator.clipboard.writeText(codeContent);
+            
+            // Show success toast
+            showToast("Code copied to clipboard!", "success");
+          } catch (err) {
+            console.error('Failed to copy code:', err);
+            showToast("Failed to copy code", "error");
+          }
+        })();
       }
     };
 
@@ -124,7 +127,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     return () => {
       document.removeEventListener('click', handleCopyClick);
     };
-  }, []);
+  }, [showToast]);
 
   // Add action buttons to code blocks using CSS approach
   useEffect(() => {

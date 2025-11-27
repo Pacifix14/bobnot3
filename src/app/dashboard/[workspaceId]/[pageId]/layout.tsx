@@ -3,6 +3,8 @@ import { db } from "@/server/db";
 import { redirect } from "next/navigation";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 
+export const dynamic = 'force-dynamic';
+
 export default async function PageLayout({
   children,
   params,

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { FileText, Folder } from "lucide-react";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 
+export const dynamic = 'force-dynamic';
+
 export default async function FolderPage({
   params,
 }: {
