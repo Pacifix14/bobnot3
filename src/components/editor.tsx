@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 
@@ -83,6 +82,237 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
       }
     };
   }, [editor, saveToDatabase, onStatusChange]);
+
+  // Enable bulk indentation for multiple selected bullet points
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const handleKeyDown = (event: Event) => {
+      const keyboardEvent = event as KeyboardEvent;
+      
+      if (keyboardEvent.key === 'Tab') {
+        try {
+          if (!editor?.isEditable) return;
+
+          const selection = editor.getSelection();
+          
+          if (selection?.blocks && selection.blocks.length > 1) {
+            const listBlocks = selection.blocks.filter(block => 
+              block.type === 'bulletListItem' || block.type === 'numberedListItem'
+            );
+            
+            if (listBlocks.length > 0) {
+              // Prevent toolbar from capturing Tab key
+              keyboardEvent.preventDefault();
+              keyboardEvent.stopPropagation();
+              keyboardEvent.stopImmediatePropagation();
+              
+              setTimeout(() => {
+                try {
+                  if (!editor?.isEditable) return;
+
+                  const processBlocks = async (blocks: typeof listBlocks, isOutdent: boolean) => {
+                    for (const block of blocks) {
+                      try {
+                        await new Promise(resolve => setTimeout(resolve, 5));
+                        
+                        if (editor?.isEditable) {
+                          editor.focus();
+                          editor.setTextCursorPosition(block.id, "end");
+                          await new Promise(resolve => setTimeout(resolve, 5));
+                          
+                          if (isOutdent) {
+                            editor.unnestBlock();
+                          } else {
+                            editor.nestBlock();
+                          }
+                        }
+                      } catch (error) {
+                        console.error(`Error ${isOutdent ? 'outdenting' : 'indenting'} block:`, error);
+                      }
+                    }
+                  };
+
+                  void processBlocks(listBlocks, keyboardEvent.shiftKey);
+                } catch (error) {
+                  console.error('Error in bulk indentation:', error);
+                }
+              }, 0);
+              
+              return false;
+            }
+          }
+        } catch (error) {
+          console.error('Error handling bulk indentation:', error);
+        }
+      }
+    };
+
+    // Capture Tab events before toolbar can intercept them
+    document.addEventListener('keydown', handleKeyDown, true);
+    
+    const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+    if (editorElement) {
+      editorElement.addEventListener('keydown', handleKeyDown, true);
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      if (editorElement) {
+        editorElement.removeEventListener('keydown', handleKeyDown, true);
+      }
+    };
+  }, [editor, isReady]);
+
+  // Hide toolbar when multiple list items are selected to prevent Tab interference
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const handleSelectionChange = () => {
+      try {
+        if (!editor?.isEditable) return;
+
+        const selection = editor.getSelection();
+        const hasMultipleListItems = selection?.blocks && 
+          selection.blocks.length > 1 &&
+          selection.blocks.some(block => 
+            block.type === 'bulletListItem' || block.type === 'numberedListItem'
+          );
+
+        setTimeout(() => {
+          const toolbar = document.querySelector('.bn-formatting-toolbar, .bn-selection-toolbar, [data-test="formatting-toolbar"]');
+          if (toolbar) {
+            (toolbar as HTMLElement).style.display = hasMultipleListItems ? 'none' : '';
+          }
+        }, 10);
+      } catch (error) {
+        console.error('Error handling selection change:', error);
+      }
+    };
+
+    let unsubscribe: (() => void) | null = null;
+    
+    try {
+      unsubscribe = editor.onSelectionChange(handleSelectionChange);
+    } catch (error) {
+      console.error('Error setting up selection change listener:', error);
+    }
+    
+    return () => {
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.error('Error cleaning up selection change listener:', error);
+        }
+      }
+      
+      setTimeout(() => {
+        const toolbar = document.querySelector('.bn-formatting-toolbar, .bn-selection-toolbar, [data-test="formatting-toolbar"]');
+        if (toolbar) {
+          (toolbar as HTMLElement).style.display = '';
+        }
+      }, 10);
+    };
+  }, [editor, isReady]);
+
+  // Fix checkbox cursor positioning for "[] " markdown syntax
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    // Add a small delay to ensure DOM is ready
+    const setupTimeout = setTimeout(() => {
+      setupEventListeners();
+    }, 100);
+
+    const handleKeyDown = (event: Event) => {
+      const keyboardEvent = event as KeyboardEvent;
+      
+      // Only handle space key
+      if (keyboardEvent.key !== ' ') return;
+      
+      try {
+        if (!editor?.isEditable) return;
+        
+        const currentBlock = editor.getTextCursorPosition().block;
+        if (!currentBlock || currentBlock.type !== 'paragraph') return;
+        
+        // Get the current text content
+        const blockContent = currentBlock.content;
+        if (!Array.isArray(blockContent) || blockContent.length === 0) return;
+        
+        // Check if the text ends with "[]"
+        const textContent = blockContent.map(item => {
+          if (typeof item === 'string') return item;
+          if (typeof item === 'object' && 'text' in item) return (item as { text?: string }).text ?? '';
+          return '';
+        }).join('');
+        
+        if (textContent === '[]') {
+          // Prevent ALL default behaviors more aggressively
+          keyboardEvent.preventDefault();
+          keyboardEvent.stopPropagation();
+          keyboardEvent.stopImmediatePropagation();
+          
+          // Immediately convert without any delay to prevent flicker
+          try {
+            if (!editor?.isEditable) return;
+            
+            // Update the block to be a checkListItem
+            editor.updateBlock(currentBlock.id, {
+              type: 'checkListItem',
+              props: { checked: false },
+              content: []
+            });
+            
+            // Position cursor at the end of the checkbox immediately
+            editor.setTextCursorPosition(currentBlock.id, "end");
+            
+          } catch (error) {
+            console.error('Error manually creating checkbox:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error in checkbox keydown handler:', error);
+      }
+    };
+
+    const setupEventListeners = () => {
+      // Add event listener to capture space key
+      const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+      
+      if (editorElement) {
+        // Use capture phase with highest priority
+        editorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+        
+        // Try adding to the ProseMirror editor specifically with highest priority
+        const proseMirrorElement = editorElement.querySelector('.ProseMirror');
+        if (proseMirrorElement) {
+          proseMirrorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+        }
+      }
+      
+      // Always add to document as backup with highest priority
+      document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+    };
+    
+    // Try immediate setup
+    setupEventListeners();
+
+    return () => {
+      clearTimeout(setupTimeout);
+      
+      const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+      if (editorElement) {
+        editorElement.removeEventListener('keydown', handleKeyDown, { capture: true });
+        const proseMirrorElement = editorElement.querySelector('.ProseMirror');
+        if (proseMirrorElement) {
+          proseMirrorElement.removeEventListener('keydown', handleKeyDown, { capture: true });
+        }
+      }
+      document.removeEventListener('keydown', handleKeyDown, { capture: true });
+    };
+  }, [editor, isReady]);
 
   // Add copy functionality for code blocks
   useEffect(() => {
@@ -223,7 +453,6 @@ function BlockNoteEditorInner({
   pageId: string, 
   title: string 
 }) {
-  const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -242,12 +471,11 @@ function BlockNoteEditorInner({
         body: JSON.stringify({ title: newTitle }),
       });
       setStatus("saved");
-      router.refresh();
     } catch (error) {
       console.error("Failed to save title", error);
       setStatus("unsaved");
     }
-  }, [pageId, router]);
+  }, [pageId]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -272,18 +500,18 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 relative">
+    <div className="max-w-5xl mx-auto space-y-4 relative overflow-hidden">
       <div className="flex items-center justify-between pl-[54px] pr-6">
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <Input
             value={title}
             onChange={handleTitleChange}
-            className="font-serif font-medium border-none px-0 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent"
+            className="font-serif font-medium border-none px-0 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full"
             placeholder="Untitled"
             style={{ fontSize: '2rem' }}
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-shrink-0">
             <ShareDialog pageId={pageId} />
             <div className="text-xs text-muted-foreground w-20 text-right">
             {status === "saving" && <span className="flex items-center justify-end gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
@@ -292,7 +520,9 @@ function BlockNoteEditorInner({
             </div>
         </div>
       </div>
-      <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
+      <div className="overflow-hidden">
+        <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
+      </div>
     </div>
   );
 }

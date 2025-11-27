@@ -173,7 +173,6 @@ export default async function WorkspaceLayout({
     <div className={`${inter.variable} font-sans`}>
       <SidebarProvider>
         <AppSidebar 
-          key={contextWorkspaceId}
           workspaceId={contextWorkspaceId} 
           items={treeItems} 
           user={user}

@@ -3,6 +3,54 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const workspaceRouter = createTRPCRouter({
+    // Get workspace data with caching
+    getWorkspace: protectedProcedure
+        .input(z.object({ workspaceId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const workspace = await ctx.db.workspace.findUnique({
+                where: { id: input.workspaceId },
+                include: {
+                    folders: {
+                        include: {
+                            pages: {
+                                orderBy: { order: 'asc' }
+                            }
+                        },
+                        orderBy: { order: 'asc' }
+                    },
+                    pages: {
+                        where: { folderId: null },
+                        orderBy: { order: 'asc' }
+                    }
+                }
+            });
+
+            if (!workspace) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+            }
+
+            // Check if user has access to this workspace
+            const isOwner = workspace.ownerId === ctx.session.user.id;
+            
+            // For now, only owners can access workspace data
+            // You can extend this to include collaborators if needed
+            if (!isOwner) {
+                throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+            }
+
+            return workspace;
+        }),
+
+    // Get user's workspaces with caching
+    getUserWorkspaces: protectedProcedure
+        .query(async ({ ctx }) => {
+            return ctx.db.workspace.findMany({
+                where: { ownerId: ctx.session.user.id },
+                select: { id: true, name: true },
+                orderBy: { createdAt: 'desc' }
+            });
+        }),
+
     createPage: protectedProcedure
         .input(z.object({ workspaceId: z.string(), folderId: z.string().optional() }))
         .mutation(async ({ ctx, input }) => {

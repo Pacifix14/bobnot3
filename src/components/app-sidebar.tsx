@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronRight, FileText, Folder, FolderOpen, Plus, Loader2, GalleryVerticalEnd, Users, Pencil, Trash2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/trpc/react";
 import { TeamSwitcher } from "./team-switcher";
 import { NavUser } from "./nav-user";
@@ -107,24 +108,18 @@ export function AppSidebar({
 
   const createPage = api.workspace.createPage.useMutation({
     onSuccess: (page) => {
-      router.refresh();
       router.push(`/dashboard/${workspaceId}/${page.id}`);
     },
   });
 
   const createFolder = api.workspace.createFolder.useMutation({
     onSuccess: () => {
-      router.refresh();
       setIsNewFolderDialogOpen(false);
       setNewFolderName("");
     }
   });
 
-  const updateStructure = api.workspace.updateStructure.useMutation({
-    onSuccess: () => {
-        router.refresh();
-    }
-  });
+  const updateStructure = api.workspace.updateStructure.useMutation();
 
   const handleCreatePage = () => {
     createPage.mutate({ workspaceId });
@@ -139,6 +134,12 @@ export function AppSidebar({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Prefetch page data on hover for instant loading
+  const utils = api.useUtils();
+  const prefetchPage = useCallback((pageId: string) => {
+    void utils.page.getPage.prefetch({ pageId });
+  }, [utils]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -343,7 +344,7 @@ export function AppSidebar({
                 <SidebarMenu className="ml-2">
                     <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         {items.map((item) => (
-                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} />
+                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} prefetchPage={prefetchPage} />
                         ))}
                     </SortableContext>
                 </SidebarMenu>
@@ -382,7 +383,11 @@ export function AppSidebar({
                                     className="h-auto py-2.5 items-start"
                                     tooltip={`${page.title} • ${page.workspaceName}`}
                                 >
-                                    <a href={`/dashboard/${page.workspaceId}/${page.id}`} className="flex items-center gap-2">
+                                    <Link 
+                                        href={`/dashboard/${page.workspaceId}/${page.id}`} 
+                                        className="flex items-center gap-2"
+                                        onMouseEnter={() => prefetchPage(page.id)}
+                                    >
                                         <FileText className="h-4 w-4 shrink-0 mt-0.5" />
                                         <div className="flex flex-col gap-0.5 overflow-hidden">
                                             <span className="truncate font-medium leading-none">{page.title}</span>
@@ -390,7 +395,7 @@ export function AppSidebar({
                                                 {page.workspaceName}
                                             </span>
                                         </div>
-                                    </a>
+                                    </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         ))
@@ -475,12 +480,13 @@ function TreeItemRenderer({
   item,
   workspaceId,
   isOwner,
+  prefetchPage,
 }: {
   item: TreeItem;
   workspaceId: string;
   isOwner?: boolean;
+  prefetchPage: (pageId: string) => void;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const isActive = pathname === `/dashboard/${workspaceId}/${item.id}`;
   const [isRenaming, setIsRenaming] = useState(false);
@@ -489,21 +495,18 @@ function TreeItemRenderer({
 
   const renameFolder = api.workspace.renameFolder.useMutation({
     onSuccess: () => {
-        router.refresh();
         setIsRenaming(false);
     }
   });
 
   const deleteFolder = api.workspace.deleteFolder.useMutation({
     onSuccess: () => {
-        router.refresh();
         setIsDeleteDialogOpen(false);
     }
   });
 
   const deletePage = api.workspace.deletePage.useMutation({
     onSuccess: () => {
-        router.refresh();
         setIsDeleteDialogOpen(false);
     }
   });
@@ -597,7 +600,7 @@ function TreeItemRenderer({
                     </div>
                 ) : (
                     <SidebarMenuButton asChild tooltip={item.name} className="cursor-grab active:cursor-grabbing flex-1 pr-2 group/row relative overflow-hidden">
-                        <a href={`/dashboard/${workspaceId}/folder/${item.id}`} className="flex items-center gap-2 w-full">
+                        <Link href={`/dashboard/${workspaceId}/folder/${item.id}`} className="flex items-center gap-2 w-full">
                             <span className="truncate transition-all duration-200 group-hover/row:pr-16">{item.name}</span>
                             
                             {isOwner && (
@@ -606,7 +609,7 @@ function TreeItemRenderer({
                                     <ActionButton icon={Trash2} onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10" />
                                 </div>
                             )}
-                        </a>
+                        </Link>
                     </SidebarMenuButton>
                 )}
               </div>
@@ -619,6 +622,7 @@ function TreeItemRenderer({
                             item={child}
                             workspaceId={workspaceId}
                             isOwner={isOwner}
+                            prefetchPage={prefetchPage}
                             />
                         ))}
                     </SortableContext>
@@ -654,7 +658,11 @@ function TreeItemRenderer({
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="group/item">
         <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive} tooltip={item.name} className="cursor-grab active:cursor-grabbing group/row relative overflow-hidden">
-                <a href={`/dashboard/${workspaceId}/${item.id}`} className={`flex items-center gap-2 w-full ${isActive ? '' : 'text-muted-foreground/70 hover:text-foreground transition-colors'}`}>
+                <Link 
+                    href={`/dashboard/${workspaceId}/${item.id}`} 
+                    className={`flex items-center gap-2 w-full ${isActive ? '' : 'text-muted-foreground/70 hover:text-foreground transition-colors'}`}
+                    onMouseEnter={() => prefetchPage(item.id)}
+                >
                     <FileText className="flex-shrink-0" />
                     <span className="truncate transition-all duration-200 group-hover/row:pr-8">{item.name}</span>
                     
@@ -663,7 +671,7 @@ function TreeItemRenderer({
                             <ActionButton icon={Trash2} onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10" />
                         </div>
                     )}
-                </a>
+                </Link>
             </SidebarMenuButton>
         </SidebarMenuItem>
         

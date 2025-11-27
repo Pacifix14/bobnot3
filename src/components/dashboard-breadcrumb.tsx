@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function DashboardBreadcrumb({
   items
@@ -38,6 +39,9 @@ export function DashboardBreadcrumb({
           ))}
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="ml-auto">
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

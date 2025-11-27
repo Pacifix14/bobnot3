@@ -149,9 +149,14 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-weight: 300;
+    overflow-x: hidden;
     /* Subtle dot grid pattern with a slight radial fade */
     background-image:
       radial-gradient(circle at center, transparent 0%, var(--color-background) 100%),
@@ -182,6 +187,123 @@ div[data-id="blocknote-editor"] {
 .bn-editor,
 .bn-editor * {
   color: var(--foreground);
+}
+
+/* Hyperlink styling for BlockNote editor */
+.bn-editor a,
+.bn-editor a[href] {
+  color: #2563eb !important; /* Blue-600 for light mode */
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.bn-editor a:hover,
+.bn-editor a[href]:hover {
+  color: #1d4ed8 !important; /* Blue-700 for hover in light mode */
+  text-decoration: underline !important;
+}
+
+.bn-editor a:visited,
+.bn-editor a[href]:visited {
+  color: #7c3aed !important; /* Purple-600 for visited links in light mode */
+}
+
+/* Dark mode link styling */
+.dark .bn-editor a,
+.dark .bn-editor a[href] {
+  color: #60a5fa !important; /* Blue-400 for dark mode */
+}
+
+.dark .bn-editor a:hover,
+.dark .bn-editor a[href]:hover {
+  color: #93c5fd !important; /* Blue-300 for hover in dark mode */
+}
+
+.dark .bn-editor a:visited,
+.dark .bn-editor a[href]:visited {
+  color: #a78bfa !important; /* Purple-400 for visited links in dark mode */
+}
+
+/* BlockNote specific link elements */
+.bn-editor .bn-inline-content a,
+.bn-editor [data-link],
+.bn-editor .ProseMirror a {
+  color: #2563eb !important; /* Blue-600 for light mode */
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.bn-editor .bn-inline-content a:hover,
+.bn-editor [data-link]:hover,
+.bn-editor .ProseMirror a:hover {
+  color: #1d4ed8 !important; /* Blue-700 for hover in light mode */
+}
+
+/* Dark mode for BlockNote specific elements */
+.dark .bn-editor .bn-inline-content a,
+.dark .bn-editor [data-link],
+.dark .bn-editor .ProseMirror a {
+  color: #60a5fa !important; /* Blue-400 for dark mode */
+}
+
+.dark .bn-editor .bn-inline-content a:hover,
+.dark .bn-editor [data-link]:hover,
+.dark .bn-editor .ProseMirror a:hover {
+  color: #93c5fd !important; /* Blue-300 for hover in dark mode */
+}
+
+/* Ensure links are distinguishable in all block types */
+.bn-editor [data-content-type] a,
+.bn-editor .bn-block-content a {
+  color: #2563eb !important; /* Blue-600 for light mode */
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.dark .bn-editor [data-content-type] a,
+.dark .bn-editor .bn-block-content a {
+  color: #60a5fa !important; /* Blue-400 for dark mode */
+}
+
+/* Override any conflicting styles that might hide link appearance */
+.bn-editor a:not(.bn-button):not(.copy-btn) {
+  color: #2563eb !important; /* Blue-600 for light mode */
+  text-decoration: underline !important;
+  font-weight: 500 !important;
+}
+
+.dark .bn-editor a:not(.bn-button):not(.copy-btn) {
+  color: #60a5fa !important; /* Blue-400 for dark mode */
+}
+
+/* Focus state for accessibility */
+.bn-editor a:focus {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px !important;
+  border-radius: 2px !important;
+}
+
+/* Fix horizontal scrolling by ensuring proper text wrapping */
+.bn-editor,
+.bn-editor * {
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  max-width: 100% !important;
+}
+
+/* Ensure BlockNote content containers don't overflow */
+.bn-editor [data-content-type],
+.bn-editor .ProseMirror,
+.bn-editor .bn-block-content {
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
 }
 
 /* Collaboration Cursor Styles */
@@ -312,6 +434,9 @@ div[data-id="blocknote-editor"] {
   font-size: 0.875rem !important;
   line-height: 1.6 !important;
   font-weight: 400 !important;
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
 }
 
 .bn-editor [data-content-type="codeBlock"] pre code {

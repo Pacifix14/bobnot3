@@ -3,6 +3,34 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const pageRouter = createTRPCRouter({
+  // Get page data with caching
+  getPage: protectedProcedure
+    .input(z.object({ pageId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const page = await ctx.db.page.findUnique({
+        where: { id: input.pageId },
+        include: { 
+          workspace: true, 
+          collaborators: true,
+          folder: true 
+        }
+      });
+
+      if (!page) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Page not found" });
+      }
+
+      // Check access permissions
+      const isOwner = page.workspace.ownerId === ctx.session.user.id;
+      const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
+      
+      if (!isOwner && !isCollaborator) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return page;
+    }),
+
   addCollaborator: protectedProcedure
     .input(z.object({ pageId: z.string(), email: z.string().email() }))
     .mutation(async ({ ctx, input }) => {

@@ -1,34 +1,76 @@
-import { auth } from "@/server/auth";
-import { db } from "@/server/db";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
 
-export const dynamic = 'force-dynamic';
-
-export default async function PageLayout({
+export default function PageLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ workspaceId: string; pageId: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user) redirect("/api/auth/signin");
+  const params = useParams();
+  const router = useRouter();
+  const workspaceId = params.workspaceId as string;
+  const pageId = params.pageId as string;
 
-  const { workspaceId, pageId } = await params;
+  const { data: page, isLoading: pageLoading, error: pageError } = api.page.getPage.useQuery(
+    { pageId },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  const workspace = await db.workspace.findUnique({
-    where: { id: workspaceId },
-  });
+  const { data: workspace, isLoading: workspaceLoading, error: workspaceError } = api.workspace.getWorkspace.useQuery(
+    { workspaceId },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  if (!workspace) redirect("/dashboard");
+  // Handle errors and redirects
+  useEffect(() => {
+    if (workspaceError) {
+      if (workspaceError.data?.code === "NOT_FOUND" || workspaceError.data?.code === "FORBIDDEN") {
+        router.push("/dashboard");
+      }
+    }
+    if (pageError) {
+      if (pageError.data?.code === "NOT_FOUND" || pageError.data?.code === "FORBIDDEN") {
+        router.push(`/dashboard/${workspaceId}`);
+      }
+    }
+  }, [workspaceError, pageError, router, workspaceId]);
 
-  const page = await db.page.findUnique({
-    where: { id: pageId },
-    include: { folder: true },
-  });
+  if (pageLoading || workspaceLoading) {
+    return (
+      <>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-4 w-px" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-24" />
+          <div className="ml-auto">
+            <Skeleton className="h-9 w-9" />
+          </div>
+        </header>
+        <div className="h-[calc(100vh-4rem)] overflow-y-auto">
+          {children}
+        </div>
+      </>
+    );
+  }
 
-  if (!page) redirect(`/dashboard/${workspaceId}`);
+  if (!page || !workspace) {
+    return null; // Will redirect via useEffect
+  }
 
   const breadcrumbItems: { label: string; href?: string }[] = [
     { label: workspace.name, href: `/dashboard/${workspaceId}` },
