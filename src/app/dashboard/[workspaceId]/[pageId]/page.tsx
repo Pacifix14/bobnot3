@@ -25,7 +25,11 @@ export default function PageEditor() {
   // Handle errors and redirects
   useEffect(() => {
     if (error) {
-      if (error.data?.code === "NOT_FOUND" || error.data?.code === "FORBIDDEN") {
+      if (error.data?.code === "NOT_FOUND") {
+        // Page not found, redirect to dashboard
+        router.push("/dashboard");
+      } else if (error.data?.code === "FORBIDDEN") {
+        // Access denied, redirect to dashboard
         router.push("/dashboard");
       }
     }
