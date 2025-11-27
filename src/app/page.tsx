@@ -2,8 +2,17 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Layers, Sparkles } from "lucide-react";
+import { auth } from "@/server/auth";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  // Check if user is already authenticated
+  const session = await auth();
+  if (session?.user) {
+    redirect("/dashboard");
+  }
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/10 selection:text-primary">
       <Navbar />

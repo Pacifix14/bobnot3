@@ -684,3 +684,143 @@ div[data-id="blocknote-editor"] {
 .bn-editor [data-content-type="codeBlock"] .copy-button-area:hover {
   background-color: var(--muted) !important;
 }
+
+/* Checkbox styling - grey out checked items and their nested content */
+.bn-editor [data-content-type="checkListItem"] {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* When checkbox is checked, grey out the text content with strikethrough */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  text-decoration: line-through;
+  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+  transition: all 0.2s ease;
+}
+
+/* Grey out nested bullet points when parent checkbox is checked */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"],
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
+  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+  text-decoration: line-through;
+  transition: all 0.2s ease;
+}
+
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
+  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+  text-decoration: line-through;
+  transition: all 0.2s ease;
+}
+
+/* Grey out the bullet point symbol itself */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
+  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  text-decoration: line-through;
+}
+
+/* Grey out nested checked checkboxes when parent checkbox is checked */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  opacity: 1;
+  text-decoration: line-through;
+  transition: all 0.2s ease;
+}
+
+/* Keep unchecked nested checkboxes completely normal (black text) - HIGHEST PRIORITY */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
+  color: var(--foreground) !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+}
+
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
+  color: var(--foreground) !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
+  color: var(--foreground) !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+
+/* Dark mode adjustments */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #6b7280 !important; /* grey-500 for dark mode */
+}
+
+/* Dark mode - Grey out nested bullet points when parent checkbox is checked */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"],
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
+  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+  opacity: 1;
+  text-decoration: line-through;
+}
+
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
+  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+  opacity: 1;
+  text-decoration: line-through;
+}
+
+/* Dark mode - Grey out the bullet point symbol itself */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
+  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+  text-decoration: line-through;
+}
+
+/* Dark mode - Grey out nested checked checkboxes when parent checkbox is checked */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+  opacity: 1;
+  text-decoration: line-through;
+}
+
+/* Keep unchecked nested checkboxes normal in dark mode too - HIGHEST PRIORITY */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
+  color: var(--foreground) !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+}
+
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
+  color: var(--foreground) !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
+  color: var(--foreground) !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+/* Ensure checked nested checkboxes still show as checked (darker grey) */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #6b7280 !important; /* darker grey for checked nested items */
+  text-decoration: line-through !important;
+  opacity: 0.8 !important;
+}
+
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #4b5563 !important; /* darker grey for dark mode */
+}

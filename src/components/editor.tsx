@@ -12,6 +12,8 @@ import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
 // Import BlockNote styles
 import "@blocknote/core/fonts/inter.css";
@@ -98,7 +100,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
           
           if (selection?.blocks && selection.blocks.length > 1) {
             const listBlocks = selection.blocks.filter(block => 
-              block.type === 'bulletListItem' || block.type === 'numberedListItem'
+              block.type === 'bulletListItem' || block.type === 'numberedListItem' || block.type === 'checkListItem'
             );
             
             if (listBlocks.length > 0) {
@@ -176,7 +178,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         const hasMultipleListItems = selection?.blocks && 
           selection.blocks.length > 1 &&
           selection.blocks.some(block => 
-            block.type === 'bulletListItem' || block.type === 'numberedListItem'
+            block.type === 'bulletListItem' || block.type === 'numberedListItem' || block.type === 'checkListItem'
           );
 
         setTimeout(() => {
@@ -453,6 +455,8 @@ function BlockNoteEditorInner({
   pageId: string, 
   title: string 
 }) {
+  const router = useRouter();
+  const utils = api.useUtils();
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -462,20 +466,28 @@ function BlockNoteEditorInner({
     setStatus(newStatus);
   }, []);
 
-  const saveTitle = useCallback(async (newTitle: string) => {
-    setStatus("saving");
-    try {
-      await fetch(`/api/pages/${pageId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle }),
-      });
+  const updateTitle = api.page.updateTitle.useMutation({
+    onMutate: () => {
+      setStatus("saving");
+    },
+    onSuccess: () => {
       setStatus("saved");
-    } catch (error) {
+      // Invalidate page cache to update breadcrumbs
+      void utils.page.getPage.invalidate({ pageId });
+      // Invalidate workspace cache to update sidebar
+      void utils.workspace.getWorkspace.invalidate();
+      // Refresh server-side data to update sidebar immediately
+      router.refresh();
+    },
+    onError: (error) => {
       console.error("Failed to save title", error);
       setStatus("unsaved");
     }
-  }, [pageId]);
+  });
+
+  const saveTitle = useCallback(async (newTitle: string) => {
+    updateTitle.mutate({ pageId, title: newTitle });
+  }, [pageId, updateTitle]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;

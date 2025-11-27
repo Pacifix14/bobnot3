@@ -124,6 +124,33 @@ export const pageRouter = createTRPCRouter({
       }
 
       return page.collaborators;
+    }),
+
+  // Update page title
+  updateTitle: protectedProcedure
+    .input(z.object({ pageId: z.string(), title: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const page = await ctx.db.page.findUnique({
+        where: { id: input.pageId },
+        include: { workspace: true, collaborators: true }
+      });
+
+      if (!page) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Page not found" });
+      }
+
+      // Check access permissions
+      const isOwner = page.workspace.ownerId === ctx.session.user.id;
+      const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
+      
+      if (!isOwner && !isCollaborator) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return ctx.db.page.update({
+        where: { id: input.pageId },
+        data: { title: input.title }
+      });
     })
 });
 
