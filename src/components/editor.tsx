@@ -474,7 +474,6 @@ function BlockNoteEditorInner({
         body: JSON.stringify({ title: newTitle }),
       });
       setStatus("saved");
-      router.refresh();
     } catch (error) {
       console.error("Failed to save title", error);
       setStatus("unsaved");

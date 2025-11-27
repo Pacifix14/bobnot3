@@ -30,7 +30,6 @@ export function Sidebar({ workspaceId, folders, pages }: SidebarProps) {
   const router = useRouter();
   const createPage = api.workspace.createPage.useMutation({
     onSuccess: (page) => {
-      router.refresh();
       router.push(`/dashboard/${workspaceId}/${page.id}`);
     },
   });
