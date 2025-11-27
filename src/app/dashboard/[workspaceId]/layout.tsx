@@ -182,7 +182,7 @@ export default async function WorkspaceLayout({
           sharedPages={formattedSharedPages}
         />
         <SidebarInset>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1">
             {children}
           </div>
         </SidebarInset>
