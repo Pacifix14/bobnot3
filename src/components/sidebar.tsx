@@ -28,8 +28,13 @@ type SidebarProps = {
 
 export function Sidebar({ workspaceId, folders, pages }: SidebarProps) {
   const router = useRouter();
+  const utils = api.useUtils();
   const createPage = api.workspace.createPage.useMutation({
     onSuccess: (page) => {
+      // Invalidate workspace data to refresh sidebar
+      void utils.workspace.getWorkspace.invalidate({ workspaceId });
+      // Refresh server-side data to update sidebar immediately
+      router.refresh();
       router.push(`/dashboard/${workspaceId}/${page.id}`);
     },
   });

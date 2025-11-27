@@ -108,18 +108,41 @@ export function AppSidebar({
 
   const createPage = api.workspace.createPage.useMutation({
     onSuccess: (page) => {
+      // Optimistically update local state
+      const newPageItem: TreeItem = {
+        id: page.id,
+        name: page.title,
+        type: 'page'
+      };
+      setItems(prev => [...prev, newPageItem]);
+      
+      // Invalidate workspace data to refresh sidebar
+      void utils.workspace.getWorkspace.invalidate({ workspaceId });
+      // Refresh server-side data to update sidebar immediately
+      router.refresh();
       router.push(`/dashboard/${workspaceId}/${page.id}`);
     },
   });
 
   const createFolder = api.workspace.createFolder.useMutation({
     onSuccess: () => {
+      // Invalidate workspace data to refresh sidebar
+      void utils.workspace.getWorkspace.invalidate({ workspaceId });
+      // Refresh server-side data to update sidebar immediately
+      router.refresh();
       setIsNewFolderDialogOpen(false);
       setNewFolderName("");
     }
   });
 
-  const updateStructure = api.workspace.updateStructure.useMutation();
+  const updateStructure = api.workspace.updateStructure.useMutation({
+    onSuccess: () => {
+      // Invalidate workspace data to refresh sidebar
+      void utils.workspace.getWorkspace.invalidate({ workspaceId });
+      // Refresh server-side data to update sidebar immediately
+      router.refresh();
+    }
+  });
 
   const handleCreatePage = () => {
     createPage.mutate({ workspaceId });
@@ -344,7 +367,7 @@ export function AppSidebar({
                 <SidebarMenu className="ml-2">
                     <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         {items.map((item) => (
-                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} prefetchPage={prefetchPage} />
+                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} prefetchPage={prefetchPage} utils={utils} />
                         ))}
                     </SortableContext>
                 </SidebarMenu>
@@ -481,12 +504,15 @@ function TreeItemRenderer({
   workspaceId,
   isOwner,
   prefetchPage,
+  utils,
 }: {
   item: TreeItem;
   workspaceId: string;
   isOwner?: boolean;
   prefetchPage: (pageId: string) => void;
+  utils: ReturnType<typeof api.useUtils>;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const isActive = pathname === `/dashboard/${workspaceId}/${item.id}`;
   const [isRenaming, setIsRenaming] = useState(false);
@@ -495,18 +521,30 @@ function TreeItemRenderer({
 
   const renameFolder = api.workspace.renameFolder.useMutation({
     onSuccess: () => {
+        // Invalidate workspace data to refresh sidebar
+        void utils.workspace.getWorkspace.invalidate({ workspaceId });
+        // Refresh server-side data to update sidebar immediately
+        router.refresh();
         setIsRenaming(false);
     }
   });
 
   const deleteFolder = api.workspace.deleteFolder.useMutation({
     onSuccess: () => {
+        // Invalidate workspace data to refresh sidebar
+        void utils.workspace.getWorkspace.invalidate({ workspaceId });
+        // Refresh server-side data to update sidebar immediately
+        router.refresh();
         setIsDeleteDialogOpen(false);
     }
   });
 
   const deletePage = api.workspace.deletePage.useMutation({
     onSuccess: () => {
+        // Invalidate workspace data to refresh sidebar
+        void utils.workspace.getWorkspace.invalidate({ workspaceId });
+        // Refresh server-side data to update sidebar immediately
+        router.refresh();
         setIsDeleteDialogOpen(false);
     }
   });
@@ -623,6 +661,7 @@ function TreeItemRenderer({
                             workspaceId={workspaceId}
                             isOwner={isOwner}
                             prefetchPage={prefetchPage}
+                            utils={utils}
                             />
                         ))}
                     </SortableContext>
