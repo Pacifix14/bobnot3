@@ -5,6 +5,21 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  // Optimize for Vercel CDN
+  images: {
+    formats: ["image/avif", "image/webp"],
+    // Enable image optimization
+    minimumCacheTTL: 60,
+  },
+  // Enable compression
+  compress: true,
+  // Enable static page generation where possible
+  output: "standalone",
+  // Optimize font loading
+  experimental: {
+    optimizePackageImports: ["@blocknote/core", "@blocknote/mantine", "@mantine/core"],
+  },
+};
 
 export default config;

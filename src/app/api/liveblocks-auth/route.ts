@@ -50,9 +50,21 @@ export async function POST(request: Request) {
     // Assume room format "page-{id}"
     if (typeof room === 'string' && room.startsWith("page-")) {
         const pageId = room.replace("page-", "");
+        // Optimize query - only fetch what we need for access check
         const page = await db.page.findUnique({
             where: { id: pageId },
-            include: { workspace: true, collaborators: true }
+            select: {
+                workspace: {
+                    select: {
+                        ownerId: true,
+                    }
+                },
+                collaborators: {
+                    select: {
+                        id: true,
+                    }
+                }
+            }
         });
 
         if (page) {

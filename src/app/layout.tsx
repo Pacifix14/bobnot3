@@ -4,7 +4,6 @@ import { type Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { LiveblocksProviderWrapper } from "@/components/liveblocks-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/toast-provider";
 
@@ -38,9 +37,7 @@ export default function RootLayout({
         >
           <ToastProvider>
             <TRPCReactProvider>
-              <LiveblocksProviderWrapper>
-                {children}
-              </LiveblocksProviderWrapper>
+              {children}
             </TRPCReactProvider>
           </ToastProvider>
         </ThemeProvider>

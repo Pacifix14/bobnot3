@@ -7,7 +7,8 @@ export function LiveblocksProviderWrapper({ children }: { children: ReactNode })
   return (
     <LiveblocksProvider
       authEndpoint="/api/liveblocks-auth"
-      // Throttle updates to avoid too many re-renders
+      // Optimized throttle - 16ms provides smooth 60fps updates
+      // This balances responsiveness with performance
       throttle={16}
     >
       {children}

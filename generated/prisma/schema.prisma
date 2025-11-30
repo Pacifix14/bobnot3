@@ -66,6 +66,10 @@ model Workspace {
 
   folders Folder[]
   pages   Page[]
+
+  // Performance indexes for common queries
+  @@index([ownerId]) // For getUserWorkspaces
+  @@index([id, ownerId]) // Composite for getWorkspace with ownership check
 }
 
 model Folder {
@@ -84,6 +88,11 @@ model Folder {
   pages Page[]
 
   order Int @default(0)
+
+  // Performance indexes for common queries
+  @@index([workspaceId]) // For getWorkspace folders query
+  @@index([workspaceId, order]) // Composite for ordered folder queries
+  @@index([parentId]) // For folder hierarchy queries
 }
 
 model Page {
@@ -102,6 +111,12 @@ model Page {
   order Int @default(0)
 
   collaborators User[] @relation("PageCollaborators")
+
+  // Performance indexes for common queries
+  @@index([workspaceId]) // For getWorkspace pages query
+  @@index([workspaceId, folderId]) // Composite for pages in workspace/folder
+  @@index([workspaceId, order]) // For ordered page queries
+  @@index([id, workspaceId]) // Composite for getPage with workspace check
 }
 
 model VerificationToken {

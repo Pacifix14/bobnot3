@@ -3,16 +3,34 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const pageRouter = createTRPCRouter({
-  // Get page data with caching
+  // Get page data with caching - optimized to only fetch needed fields
   getPage: protectedProcedure
     .input(z.object({ pageId: z.string() }))
     .query(async ({ ctx, input }) => {
       const page = await ctx.db.page.findUnique({
         where: { id: input.pageId },
-        include: { 
-          workspace: true, 
-          collaborators: true,
-          folder: true 
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          workspace: {
+            select: {
+              id: true,
+              name: true,
+              ownerId: true,
+            }
+          },
+          collaborators: {
+            select: {
+              id: true,
+            }
+          },
+          folder: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
         }
       });
 

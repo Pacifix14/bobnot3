@@ -1,137 +1,77 @@
-"use client";
+import { createCaller } from "@/server/api/root";
+import { createTRPCContext } from "@/server/api/trpc";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { PageLayoutClient } from "./page-layout-client";
+import { TRPCError } from "@trpc/server";
 
-import { useParams, useRouter } from "next/navigation";
-import { api } from "@/trpc/react";
-import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect } from "react";
-
-export default function PageLayout({
+export default async function PageLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ workspaceId: string; pageId: string }>;
 }) {
-  const params = useParams();
-  const router = useRouter();
-  const workspaceId = params.workspaceId as string;
-  const pageId = params.pageId as string;
+  const { workspaceId, pageId } = await params;
+  const headersList = await headers();
+  
+  // Create server-side tRPC caller for prefetching
+  const ctx = await createTRPCContext({ headers: headersList });
+  const caller = createCaller(ctx);
 
-  // First, get user's workspaces to determine if they own the current workspace
-  const { data: userWorkspaces } = api.workspace.getUserWorkspaces.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  // Prefetch all critical data in parallel on the server
+  // This data will be available immediately on the client, eliminating loading states
+  const [userWorkspaces, pageResult] = await Promise.allSettled([
+    caller.workspace.getUserWorkspaces(),
+    caller.page.getPage({ pageId }),
+  ]);
 
-  const { data: page, isLoading: pageLoading, error: pageError } = api.page.getPage.useQuery(
-    { pageId },
-    {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
-    }
-  );
+  const userWorkspacesData = userWorkspaces.status === "fulfilled" ? userWorkspaces.value : [];
+  const page = pageResult.status === "fulfilled" ? pageResult.value : null;
 
-  // Check if user owns this workspace
-  const isWorkspaceOwner = userWorkspaces?.some(w => w.id === workspaceId) ?? false;
-
-  // Only try to get full workspace data if user owns the workspace
-  const { data: workspace, isLoading: workspaceLoading, error: workspaceError } = api.workspace.getWorkspace.useQuery(
-    { workspaceId },
-    {
-      enabled: isWorkspaceOwner, // Only query if user owns the workspace
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  // For non-owners, get basic workspace info (for shared pages)
-  const { data: workspaceInfo } = api.workspace.getWorkspaceInfo.useQuery(
-    { workspaceId },
-    {
-      enabled: !isWorkspaceOwner && !!userWorkspaces, // Only query if not owner and we know user's workspaces
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  // Handle errors and redirects
-  useEffect(() => {
-    if (pageError) {
-      if (pageError.data?.code === "NOT_FOUND") {
-        // Page not found, redirect to workspace
-        router.push(`/dashboard/${workspaceId}`);
-      } else if (pageError.data?.code === "FORBIDDEN") {
-        // Access denied to page, redirect to dashboard
-        router.push("/dashboard");
+  // Handle page errors on server
+  if (pageResult.status === "rejected") {
+    const error = pageResult.reason as unknown;
+    // Type guard for TRPCError
+    if (error instanceof TRPCError || (error && typeof error === "object" && "data" in error)) {
+      const trpcError = error as { data?: { code?: string } };
+      if (trpcError.data?.code === "NOT_FOUND") {
+        redirect(`/dashboard/${workspaceId}`);
+      } else if (trpcError.data?.code === "FORBIDDEN") {
+        redirect("/dashboard");
       }
     }
-    // Handle workspace errors only for owners
-    if (workspaceError && isWorkspaceOwner) {
-      if (workspaceError.data?.code === "NOT_FOUND" || workspaceError.data?.code === "FORBIDDEN") {
-        router.push("/dashboard");
-      }
-    }
-  }, [workspaceError, pageError, router, workspaceId, page]);
-
-  if (pageLoading || workspaceLoading) {
-    return (
-      <>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <Skeleton className="h-6 w-6" />
-          <Skeleton className="h-4 w-px" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-4" />
-          <Skeleton className="h-4 w-24" />
-          <div className="ml-auto">
-            <Skeleton className="h-9 w-9" />
-          </div>
-        </header>
-        <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-          {children}
-        </div>
-      </>
-    );
   }
 
   if (!page) {
-    return null; // Will redirect via useEffect
+    redirect(`/dashboard/${workspaceId}`);
   }
 
-  // Build breadcrumbs - use workspace data if available, otherwise use fallback info
-  const breadcrumbItems: { label: string; href?: string }[] = [];
-  
-  if (workspace) {
-    // We have full workspace access (owner scenario)
-    breadcrumbItems.push({ label: workspace.name, href: `/dashboard/${workspaceId}` });
-  } else if (workspaceInfo) {
-    // Shared page scenario - use basic workspace info, but no link
-    breadcrumbItems.push({ label: workspaceInfo.name });
-  } else if (page.workspace) {
-    // Final fallback - use workspace name from page data
-    breadcrumbItems.push({ label: page.workspace.name });
-  }
+  const isWorkspaceOwner = userWorkspacesData.some(w => w.id === workspaceId);
 
-  if (page.folder) {
-    breadcrumbItems.push({
-      label: page.folder.name,
-      href: workspace ? `/dashboard/${workspaceId}/folder/${page.folder.id}` : undefined,
-    });
-  }
+  // Prefetch workspace data based on ownership
+  const [workspaceResult, workspaceInfoResult] = await Promise.allSettled([
+    isWorkspaceOwner ? caller.workspace.getWorkspace({ workspaceId }) : Promise.resolve(null),
+    !isWorkspaceOwner ? caller.workspace.getWorkspaceInfo({ workspaceId }) : Promise.resolve(null),
+  ]);
 
-  breadcrumbItems.push({
-    label: page.title || "Untitled",
-  });
+  const workspace = workspaceResult.status === "fulfilled" ? workspaceResult.value : null;
+  const workspaceInfo = workspaceInfoResult.status === "fulfilled" ? workspaceInfoResult.value : null;
 
+  // Pass prefetched data to client component
   return (
-    <>
-      <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-        {children}
-      </div>
-    </>
+    <PageLayoutClient
+      workspaceId={workspaceId}
+      pageId={pageId}
+      prefetchedData={{
+        userWorkspaces: userWorkspacesData,
+        page,
+        workspace,
+        workspaceInfo,
+      }}
+    >
+      {children}
+    </PageLayoutClient>
   );
 }
 

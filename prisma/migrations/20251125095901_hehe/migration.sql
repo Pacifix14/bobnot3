@@ -1,0 +1,1 @@
+-- Production migration: Already applied in production database

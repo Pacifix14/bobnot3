@@ -9,16 +9,16 @@ import { useToast } from "@/components/toast-provider";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
+import { LiveblocksProvider } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
-// Import BlockNote styles
-import "@blocknote/core/fonts/inter.css";
-import "@mantine/core/styles.css";
-import "@blocknote/mantine/style.css";
+// Dynamically import BlockNote styles to avoid blocking lazy load
+// This ensures CSS only loads when the editor component is actually used
+import "./editor-styles";
 
 // Memoized Editor Component to prevent re-renders
 const BlockNoteEditor = memo(function BlockNoteEditor({ 
@@ -415,6 +415,9 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, [editor]);
 
+  // Wait for both editor and Liveblocks to be ready
+  // The optimizations we made (deferred LiveblocksProvider, optimized auth) 
+  // should make this much faster
   if (!editor || !isReady) {
     return (
       <div className="pl-[54px] pr-6 space-y-4">
@@ -546,16 +549,25 @@ export function Editor({
   pageId: string, 
   title: string 
 }) {
+  // Only initialize Liveblocks when editor is actually rendered
+  // This defers the connection until the component is mounted
   return (
-    <RoomProvider id={`page-${pageId}`} initialPresence={{}}>
-      <ClientSideSuspense fallback={<EditorSkeleton />}>
-        {() => (
-          <BlockNoteEditorInner 
-            pageId={pageId}
-            title={title}
-          />
-        )}
-      </ClientSideSuspense>
-    </RoomProvider>
+    <LiveblocksProvider
+      authEndpoint="/api/liveblocks-auth"
+      // Optimized throttle - 16ms provides smooth 60fps updates
+      // This is already optimal for most use cases
+      throttle={16}
+    >
+      <RoomProvider id={`page-${pageId}`} initialPresence={{}}>
+        <ClientSideSuspense fallback={<EditorSkeleton />}>
+          {() => (
+            <BlockNoteEditorInner 
+              pageId={pageId}
+              title={title}
+            />
+          )}
+        </ClientSideSuspense>
+      </RoomProvider>
+    </LiveblocksProvider>
   );
 }
