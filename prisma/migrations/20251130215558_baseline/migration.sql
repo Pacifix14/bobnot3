@@ -1,0 +1,1 @@
+-- Baseline migration: Database already has this schema from prisma db push
