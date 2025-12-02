@@ -120,7 +120,7 @@ export function PageLayoutClient({
   return (
     <>
       <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="h-[calc(100vh-4rem)] overflow-y-auto">
+      <div className="h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-y-auto">
         {children}
       </div>
     </>

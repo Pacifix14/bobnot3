@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -460,6 +461,7 @@ function BlockNoteEditorInner({
 }) {
   const router = useRouter();
   const utils = api.useUtils();
+  const isMobile = useIsMobile();
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -515,23 +517,23 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 relative overflow-hidden">
-      <div className="flex items-center justify-between pl-[54px] pr-6">
-        <div className="flex-1 min-w-0">
+    <div className="max-w-5xl mx-auto space-y-3 md:space-y-4 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4 pl-0 md:pl-[54px] pr-4 md:pr-6">
+        <div className="flex-1 min-w-0 w-full md:w-auto">
           <Input
             value={title}
             onChange={handleTitleChange}
             className="font-serif font-medium border-none px-0 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full"
             placeholder="Untitled"
-            style={{ fontSize: '2rem' }}
+            style={{ fontSize: isMobile ? '1.25rem' : '2rem' }}
           />
         </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0 w-full md:w-auto justify-between md:justify-end">
             <ShareDialog pageId={pageId} />
-            <div className="text-xs text-muted-foreground w-20 text-right">
-            {status === "saving" && <span className="flex items-center justify-end gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
-            {status === "saved" && "Saved"}
-            {status === "unsaved" && "Unsaved"}
+            <div className="text-xs text-muted-foreground w-auto md:w-20 text-right">
+            {status === "saving" && <span className="flex items-center justify-end gap-1"><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden md:inline">Saving</span></span>}
+            {status === "saved" && <span className="hidden md:inline">Saved</span>}
+            {status === "unsaved" && <span className="hidden md:inline">Unsaved</span>}
             </div>
         </div>
       </div>
