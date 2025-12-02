@@ -81,7 +81,7 @@ export default function PageEditor() {
           </div>
         }
       >
-        <Editor pageId={page.id} title={page.title} coverImage={page.coverImage} />
+        <Editor pageId={page.id} title={page.title} coverImage={page.coverImage} bannerImage={page.bannerImage} />
       </Suspense>
     </div>
   );

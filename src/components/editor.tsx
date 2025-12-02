@@ -14,6 +14,7 @@ import type { Block } from "@blocknote/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { CoverImage } from "@/components/cover-image";
+import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
@@ -453,7 +454,7 @@ function EditorSkeleton() {
 }
 
 import { Button } from "@/components/ui/button";
-import { Pencil, Download } from "lucide-react";
+import { Pencil, Download, Image } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -462,22 +463,26 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-function BlockNoteEditorInner({ 
-  pageId, 
+function BlockNoteEditorInner({
+  pageId,
   title: initialTitle,
-  coverImage: initialCoverImage
-}: { 
-  pageId: string, 
+  coverImage: initialCoverImage,
+  bannerImage: initialBannerImage
+}: {
+  pageId: string,
   title: string,
-  coverImage?: string | null
+  coverImage?: string | null,
+  bannerImage?: string | null
 }) {
   const router = useRouter();
   const utils = api.useUtils();
   const [title, setTitle] = useState(initialTitle);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
+  const [bannerImage, setBannerImage] = useState(initialBannerImage);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
   
   // Stable callback for status updates
   const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
@@ -536,6 +541,25 @@ function BlockNoteEditorInner({
     updateCoverImage.mutate({ pageId, coverImage: url });
   };
 
+  const updateBannerImage = api.page.updateBannerImage.useMutation({
+    onMutate: () => {
+      setStatus("saving");
+    },
+    onSuccess: () => {
+      setStatus("saved");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Failed to save banner image", error);
+      setStatus("unsaved");
+    }
+  });
+
+  const handleBannerUpdate = (url: string | null) => {
+    setBannerImage(url);
+    updateBannerImage.mutate({ pageId, bannerImage: url });
+  };
+
   useEffect(() => {
     return () => {
       if (saveTitleTimeoutRef.current) {
@@ -545,16 +569,27 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 relative overflow-hidden pb-20">
+    <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+      {/* Banner Image - Full width at top, behind other content */}
+      {bannerImage && (
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
+          <BannerImage
+            url={bannerImage}
+            editable={false}
+            onUpdate={() => {}}
+          />
+        </div>
+      )}
+
       {/* Saved Status - Top Right */}
-      <div className="absolute top-4 right-6 text-xs text-muted-foreground">
+      <div className="absolute top-4 right-6 text-xs text-muted-foreground z-10">
         {status === "saving" && <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
         {status === "saved" && "Saved"}
         {status === "unsaved" && "Unsaved"}
       </div>
 
       {/* New Header Layout */}
-      <div className="flex flex-col md:flex-row gap-6 items-end px-[54px]">
+      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
         {/* Cover Image - Smaller size (w-40 = 10rem) */}
         <div className="w-40 h-40 flex-shrink-0">
             <CoverImage 
@@ -615,6 +650,29 @@ function BlockNoteEditorInner({
              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                <Download className="h-6 w-6" />
              </Button>
+
+             <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                   <Image className="h-6 w-6" />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent>
+                 <DialogHeader>
+                   <DialogTitle>Edit Banner Image</DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4 py-4">
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Banner Image</label>
+                     <BannerImage
+                       url={bannerImage}
+                       editable={true}
+                       onUpdate={handleBannerUpdate}
+                     />
+                   </div>
+                 </div>
+               </DialogContent>
+             </Dialog>
           </div>
         </div>
       </div>
@@ -626,14 +684,16 @@ function BlockNoteEditorInner({
   );
 }
 
-export function Editor({ 
-  pageId, 
+export function Editor({
+  pageId,
   title,
-  coverImage
-}: { 
-  pageId: string, 
+  coverImage,
+  bannerImage
+}: {
+  pageId: string,
   title: string,
-  coverImage?: string | null
+  coverImage?: string | null,
+  bannerImage?: string | null
 }) {
   // Only initialize Liveblocks when editor is actually rendered
   // This defers the connection until the component is mounted
@@ -647,10 +707,11 @@ export function Editor({
       <RoomProvider id={`page-${pageId}`} initialPresence={{}}>
         <ClientSideSuspense fallback={<EditorSkeleton />}>
           {() => (
-            <BlockNoteEditorInner 
+            <BlockNoteEditorInner
               pageId={pageId}
               title={title}
               coverImage={coverImage}
+              bannerImage={bannerImage}
             />
           )}
         </ClientSideSuspense>

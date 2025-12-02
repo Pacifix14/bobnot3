@@ -101,6 +101,7 @@ model Page {
     id          String   @id @default(cuid())
     title       String   @default("Untitled")
     coverImage  String?
+    bannerImage String?
     content     Json?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt

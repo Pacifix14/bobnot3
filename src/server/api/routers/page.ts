@@ -13,6 +13,7 @@ export const pageRouter = createTRPCRouter({
           id: true,
           title: true,
           coverImage: true,
+          bannerImage: true,
           content: true,
           workspace: {
             select: {
@@ -196,6 +197,33 @@ export const pageRouter = createTRPCRouter({
       return ctx.db.page.update({
         where: { id: input.pageId },
         data: { coverImage: input.coverImage }
+      });
+    }),
+
+  // Update page banner image
+  updateBannerImage: protectedProcedure
+    .input(z.object({ pageId: z.string(), bannerImage: z.string().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const page = await ctx.db.page.findUnique({
+        where: { id: input.pageId },
+        include: { workspace: true, collaborators: true }
+      });
+
+      if (!page) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Page not found" });
+      }
+
+      // Check access permissions
+      const isOwner = page.workspace.ownerId === ctx.session.user.id;
+      const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
+
+      if (!isOwner && !isCollaborator) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return ctx.db.page.update({
+        where: { id: input.pageId },
+        data: { bannerImage: input.bannerImage }
       });
     }),
 });

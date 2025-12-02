@@ -7317,6 +7317,7 @@ export namespace Prisma {
     id: string | null
     title: string | null
     coverImage: string | null
+    bannerImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
     workspaceId: string | null
@@ -7328,6 +7329,7 @@ export namespace Prisma {
     id: string | null
     title: string | null
     coverImage: string | null
+    bannerImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
     workspaceId: string | null
@@ -7339,6 +7341,7 @@ export namespace Prisma {
     id: number
     title: number
     coverImage: number
+    bannerImage: number
     content: number
     createdAt: number
     updatedAt: number
@@ -7361,6 +7364,7 @@ export namespace Prisma {
     id?: true
     title?: true
     coverImage?: true
+    bannerImage?: true
     createdAt?: true
     updatedAt?: true
     workspaceId?: true
@@ -7372,6 +7376,7 @@ export namespace Prisma {
     id?: true
     title?: true
     coverImage?: true
+    bannerImage?: true
     createdAt?: true
     updatedAt?: true
     workspaceId?: true
@@ -7383,6 +7388,7 @@ export namespace Prisma {
     id?: true
     title?: true
     coverImage?: true
+    bannerImage?: true
     content?: true
     createdAt?: true
     updatedAt?: true
@@ -7482,6 +7488,7 @@ export namespace Prisma {
     id: string
     title: string
     coverImage: string | null
+    bannerImage: string | null
     content: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -7513,6 +7520,7 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7529,6 +7537,7 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7543,6 +7552,7 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7557,6 +7567,7 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7565,7 +7576,7 @@ export namespace Prisma {
     order?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "coverImage" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId" | "order", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "coverImage" | "bannerImage" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId" | "order", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
@@ -7592,6 +7603,7 @@ export namespace Prisma {
       id: string
       title: string
       coverImage: string | null
+      bannerImage: string | null
       content: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -8027,6 +8039,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Page", 'String'>
     readonly title: FieldRef<"Page", 'String'>
     readonly coverImage: FieldRef<"Page", 'String'>
+    readonly bannerImage: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'Json'>
     readonly createdAt: FieldRef<"Page", 'DateTime'>
     readonly updatedAt: FieldRef<"Page", 'DateTime'>
@@ -9541,6 +9554,7 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     coverImage: 'coverImage',
+    bannerImage: 'bannerImage',
     content: 'content',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -10036,6 +10050,7 @@ export namespace Prisma {
     id?: StringFilter<"Page"> | string
     title?: StringFilter<"Page"> | string
     coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -10051,6 +10066,7 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    bannerImage?: SortOrderInput | SortOrder
     content?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10069,6 +10085,7 @@ export namespace Prisma {
     NOT?: PageWhereInput | PageWhereInput[]
     title?: StringFilter<"Page"> | string
     coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -10084,6 +10101,7 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    bannerImage?: SortOrderInput | SortOrder
     content?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10104,6 +10122,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Page"> | string
     title?: StringWithAggregatesFilter<"Page"> | string
     coverImage?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    bannerImage?: StringNullableWithAggregatesFilter<"Page"> | string | null
     content?: JsonNullableWithAggregatesFilter<"Page">
     createdAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
@@ -10529,6 +10548,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10542,6 +10562,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10555,6 +10576,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10568,6 +10590,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10581,6 +10604,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10593,6 +10617,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10603,6 +10628,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11100,6 +11126,7 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     coverImage?: SortOrder
+    bannerImage?: SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11116,6 +11143,7 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     coverImage?: SortOrder
+    bannerImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     workspaceId?: SortOrder
@@ -11127,6 +11155,7 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     coverImage?: SortOrder
+    bannerImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     workspaceId?: SortOrder
@@ -12116,6 +12145,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12128,6 +12158,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12252,6 +12283,7 @@ export namespace Prisma {
     id?: StringFilter<"Page"> | string
     title?: StringFilter<"Page"> | string
     coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -12323,6 +12355,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12335,6 +12368,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12517,6 +12551,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12529,6 +12564,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12927,6 +12963,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12939,6 +12976,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12951,6 +12989,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12972,6 +13011,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13014,6 +13054,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13026,6 +13067,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13038,6 +13080,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13058,6 +13101,7 @@ export namespace Prisma {
     id?: string
     title?: string
     coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13100,6 +13144,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13112,6 +13157,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13124,6 +13170,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
