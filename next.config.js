@@ -11,6 +11,12 @@ const config = {
     formats: ["image/avif", "image/webp"],
     // Enable image optimization
     minimumCacheTTL: 60,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.r2.cloudflarestorage.com",
+      },
+    ],
   },
   // Enable compression
   compress: true,

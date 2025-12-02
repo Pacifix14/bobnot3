@@ -13,6 +13,7 @@ import { LiveblocksProvider } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
+import { CoverImage } from "@/components/cover-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
@@ -451,18 +452,32 @@ function EditorSkeleton() {
   );
 }
 
+import { Button } from "@/components/ui/button";
+import { Pencil, Download } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 function BlockNoteEditorInner({ 
   pageId, 
-  title: initialTitle 
+  title: initialTitle,
+  coverImage: initialCoverImage
 }: { 
   pageId: string, 
-  title: string 
+  title: string,
+  coverImage?: string | null
 }) {
   const router = useRouter();
   const utils = api.useUtils();
   const [title, setTitle] = useState(initialTitle);
+  const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   // Stable callback for status updates
   const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
@@ -475,15 +490,26 @@ function BlockNoteEditorInner({
     },
     onSuccess: () => {
       setStatus("saved");
-      // Invalidate page cache to update breadcrumbs
       void utils.page.getPage.invalidate({ pageId });
-      // Invalidate workspace cache to update sidebar
       void utils.workspace.getWorkspace.invalidate();
-      // Refresh server-side data to update sidebar immediately
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save title", error);
+      setStatus("unsaved");
+    }
+  });
+
+  const updateCoverImage = api.page.updateCoverImage.useMutation({
+    onMutate: () => {
+      setStatus("saving");
+    },
+    onSuccess: () => {
+      setStatus("saved");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Failed to save cover image", error);
       setStatus("unsaved");
     }
   });
@@ -505,7 +531,11 @@ function BlockNoteEditorInner({
     }, 1000);
   };
 
-  // Cleanup title timeout
+  const handleCoverUpdate = (url: string | null) => {
+    setCoverImage(url);
+    updateCoverImage.mutate({ pageId, coverImage: url });
+  };
+
   useEffect(() => {
     return () => {
       if (saveTitleTimeoutRef.current) {
@@ -515,26 +545,80 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 relative overflow-hidden">
-      <div className="flex items-center justify-between pl-[54px] pr-6">
-        <div className="flex-1 min-w-0">
+    <div className="max-w-5xl mx-auto space-y-8 relative overflow-hidden pb-20">
+      {/* Saved Status - Top Right */}
+      <div className="absolute top-4 right-6 text-xs text-muted-foreground">
+        {status === "saving" && <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
+        {status === "saved" && "Saved"}
+        {status === "unsaved" && "Unsaved"}
+      </div>
+
+      {/* New Header Layout */}
+      <div className="flex flex-col md:flex-row gap-6 items-end px-[54px]">
+        {/* Cover Image - Smaller size (w-40 = 10rem) */}
+        <div className="w-40 h-40 flex-shrink-0">
+            <CoverImage 
+              url={coverImage} 
+              editable={false} // Read-only in main view
+              onUpdate={() => {}} 
+            />
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 min-w-0 pb-4">
+          {/* Title - Bricolage Grotesque (matches H1) */}
           <Input
             value={title}
             onChange={handleTitleChange}
-            className="font-serif font-medium border-none px-0 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full"
+            className="font-serif font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
             placeholder="Untitled"
-            style={{ fontSize: '2rem' }}
+            style={{ fontFamily: 'var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif', fontSize: '4.5rem', fontWeight: 700 }}
           />
-        </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
-            <ShareDialog pageId={pageId} />
-            <div className="text-xs text-muted-foreground w-20 text-right">
-            {status === "saving" && <span className="flex items-center justify-end gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
-            {status === "saved" && "Saved"}
-            {status === "unsaved" && "Unsaved"}
-            </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-0.5 pl-2">
+             <ShareDialog pageId={pageId} />
+
+             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                   <Pencil className="h-6 w-6" />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent>
+                 <DialogHeader>
+                   <DialogTitle>Edit Page Details</DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-6 py-4">
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Cover Image</label>
+                     <div className="w-40 h-40 mx-auto">
+                       <CoverImage 
+                         url={coverImage} 
+                         editable={true} 
+                         onUpdate={handleCoverUpdate} 
+                       />
+                     </div>
+                   </div>
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Title</label>
+                     <Input 
+                       value={title} 
+                       onChange={handleTitleChange}
+                       className="font-serif"
+                     />
+                   </div>
+                 </div>
+               </DialogContent>
+             </Dialog>
+
+             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+               <Download className="h-6 w-6" />
+             </Button>
+          </div>
         </div>
       </div>
+
       <div className="overflow-hidden">
         <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
       </div>
@@ -544,10 +628,12 @@ function BlockNoteEditorInner({
 
 export function Editor({ 
   pageId, 
-  title 
+  title,
+  coverImage
 }: { 
   pageId: string, 
-  title: string 
+  title: string,
+  coverImage?: string | null
 }) {
   // Only initialize Liveblocks when editor is actually rendered
   // This defers the connection until the component is mounted
@@ -564,6 +650,7 @@ export function Editor({
             <BlockNoteEditorInner 
               pageId={pageId}
               title={title}
+              coverImage={coverImage}
             />
           )}
         </ClientSideSuspense>
