@@ -608,6 +608,17 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
       if (clickX >= rect.width - 60 && clickX <= rect.width - 20 && clickY >= 8 && clickY <= 36) {
         event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
+        
+        // Store current scroll position to prevent page jump
+        const scrollY = window.scrollY;
+        const scrollX = window.scrollX;
+        
+        // Prevent any focus changes that might cause scrolling
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement && activeElement.blur) {
+          activeElement.blur();
+        }
         
         // Get the code content
         const preElement = codeBlock.querySelector('pre');
@@ -618,21 +629,56 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
           try {
             await navigator.clipboard.writeText(codeContent);
             
+            // Restore scroll position immediately after copy
+            window.scrollTo({
+              left: scrollX,
+              top: scrollY,
+              behavior: 'instant'
+            });
+            
             // Show success toast
             showToast("Code copied to clipboard!", "success");
+            
+            // Ensure scroll position is maintained (sometimes needed after async operations)
+            requestAnimationFrame(() => {
+              window.scrollTo({
+                left: scrollX,
+                top: scrollY,
+                behavior: 'instant'
+              });
+            });
+            
+            // One more check after a short delay to ensure position is maintained
+            setTimeout(() => {
+              if (window.scrollY !== scrollY || window.scrollX !== scrollX) {
+                window.scrollTo({
+                  left: scrollX,
+                  top: scrollY,
+                  behavior: 'instant'
+                });
+              }
+            }, 10);
           } catch (err) {
             console.error('Failed to copy code:', err);
             showToast("Failed to copy code", "error");
+            // Restore scroll position even on error
+            window.scrollTo({
+              left: scrollX,
+              top: scrollY,
+              behavior: 'instant'
+            });
           }
         })();
+        
+        return false;
       }
     };
 
     // Add event listener to the document to catch all clicks
-    document.addEventListener('click', handleCopyClick);
+    document.addEventListener('click', handleCopyClick, true); // Use capture phase
     
     return () => {
-      document.removeEventListener('click', handleCopyClick);
+      document.removeEventListener('click', handleCopyClick, true);
     };
   }, [showToast]);
 
