@@ -7316,6 +7316,8 @@ export namespace Prisma {
   export type PageMinAggregateOutputType = {
     id: string | null
     title: string | null
+    coverImage: string | null
+    bannerImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
     workspaceId: string | null
@@ -7326,6 +7328,8 @@ export namespace Prisma {
   export type PageMaxAggregateOutputType = {
     id: string | null
     title: string | null
+    coverImage: string | null
+    bannerImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
     workspaceId: string | null
@@ -7336,6 +7340,8 @@ export namespace Prisma {
   export type PageCountAggregateOutputType = {
     id: number
     title: number
+    coverImage: number
+    bannerImage: number
     content: number
     createdAt: number
     updatedAt: number
@@ -7357,6 +7363,8 @@ export namespace Prisma {
   export type PageMinAggregateInputType = {
     id?: true
     title?: true
+    coverImage?: true
+    bannerImage?: true
     createdAt?: true
     updatedAt?: true
     workspaceId?: true
@@ -7367,6 +7375,8 @@ export namespace Prisma {
   export type PageMaxAggregateInputType = {
     id?: true
     title?: true
+    coverImage?: true
+    bannerImage?: true
     createdAt?: true
     updatedAt?: true
     workspaceId?: true
@@ -7377,6 +7387,8 @@ export namespace Prisma {
   export type PageCountAggregateInputType = {
     id?: true
     title?: true
+    coverImage?: true
+    bannerImage?: true
     content?: true
     createdAt?: true
     updatedAt?: true
@@ -7475,6 +7487,8 @@ export namespace Prisma {
   export type PageGroupByOutputType = {
     id: string
     title: string
+    coverImage: string | null
+    bannerImage: string | null
     content: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -7505,6 +7519,8 @@ export namespace Prisma {
   export type PageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7520,6 +7536,8 @@ export namespace Prisma {
   export type PageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7533,6 +7551,8 @@ export namespace Prisma {
   export type PageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7546,6 +7566,8 @@ export namespace Prisma {
   export type PageSelectScalar = {
     id?: boolean
     title?: boolean
+    coverImage?: boolean
+    bannerImage?: boolean
     content?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7554,7 +7576,7 @@ export namespace Prisma {
     order?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId" | "order", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "coverImage" | "bannerImage" | "content" | "createdAt" | "updatedAt" | "workspaceId" | "folderId" | "order", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     folder?: boolean | Page$folderArgs<ExtArgs>
@@ -7580,6 +7602,8 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       title: string
+      coverImage: string | null
+      bannerImage: string | null
       content: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -8014,6 +8038,8 @@ export namespace Prisma {
   interface PageFieldRefs {
     readonly id: FieldRef<"Page", 'String'>
     readonly title: FieldRef<"Page", 'String'>
+    readonly coverImage: FieldRef<"Page", 'String'>
+    readonly bannerImage: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'Json'>
     readonly createdAt: FieldRef<"Page", 'DateTime'>
     readonly updatedAt: FieldRef<"Page", 'DateTime'>
@@ -9527,6 +9553,8 @@ export namespace Prisma {
   export const PageScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    coverImage: 'coverImage',
+    bannerImage: 'bannerImage',
     content: 'content',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -10021,6 +10049,8 @@ export namespace Prisma {
     NOT?: PageWhereInput | PageWhereInput[]
     id?: StringFilter<"Page"> | string
     title?: StringFilter<"Page"> | string
+    coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -10035,6 +10065,8 @@ export namespace Prisma {
   export type PageOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    coverImage?: SortOrderInput | SortOrder
+    bannerImage?: SortOrderInput | SortOrder
     content?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10052,6 +10084,8 @@ export namespace Prisma {
     OR?: PageWhereInput[]
     NOT?: PageWhereInput | PageWhereInput[]
     title?: StringFilter<"Page"> | string
+    coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -10066,6 +10100,8 @@ export namespace Prisma {
   export type PageOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    coverImage?: SortOrderInput | SortOrder
+    bannerImage?: SortOrderInput | SortOrder
     content?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10085,6 +10121,8 @@ export namespace Prisma {
     NOT?: PageScalarWhereWithAggregatesInput | PageScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Page"> | string
     title?: StringWithAggregatesFilter<"Page"> | string
+    coverImage?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    bannerImage?: StringNullableWithAggregatesFilter<"Page"> | string | null
     content?: JsonNullableWithAggregatesFilter<"Page">
     createdAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
@@ -10509,6 +10547,8 @@ export namespace Prisma {
   export type PageCreateInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10521,6 +10561,8 @@ export namespace Prisma {
   export type PageUncheckedCreateInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10533,6 +10575,8 @@ export namespace Prisma {
   export type PageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10545,6 +10589,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10557,6 +10603,8 @@ export namespace Prisma {
   export type PageCreateManyInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10568,6 +10616,8 @@ export namespace Prisma {
   export type PageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10577,6 +10627,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11073,6 +11125,8 @@ export namespace Prisma {
   export type PageCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    coverImage?: SortOrder
+    bannerImage?: SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11088,6 +11142,8 @@ export namespace Prisma {
   export type PageMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    coverImage?: SortOrder
+    bannerImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     workspaceId?: SortOrder
@@ -11098,6 +11154,8 @@ export namespace Prisma {
   export type PageMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    coverImage?: SortOrder
+    bannerImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     workspaceId?: SortOrder
@@ -12086,6 +12144,8 @@ export namespace Prisma {
   export type PageCreateWithoutCollaboratorsInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12097,6 +12157,8 @@ export namespace Prisma {
   export type PageUncheckedCreateWithoutCollaboratorsInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12220,6 +12282,8 @@ export namespace Prisma {
     NOT?: PageScalarWhereInput | PageScalarWhereInput[]
     id?: StringFilter<"Page"> | string
     title?: StringFilter<"Page"> | string
+    coverImage?: StringNullableFilter<"Page"> | string | null
+    bannerImage?: StringNullableFilter<"Page"> | string | null
     content?: JsonNullableFilter<"Page">
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
@@ -12290,6 +12354,8 @@ export namespace Prisma {
   export type PageCreateWithoutWorkspaceInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12301,6 +12367,8 @@ export namespace Prisma {
   export type PageUncheckedCreateWithoutWorkspaceInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12482,6 +12550,8 @@ export namespace Prisma {
   export type PageCreateWithoutFolderInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12493,6 +12563,8 @@ export namespace Prisma {
   export type PageUncheckedCreateWithoutFolderInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12890,6 +12962,8 @@ export namespace Prisma {
   export type PageUpdateWithoutCollaboratorsInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12901,6 +12975,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateWithoutCollaboratorsInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12912,6 +12988,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateManyWithoutCollaboratorsInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12932,6 +13010,8 @@ export namespace Prisma {
   export type PageCreateManyWorkspaceInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12973,6 +13053,8 @@ export namespace Prisma {
   export type PageUpdateWithoutWorkspaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12984,6 +13066,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateWithoutWorkspaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12995,6 +13079,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateManyWithoutWorkspaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13014,6 +13100,8 @@ export namespace Prisma {
   export type PageCreateManyFolderInput = {
     id?: string
     title?: string
+    coverImage?: string | null
+    bannerImage?: string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13055,6 +13143,8 @@ export namespace Prisma {
   export type PageUpdateWithoutFolderInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13066,6 +13156,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateWithoutFolderInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13077,6 +13169,8 @@ export namespace Prisma {
   export type PageUncheckedUpdateManyWithoutFolderInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerImage?: NullableStringFieldUpdateOperationsInput | string | null
     content?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

@@ -97,7 +97,7 @@ export function PageLayoutClient({
 
   // Build breadcrumbs
   const breadcrumbItems: { label: string; href?: string }[] = [];
-  
+
   if (workspace) {
     breadcrumbItems.push({ label: workspace.name, href: `/dashboard/${workspaceId}` });
   } else if (workspaceInfo) {
@@ -126,4 +126,3 @@ export function PageLayoutClient({
     </>
   );
 }
-
