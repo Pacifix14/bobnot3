@@ -664,11 +664,13 @@ function BlockNoteEditorInner({
                  <div className="space-y-4 py-4">
                    <div className="flex flex-col gap-2">
                      <label className="text-sm font-medium">Banner Image</label>
-                     <BannerImage
-                       url={bannerImage}
-                       editable={true}
-                       onUpdate={handleBannerUpdate}
-                     />
+                     <div className="h-64">
+                       <BannerImage
+                         url={bannerImage}
+                         editable={true}
+                         onUpdate={handleBannerUpdate}
+                       />
+                     </div>
                    </div>
                  </div>
                </DialogContent>
