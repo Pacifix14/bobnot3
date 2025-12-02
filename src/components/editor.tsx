@@ -572,7 +572,7 @@ function BlockNoteEditorInner({
     <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
       {/* Banner Image - Full width at top, behind other content */}
       {bannerImage && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-96 z-0">
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
           <BannerImage
             url={bannerImage}
             editable={false}
@@ -589,7 +589,7 @@ function BlockNoteEditorInner({
       </div>
 
       {/* New Header Layout */}
-      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-48' : 'pt-12'}`}>
+      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
         {/* Cover Image - Smaller size (w-40 = 10rem) */}
         <div className="w-40 h-40 flex-shrink-0">
             <CoverImage
