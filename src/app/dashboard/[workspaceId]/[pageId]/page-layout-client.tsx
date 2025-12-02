@@ -5,6 +5,7 @@ import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 import { api } from "@/trpc/react";
 import { useEffect } from "react";
 import type { RouterOutputs } from "@/trpc/react";
+import { SmoothScrollContainer } from "@/components/smooth-scroll-container";
 
 type PrefetchedData = {
   userWorkspaces: RouterOutputs["workspace"]["getUserWorkspaces"];
@@ -120,9 +121,9 @@ export function PageLayoutClient({
   return (
     <>
       <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-y-auto">
+      <SmoothScrollContainer className="h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-y-auto">
         {children}
-      </div>
+      </SmoothScrollContainer>
     </>
   );
 }

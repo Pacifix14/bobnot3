@@ -9,8 +9,11 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Only enable smooth scroll on landing page
-    if (pathname !== "/") {
+    // Enable smooth scroll on landing page and dashboard pages
+    const isLandingPage = pathname === "/";
+    const isDashboardPage = pathname?.startsWith("/dashboard");
+    
+    if (!isLandingPage && !isDashboardPage) {
       return;
     }
 
