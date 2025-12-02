@@ -393,6 +393,107 @@ div[data-id="blocknote-editor"] {
   color: inherit;
 }
 
+/* Fix toggle list arrow size - ensure consistent size regardless of content */
+/* Only target the toggle button, not the text content or add-block button */
+.bn-editor [data-content-type="toggleListItem"] button:not(.bn-toggle-add-block-button),
+.bn-editor [data-content-type="toggleListItem"] [role="button"]:not(.bn-toggle-add-block-button) {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  min-width: 1.25em !important;
+  min-height: 1.25em !important;
+  max-width: 1.25em !important;
+  max-height: 1.25em !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  font-size: 1em !important;
+  line-height: 1 !important;
+}
+
+/* Fix toggle list arrow icon/SVG specifically - prevent scaling with font-size */
+.bn-editor [data-content-type="toggleListItem"] button svg,
+.bn-editor [data-content-type="toggleListItem"] [role="button"] svg {
+  width: 0.875em !important;
+  height: 0.875em !important;
+  min-width: 0.875em !important;
+  min-height: 0.875em !important;
+  max-width: 0.875em !important;
+  max-height: 0.875em !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+/* Ensure toggle list content displays horizontally */
+.bn-editor [data-content-type="toggleListItem"] .bn-block-content,
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"],
+.bn-editor [data-content-type="toggleListItem"] .bn-inline-content,
+.bn-editor [data-content-type="toggleListItem"] p,
+.bn-editor [data-content-type="toggleListItem"] .ProseMirror {
+  display: block !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  writing-mode: horizontal-tb !important;
+}
+
+/* Fix placeholder text in toggle lists */
+.bn-editor [data-content-type="toggleListItem"] .bn-placeholder,
+.bn-editor [data-content-type="toggleListItem"] [data-placeholder],
+.bn-editor [data-content-type="toggleListItem"] ::placeholder {
+  display: inline-block !important;
+  white-space: normal !important;
+  writing-mode: horizontal-tb !important;
+  word-wrap: normal !important;
+}
+
+/* Fix empty toggle button text display - prevent vertical text */
+.bn-editor button.bn-toggle-add-block-button,
+.bn-editor .bn-toggle-add-block-button,
+.bn-editor [data-content-type="toggleListItem"] .bn-toggle-add-block-button,
+.bn-editor [data-content-type="toggleListItem"] button.bn-toggle-add-block-button,
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"] button.bn-toggle-add-block-button {
+  white-space: normal !important;
+  writing-mode: horizontal-tb !important;
+  word-wrap: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+  text-orientation: mixed !important;
+  unicode-bidi: normal !important;
+  transform: none !important;
+  letter-spacing: normal !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+}
+
+/* Fix any parent containers that might be causing vertical display */
+.bn-editor [data-content-type="toggleListItem"],
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"],
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"] > *,
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"] > button.bn-toggle-add-block-button {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+.bn-editor button.bn-toggle-add-block-button *,
+.bn-editor .bn-toggle-add-block-button *,
+.bn-editor [data-content-type="toggleListItem"] .bn-toggle-add-block-button * {
+  display: inline !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: normal !important;
+  letter-spacing: normal !important;
+}
+
+.bn-editor button.bn-toggle-add-block-button::before,
+.bn-editor button.bn-toggle-add-block-button::after,
+.bn-editor .bn-toggle-add-block-button::before,
+.bn-editor .bn-toggle-add-block-button::after {
+  display: none !important;
+  content: none !important;
+}
+
 /* Code Block Styling for BlockNote - Exact pink reference structure */
 .bn-editor [data-content-type="codeBlock"] {
   background-color: var(--card) !important;

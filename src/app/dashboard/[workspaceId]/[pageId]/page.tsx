@@ -46,12 +46,12 @@ export default function PageEditor() {
   // This improves perceived performance by using cached data immediately
   if (isLoading && !page) {
     return (
-      <div className="py-12 px-8 min-h-full overflow-hidden">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="pl-[54px] pr-6">
-            <Skeleton className="h-12 w-1/2" />
+      <div className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden">
+        <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
+          <div className="pl-0 md:pl-[54px] pr-4 md:pr-6">
+            <Skeleton className="h-10 md:h-12 w-1/2" />
           </div>
-          <div className="pl-[54px] pr-6 space-y-4">
+          <div className="pl-0 md:pl-[54px] pr-4 md:pr-6 space-y-4">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-5/6" />
@@ -66,14 +66,14 @@ export default function PageEditor() {
   }
 
   return (
-    <div className="py-12 px-8 min-h-full overflow-hidden">
+    <div className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden">
       <Suspense
         fallback={
-          <div className="max-w-5xl mx-auto space-y-8">
-            <div className="pl-[54px] pr-6">
-              <Skeleton className="h-12 w-1/2" />
+          <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
+            <div className="pl-0 md:pl-[54px] pr-4 md:pr-6">
+              <Skeleton className="h-10 md:h-12 w-1/2" />
             </div>
-            <div className="pl-[54px] pr-6 space-y-4">
+            <div className="pl-0 md:pl-[54px] pr-4 md:pr-6 space-y-4">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-5/6" />

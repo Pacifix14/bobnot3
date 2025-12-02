@@ -21,10 +21,10 @@ export default async function WorkspacePage({
   return (
     <div className="flex flex-col h-full">
       <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <div className="text-center space-y-2">
-          <h2 className="text-xl font-serif text-foreground">Welcome to your workspace</h2>
-          <p>Select a page from the sidebar to start writing.</p>
+      <div className="flex items-center justify-center h-full text-muted-foreground px-4">
+        <div className="text-center space-y-2 max-w-md">
+          <h2 className="text-lg md:text-xl font-serif text-foreground">Welcome to your workspace</h2>
+          <p className="text-sm md:text-base">Select a page from the sidebar to start writing.</p>
         </div>
       </div>
     </div>

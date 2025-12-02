@@ -189,6 +189,21 @@ export function AppSidebar({
     }, []);
   }, []);
 
+  // Helper function to remove an item from the tree structure
+  const removeItemFromTree = useCallback((items: TreeItem[], itemId: string): TreeItem[] => {
+    return items
+      .filter(item => item.id !== itemId)
+      .map(item => {
+        if (item.children) {
+          return {
+            ...item,
+            children: removeItemFromTree(item.children, itemId)
+          };
+        }
+        return item;
+      });
+  }, []);
+
   const flattenedItems = useMemo(() => flatten(items), [items, flatten]);
   const activeItem = activeId ? flattenedItems.find((i) => i.id === activeId) : null;
 
@@ -367,7 +382,7 @@ export function AppSidebar({
                 <SidebarMenu className="ml-2">
                     <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         {items.map((item) => (
-                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} prefetchPage={prefetchPage} utils={utils} />
+                            <TreeItemRenderer key={item.id} item={item} workspaceId={workspaceId} isOwner={isOwner} prefetchPage={prefetchPage} utils={utils} onItemDeleted={(itemId) => setItems(prev => removeItemFromTree(prev, itemId))} />
                         ))}
                     </SortableContext>
                 </SidebarMenu>
@@ -505,12 +520,14 @@ function TreeItemRenderer({
   isOwner,
   prefetchPage,
   utils,
+  onItemDeleted,
 }: {
   item: TreeItem;
   workspaceId: string;
   isOwner?: boolean;
   prefetchPage: (pageId: string) => void;
   utils: ReturnType<typeof api.useUtils>;
+  onItemDeleted?: (itemId: string) => void;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -531,6 +548,8 @@ function TreeItemRenderer({
 
   const deleteFolder = api.workspace.deleteFolder.useMutation({
     onSuccess: () => {
+        // Optimistically remove item from sidebar
+        onItemDeleted?.(item.id);
         // Invalidate workspace data to refresh sidebar
         void utils.workspace.getWorkspace.invalidate({ workspaceId });
         // Refresh server-side data to update sidebar immediately
@@ -541,11 +560,17 @@ function TreeItemRenderer({
 
   const deletePage = api.workspace.deletePage.useMutation({
     onSuccess: () => {
+        // Optimistically remove item from sidebar
+        onItemDeleted?.(item.id);
         // Invalidate workspace data to refresh sidebar
         void utils.workspace.getWorkspace.invalidate({ workspaceId });
         // Refresh server-side data to update sidebar immediately
         router.refresh();
         setIsDeleteDialogOpen(false);
+        // Redirect if user is currently viewing the deleted page
+        if (isActive) {
+            router.push(`/dashboard/${workspaceId}`);
+        }
     }
   });
 
@@ -662,6 +687,7 @@ function TreeItemRenderer({
                             isOwner={isOwner}
                             prefetchPage={prefetchPage}
                             utils={utils}
+                            onItemDeleted={onItemDeleted}
                             />
                         ))}
                     </SortableContext>

@@ -16,11 +16,11 @@ export function DashboardBreadcrumb({
   items: { label: string; href?: string }[]
 }) {
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+    <header className="flex h-14 md:h-16 shrink-0 items-center gap-1 md:gap-2 border-b px-2 md:px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 h-4" />
-      <Breadcrumb>
-        <BreadcrumbList>
+      <Separator orientation="vertical" className="mr-1 md:mr-2 h-4" />
+      <Breadcrumb className="flex-1 min-w-0">
+        <BreadcrumbList className="overflow-hidden">
           {items.map((item, index) => (
             <div key={index} className="flex items-center">
               <BreadcrumbItem className="hidden md:block">
@@ -37,9 +37,15 @@ export function DashboardBreadcrumb({
               )}
             </div>
           ))}
+          {/* Show last item on mobile */}
+          {items.length > 0 && (
+            <BreadcrumbItem className="md:hidden">
+              <BreadcrumbPage className="truncate max-w-[150px]">{items[items.length - 1]?.label}</BreadcrumbPage>
+            </BreadcrumbItem>
+          )}
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="ml-auto">
+      <div className="ml-auto flex-shrink-0">
         <ThemeToggle />
       </div>
     </header>
