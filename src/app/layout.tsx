@@ -6,6 +6,7 @@ import { Bricolage_Grotesque } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/toast-provider";
+import { SmoothScroll } from "@/components/smooth-scroll";
 
 export const metadata: Metadata = {
   title: "bobnot3",
@@ -37,7 +38,9 @@ export default function RootLayout({
         >
           <ToastProvider>
             <TRPCReactProvider>
-              {children}
+              <SmoothScroll>
+                {children}
+              </SmoothScroll>
             </TRPCReactProvider>
           </ToastProvider>
         </ThemeProvider>
