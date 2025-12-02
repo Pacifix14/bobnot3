@@ -54,7 +54,7 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
         callbackUrl: "/dashboard",
         redirect: true,
       });
-    } catch (err) {
+        } catch {
       setError("Failed to sign in with Google. Please try again.");
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
         setEmailSent(true);
         setIsLoading(false);
       }
-    } catch (err) {
+        } catch {
       setError("Failed to send sign in link. Please try again.");
       setIsLoading(false);
     }
@@ -128,7 +128,7 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">Check your email</h3>
                   <p className="text-sm text-muted-foreground">
-                    We've sent a sign in link to <strong>{email}</strong>
+                    We&apos;ve sent a sign in link to <strong>{email}</strong>
                   </p>
                   <p className="text-xs text-muted-foreground pt-2">
                     Click the link in the email to sign in. The link will expire in 24 hours.
@@ -264,7 +264,7 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
                   </>
                 ) : (
                   <>
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <button
                       type="button"
                       onClick={() => setView("signup")}

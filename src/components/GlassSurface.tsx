@@ -80,8 +80,8 @@ const GlassSurface = ({
 
   const generateDisplacementMap = () => {
     const rect = containerRef.current?.getBoundingClientRect();
-    const actualWidth = rect?.width || 400;
-    const actualHeight = rect?.height || 200;
+    const actualWidth = rect?.width ?? 400;
+    const actualHeight = rect?.height ?? 200;
     const edgeSize = Math.min(actualWidth, actualHeight) * (borderWidth * 0.5);
 
     const svgContent = `
@@ -166,8 +166,8 @@ const GlassSurface = ({
       return false;
     }
 
-    const isWebkit = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-    const isFirefox = /Firefox/.test(navigator.userAgent);
+    const isWebkit = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+    const isFirefox = navigator.userAgent.includes('Firefox');
 
     if (isWebkit || isFirefox) {
       return false;

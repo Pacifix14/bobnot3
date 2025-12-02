@@ -139,7 +139,7 @@ const Threads = ({
   ...rest 
 }: ThreadsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -173,15 +173,18 @@ const Threads = ({
     function resize() {
       const { clientWidth, clientHeight } = container;
       renderer.setSize(clientWidth, clientHeight);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       program.uniforms.iResolution.value.r = clientWidth;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       program.uniforms.iResolution.value.g = clientHeight;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       program.uniforms.iResolution.value.b = clientWidth / clientHeight;
     }
     window.addEventListener('resize', resize);
     resize();
 
-    let currentMouse = [0.5, 0.5];
-    let targetMouse = [0.5, 0.5];
+    const currentMouse: [number, number] = [0.5, 0.5];
+    let targetMouse: [number, number] = [0.5, 0.5];
 
     function handleMouseMove(e: MouseEvent) {
       const rect = container.getBoundingClientRect();
@@ -202,12 +205,17 @@ const Threads = ({
         const smoothing = 0.05;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);
         currentMouse[1] += smoothing * (targetMouse[1] - currentMouse[1]);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         program.uniforms.uMouse.value[0] = currentMouse[0];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         program.uniforms.uMouse.value[1] = currentMouse[1];
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         program.uniforms.uMouse.value[0] = 0.5;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         program.uniforms.uMouse.value[1] = 0.5;
       }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       program.uniforms.iTime.value = t * 0.001;
 
       renderer.render({ scene: mesh });
