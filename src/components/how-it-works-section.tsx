@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FolderTree, Users, FileText } from "lucide-react";
 
-export function FeaturesSection() {
+export function HowItWorksSection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -35,38 +34,42 @@ export function FeaturesSection() {
   return (
     <section
       ref={sectionRef}
-      className="px-4 md:px-6 py-20 md:py-28"
+      className="px-4 md:px-6 py-20 md:py-28 border-t border-border/40"
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(2rem)',
         transition: 'opacity 1s ease-out, transform 1s ease-out',
       }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12 md:mb-16">
-          <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-4">
-            Everything you need
+          <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-primary mb-3">
+            Get started
           </h2>
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+            Create your workspace and start organizing your thoughts in minutes
+          </p>
         </div>
-        <div className="space-y-10 md:space-y-12">
-          <FeatureItem 
-            icon={<FolderTree className="h-8 w-8" />}
-            title="Organize your thoughts"
-            description="Create folders and pages in any structure you need. Build your knowledge base the way that makes sense to you."
+        
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <StepItem 
+            number={1}
+            title="Create a workspace"
+            description="Sign up and create your first workspace. Give it a name and you're ready to go."
             delay={0}
             isVisible={isVisible}
           />
-          <FeatureItem 
-            icon={<FileText className="h-8 w-8" />}
-            title="Write naturally"
-            description="A rich text editor that works the way you think. Format, structure, and express your ideas without friction."
+          <StepItem 
+            number={2}
+            title="Add pages and folders"
+            description="Start writing your first page or create folders to organize your content."
             delay={150}
             isVisible={isVisible}
           />
-          <FeatureItem 
-            icon={<Users className="h-8 w-8" />}
+          <StepItem 
+            number={3}
             title="Share and collaborate"
-            description="Work together in real time. Share pages with your team and see changes as they happen."
+            description="Invite others to your pages and work together in real time."
             delay={300}
             isVisible={isVisible}
           />
@@ -76,14 +79,14 @@ export function FeaturesSection() {
   );
 }
 
-function FeatureItem({ 
-  icon, 
+function StepItem({ 
+  number,
   title, 
   description, 
   delay,
   isVisible 
 }: { 
-  icon: React.ReactNode; 
+  number: number;
   title: string; 
   description: string;
   delay: number;
@@ -91,22 +94,20 @@ function FeatureItem({
 }) {
   return (
     <div 
-      className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8"
+      className="text-center"
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(1rem)',
         transition: `opacity 0.8s ease-out ${delay}ms, transform 0.8s ease-out ${delay}ms`,
       }}
     >
-      <div className="flex-shrink-0">
-        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-          {icon}
+      <div className="flex justify-center mb-4">
+        <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-medium">
+          {number}
         </div>
       </div>
-      <div className="flex-1 text-center md:text-left">
-        <h3 className="font-serif text-xl md:text-2xl font-medium text-primary mb-2">{title}</h3>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{description}</p>
-      </div>
+      <h3 className="font-serif text-lg md:text-xl font-medium text-primary mb-2">{title}</h3>
+      <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{description}</p>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { FeaturesSection } from "@/components/features-section";
+import { HowItWorksSection } from "@/components/how-it-works-section";
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 
@@ -28,6 +29,7 @@ export default async function Home() {
       <main className="flex-1 flex flex-col relative z-10">
         <HeroSection />
         <FeaturesSection />
+        <HowItWorksSection />
       </main>
       
       <footer className="py-8 md:py-10 px-4 text-center border-t border-border/40 bg-background/50 backdrop-blur-sm">
