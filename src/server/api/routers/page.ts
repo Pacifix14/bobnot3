@@ -12,6 +12,8 @@ export const pageRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
+          coverImage: true,
+          bannerImage: true,
           content: true,
           workspace: {
             select: {
@@ -41,7 +43,7 @@ export const pageRouter = createTRPCRouter({
       // Check access permissions
       const isOwner = page.workspace.ownerId === ctx.session.user.id;
       const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
-      
+
       if (!isOwner && !isCollaborator) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
@@ -62,7 +64,7 @@ export const pageRouter = createTRPCRouter({
       }
 
       if (page.workspace.ownerId !== ctx.session.user.id) {
-         throw new TRPCError({ code: "FORBIDDEN", message: "Only the owner can add collaborators" });
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only the owner can add collaborators" });
       }
 
       const userToAdd = await ctx.db.user.findUnique({
@@ -72,13 +74,13 @@ export const pageRouter = createTRPCRouter({
       if (!userToAdd) {
         throw new TRPCError({ code: "NOT_FOUND", message: "User with this email not found" });
       }
-      
+
       if (userToAdd.id === page.workspace.ownerId) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Owner is already a collaborator" });
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Owner is already a collaborator" });
       }
-      
+
       if (page.collaborators.some(c => c.id === userToAdd.id)) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "User is already a collaborator" });
+        throw new TRPCError({ code: "BAD_REQUEST", message: "User is already a collaborator" });
       }
 
       return ctx.db.page.update({
@@ -94,7 +96,7 @@ export const pageRouter = createTRPCRouter({
   removeCollaborator: protectedProcedure
     .input(z.object({ pageId: z.string(), userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-       const page = await ctx.db.page.findUnique({
+      const page = await ctx.db.page.findUnique({
         where: { id: input.pageId },
         include: { workspace: true }
       });
@@ -108,7 +110,7 @@ export const pageRouter = createTRPCRouter({
       const isSelf = input.userId === ctx.session.user.id;
 
       if (!isOwner && !isSelf) {
-         throw new TRPCError({ code: "FORBIDDEN", message: "Only the owner can remove collaborators" });
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only the owner can remove collaborators" });
       }
 
       return ctx.db.page.update({
@@ -120,7 +122,7 @@ export const pageRouter = createTRPCRouter({
         }
       });
     }),
-    
+
   getCollaborators: protectedProcedure
     .input(z.object({ pageId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -128,17 +130,17 @@ export const pageRouter = createTRPCRouter({
         where: { id: input.pageId },
         include: { collaborators: true, workspace: true }
       });
-      
+
       if (!page) {
-          throw new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
-      
+
       // Check access: Owner or Collaborator
       const isOwner = page.workspace.ownerId === ctx.session.user.id;
       const isCollaborator = page.collaborators.some(u => u.id === ctx.session.user.id);
 
       if (!isOwner && !isCollaborator) {
-           throw new TRPCError({ code: "FORBIDDEN" });
+        throw new TRPCError({ code: "FORBIDDEN" });
       }
 
       return page.collaborators;
@@ -160,7 +162,7 @@ export const pageRouter = createTRPCRouter({
       // Check access permissions
       const isOwner = page.workspace.ownerId === ctx.session.user.id;
       const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
-      
+
       if (!isOwner && !isCollaborator) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
@@ -169,6 +171,60 @@ export const pageRouter = createTRPCRouter({
         where: { id: input.pageId },
         data: { title: input.title }
       });
-    })
+    }),
+
+  // Update page cover image
+  updateCoverImage: protectedProcedure
+    .input(z.object({ pageId: z.string(), coverImage: z.string().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const page = await ctx.db.page.findUnique({
+        where: { id: input.pageId },
+        include: { workspace: true, collaborators: true }
+      });
+
+      if (!page) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Page not found" });
+      }
+
+      // Check access permissions
+      const isOwner = page.workspace.ownerId === ctx.session.user.id;
+      const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
+
+      if (!isOwner && !isCollaborator) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return ctx.db.page.update({
+        where: { id: input.pageId },
+        data: { coverImage: input.coverImage }
+      });
+    }),
+
+  // Update page banner image
+  updateBannerImage: protectedProcedure
+    .input(z.object({ pageId: z.string(), bannerImage: z.string().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const page = await ctx.db.page.findUnique({
+        where: { id: input.pageId },
+        include: { workspace: true, collaborators: true }
+      });
+
+      if (!page) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Page not found" });
+      }
+
+      // Check access permissions
+      const isOwner = page.workspace.ownerId === ctx.session.user.id;
+      const isCollaborator = page.collaborators.some(c => c.id === ctx.session.user.id);
+
+      if (!isOwner && !isCollaborator) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return ctx.db.page.update({
+        where: { id: input.pageId },
+        data: { bannerImage: input.bannerImage }
+      });
+    }),
 });
 

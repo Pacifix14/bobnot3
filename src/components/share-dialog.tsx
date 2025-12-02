@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
-import { Loader2, Share2, Trash2 } from "lucide-react";
+import { Loader2, UserPlus, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function ShareDialog({ pageId }: { pageId: string }) {
@@ -45,9 +45,8 @@ export function ShareDialog({ pageId }: { pageId: string }) {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Share
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <UserPlus className="h-6 w-6" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -57,7 +56,7 @@ export function ShareDialog({ pageId }: { pageId: string }) {
                         Invite others to collaborate on this page.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:space-x-2">
+                <div className="flex items-center space-x-2">
                     <div className="grid flex-1 gap-2">
                         <Input
                             placeholder="Email address"
@@ -66,13 +65,13 @@ export function ShareDialog({ pageId }: { pageId: string }) {
                             onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
                         />
                     </div>
-                    <Button onClick={handleInvite} disabled={addCollaborator.isPending || !email} className="w-full md:w-auto">
+                    <Button onClick={handleInvite} disabled={addCollaborator.isPending || !email}>
                         {addCollaborator.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Invite"}
                     </Button>
                 </div>
                 <div className="mt-4">
                     <h4 className="text-sm font-medium mb-2">Collaborators</h4>
-                    <div className="h-[200px] w-full rounded-md border p-3 md:p-4 overflow-y-auto">
+                    <div className="h-[200px] w-full rounded-md border p-4 overflow-y-auto">
                         {isLoadingCollaborators ? (
                             <div className="flex justify-center py-4">
                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

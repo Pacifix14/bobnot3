@@ -13,9 +13,10 @@ import { LiveblocksProvider } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareDialog } from "@/components/share-dialog";
+import { CoverImage } from "@/components/cover-image";
+import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -63,7 +64,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   }, [pageId, onStatusChange]);
 
   // Track toggle list content to prevent it from moving when Enter is pressed
-  const toggleListContentRef = useRef<{ blockId: string; content: unknown } | null>(null);
+  const toggleListContentRef = useRef<{ blockId: string; content: Block["content"] } | null>(null);
 
   // Handle editor changes
   useEffect(() => {
@@ -76,7 +77,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         const currentBlock = editor.getBlock(blockId);
         
         if (currentBlock && currentBlock.type === 'toggleListItem') {
-          const currentContentStr = JSON.stringify(currentBlock.content || []);
+          const currentContentStr = JSON.stringify(currentBlock.content ?? []);
           const originalContentStr = JSON.stringify(originalContent);
           
           // If content was moved (original block is now empty), restore it
@@ -85,8 +86,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             setTimeout(() => {
               try {
                 editor.updateBlock(blockId, {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-                  content: originalContent as any,
+                  content: originalContent,
                 });
                 toggleListContentRef.current = null;
               } catch (error) {
@@ -121,150 +121,6 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
       }
     };
   }, [editor, saveToDatabase, onStatusChange]);
-
-  // Fix toggle list Enter key behavior - prevent content from moving to new list item
-  useEffect(() => {
-    if (!editor || !isReady) return;
-
-    const handleEnterKey = (event: Event) => {
-      const keyboardEvent = event as KeyboardEvent;
-      
-      if (keyboardEvent.key !== 'Enter' || keyboardEvent.shiftKey) return;
-      
-      try {
-        if (!editor?.isEditable) return;
-
-        const textCursorPosition = editor.getTextCursorPosition();
-        const currentBlock = textCursorPosition.block;
-        
-        // Check if we're in a toggle list
-        if (currentBlock?.type === 'toggleListItem') {
-          // Get the current block content before Enter is processed
-          const blockBeforeEnter = editor.getBlock(currentBlock.id);
-          if (!blockBeforeEnter) return;
-          
-          // Check if block has content by converting to string
-          const contentStr = JSON.stringify(blockBeforeEnter.content);
-          const hasContent = contentStr && contentStr !== '[]' && contentStr !== 'null' && contentStr !== '""';
-          
-          if (hasContent) {
-            // Prevent BlockNote's default Enter behavior completely
-            keyboardEvent.preventDefault();
-            keyboardEvent.stopPropagation();
-            keyboardEvent.stopImmediatePropagation();
-            
-            // Store the original content
-            const originalContent = JSON.parse(JSON.stringify(blockBeforeEnter.content)) as Block['content'];
-            
-            // Store in ref for onChange handler as backup
-            toggleListContentRef.current = {
-              blockId: currentBlock.id,
-              content: originalContent,
-            };
-            
-            // Manually insert a new empty toggle list item
-            try {
-              void editor.insertBlocks(
-                [{
-                  type: 'toggleListItem',
-                  content: [],
-                }],
-                currentBlock.id,
-                'after'
-              );
-              
-              // Small delay to ensure the insert completed
-              setTimeout(() => {
-                // Verify original block still has content, restore if needed
-                const blockAfterInsert = editor.getBlock(currentBlock.id);
-                if (blockAfterInsert) {
-                  const contentAfterStr = JSON.stringify(blockAfterInsert.content ?? []);
-                  const originalContentStr = JSON.stringify(originalContent);
-                  
-                  if (contentAfterStr !== originalContentStr && 
-                      (contentAfterStr === '[]' || contentAfterStr === 'null' || contentAfterStr === '""')) {
-                    // Content was moved, restore it
-                    editor.updateBlock(currentBlock.id, {
-                      content: originalContent,
-                    });
-                  }
-                }
-              }, 10);
-              
-              // Find and move cursor to the new toggle list item
-              setTimeout(() => {
-                try {
-                  const document = editor.document;
-                  const findNextToggle = (blocks: Block[], targetId: string): Block | null => {
-                    for (let i = 0; i < blocks.length; i++) {
-                      const block = blocks[i];
-                      if (!block) continue;
-                      
-                      if (block.id === targetId) {
-                        // Found the target, return the next sibling if it's a toggle list
-                        if (i + 1 < blocks.length) {
-                          const nextBlock = blocks[i + 1];
-                          if (nextBlock && nextBlock.type === 'toggleListItem') {
-                            return nextBlock;
-                          }
-                        }
-                        return null;
-                      }
-                      if (block.children) {
-                        const found = findNextToggle(block.children, targetId);
-                        if (found) return found;
-                      }
-                    }
-                    return null;
-                  };
-                  
-                  const nextToggle = findNextToggle(document, currentBlock.id);
-                  if (nextToggle) {
-                    editor.setTextCursorPosition(nextToggle.id, 'start');
-                  }
-                  toggleListContentRef.current = null;
-                } catch (error) {
-                  console.error('Error moving cursor:', error);
-                  toggleListContentRef.current = null;
-                }
-              }, 20);
-              
-            } catch (error) {
-              console.error('Error inserting new toggle list item:', error);
-              toggleListContentRef.current = null;
-            }
-            
-            return false;
-          }
-        }
-      } catch (error) {
-        console.error('Error handling toggle list Enter key:', error);
-      }
-    };
-
-    // Add event listener with highest priority to catch Enter before BlockNote processes it
-    const editorElement = document.querySelector('[data-id="blocknote-editor"]');
-    const proseMirrorElement = editorElement?.querySelector('.ProseMirror');
-    
-    // Add to multiple elements to ensure we catch it
-    if (proseMirrorElement) {
-      proseMirrorElement.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
-    }
-    if (editorElement) {
-      editorElement.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
-    }
-    document.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
-    
-    return () => {
-      if (proseMirrorElement) {
-        proseMirrorElement.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
-      }
-      if (editorElement) {
-        editorElement.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
-      }
-      document.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
-    };
-  }, [editor, isReady]);
 
   // Enable bulk indentation for multiple selected bullet points
   useEffect(() => {
@@ -344,6 +200,150 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
       if (editorElement) {
         editorElement.removeEventListener('keydown', handleKeyDown, true);
       }
+    };
+  }, [editor, isReady]);
+
+  // Fix toggle list Enter key behavior - prevent content from moving to new list item
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const handleEnterKey = async (event: Event) => {
+      const keyboardEvent = event as KeyboardEvent;
+      
+      if (keyboardEvent.key !== 'Enter' || keyboardEvent.shiftKey) return;
+      
+      try {
+        if (!editor?.isEditable) return;
+
+        const textCursorPosition = editor.getTextCursorPosition();
+        const currentBlock = textCursorPosition.block;
+        
+        // Check if we're in a toggle list
+        if (currentBlock?.type === 'toggleListItem') {
+          // Get the current block content before Enter is processed
+          const blockBeforeEnter = editor.getBlock(currentBlock.id);
+          if (!blockBeforeEnter) return;
+          
+          // Check if block has content by converting to string
+          const contentStr = JSON.stringify(blockBeforeEnter.content);
+          const hasContent = contentStr && contentStr !== '[]' && contentStr !== 'null' && contentStr !== '""';
+          
+          if (hasContent) {
+            // Prevent BlockNote's default Enter behavior completely
+            keyboardEvent.preventDefault();
+            keyboardEvent.stopPropagation();
+            keyboardEvent.stopImmediatePropagation();
+            
+            // Store the original content
+            const originalContent = JSON.parse(JSON.stringify(blockBeforeEnter.content)) as Block["content"];
+            
+            // Store in ref for onChange handler as backup
+            toggleListContentRef.current = {
+              blockId: currentBlock.id,
+              content: originalContent,
+            };
+            
+            // Manually insert a new empty toggle list item
+            try {
+              void editor.insertBlocks(
+                [{
+                  type: 'toggleListItem',
+                  content: [],
+                }],
+                currentBlock.id,
+                'after'
+              );
+              
+              // Small delay to ensure the insert completed
+              void new Promise<void>(resolve => setTimeout(() => resolve(), 10)).then(() => {
+                // Verify original block still has content, restore if needed
+                const blockAfterInsert = editor.getBlock(currentBlock.id);
+                if (blockAfterInsert) {
+                  const contentAfterStr = JSON.stringify(blockAfterInsert.content ?? []);
+                  const originalContentStr = JSON.stringify(originalContent);
+                
+                  if (contentAfterStr !== originalContentStr && 
+                      (contentAfterStr === '[]' || contentAfterStr === 'null' || contentAfterStr === '""')) {
+                    // Content was moved, restore it
+                    editor.updateBlock(currentBlock.id, {
+                      content: originalContent,
+                    });
+                  }
+                }
+                
+                // Find and move cursor to the new toggle list item
+                setTimeout(() => {
+                try {
+                  const document = editor.document;
+                  const findNextToggle = (blocks: Block[], targetId: string): Block | null => {
+                    for (let i = 0; i < blocks.length; i++) {
+                      const block = blocks[i];
+                      if (!block) continue;
+                      
+                      if (block.id === targetId) {
+                        // Found the target, return the next sibling if it's a toggle list
+                        if (i + 1 < blocks.length) {
+                          const nextBlock = blocks[i + 1];
+                          if (nextBlock && nextBlock.type === 'toggleListItem') {
+                            return nextBlock;
+                          }
+                        }
+                        return null;
+                      }
+                      if (block.children) {
+                        const found = findNextToggle(block.children, targetId);
+                        if (found) return found;
+                      }
+                    }
+                    return null;
+                  };
+                  
+                  const nextToggle = findNextToggle(document, currentBlock.id);
+                  if (nextToggle) {
+                    editor.setTextCursorPosition(nextToggle.id, 'start');
+                  }
+                  toggleListContentRef.current = null;
+                } catch (error) {
+                  console.error('Error moving cursor:', error);
+                  toggleListContentRef.current = null;
+                }
+                }, 20);
+              });
+            } catch (error) {
+              console.error('Error inserting new toggle list item:', error);
+              toggleListContentRef.current = null;
+            }
+            
+            return false;
+          }
+        }
+      } catch (error) {
+        console.error('Error handling toggle list Enter key:', error);
+      }
+    };
+
+    // Add event listener with highest priority to catch Enter before BlockNote processes it
+    const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+    const proseMirrorElement = editorElement?.querySelector('.ProseMirror');
+    
+    // Add to multiple elements to ensure we catch it
+    const handleEnterKeyListener = handleEnterKey as (event: Event) => void;
+    if (proseMirrorElement) {
+      proseMirrorElement.addEventListener('keydown', handleEnterKeyListener, { capture: true, passive: false });
+    }
+    if (editorElement) {
+      editorElement.addEventListener('keydown', handleEnterKeyListener, { capture: true, passive: false });
+    }
+    document.addEventListener('keydown', handleEnterKeyListener, { capture: true, passive: false });
+    
+    return () => {
+      if (proseMirrorElement) {
+        proseMirrorElement.removeEventListener('keydown', handleEnterKeyListener, { capture: true });
+      }
+      if (editorElement) {
+        editorElement.removeEventListener('keydown', handleEnterKeyListener, { capture: true });
+      }
+      document.removeEventListener('keydown', handleEnterKeyListener, { capture: true });
     };
   }, [editor, isReady]);
 
@@ -447,17 +447,22 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             if (!editor?.isEditable) return;
             
             // Extract content after "[]" or "[] " from the original blockContent
-            let remainingContent: Block['content'] = [];
+            // We know blockContent is an array from the earlier check
+            // Create a new array that preserves the structure of blockContent
+            const blockContentArray = Array.isArray(blockContent) ? blockContent : [];
+            const remainingContentItems: Array<string | { text?: string; type?: string; [key: string]: unknown }> = [];
             
-            if (checkboxMatch?.[1]?.trim()) {
+            if (checkboxMatch?.[1]?.trim() && Array.isArray(blockContentArray)) {
               // There's content after "[] ", preserve it by extracting from blockContent
               // We need to find where "[]" ends in the content array and keep everything after
               
               // Iterate through blockContent to find where "[]" or "[] " ends
-              for (let i = 0; i < blockContent.length; i++) {
-                const item = blockContent[i];
+              for (let i = 0; i < blockContentArray.length; i++) {
+                const item = blockContentArray[i];
+                if (typeof item !== 'string' && (typeof item !== 'object' || item === null)) continue;
+                
                 const itemText = typeof item === 'string' ? item : 
-                  (typeof item === 'object' && 'text' in item ? (item as { text?: string }).text ?? '' : '');
+                  ('text' in item && typeof item.text === 'string' ? item.text : '');
                 
                 if (!itemText) continue;
                 
@@ -471,71 +476,62 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
                     
                     if (afterSpace) {
                       // There's content in this same item after "[] "
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                       if (typeof item === 'string') {
-                        remainingContent.push(afterSpace as never);
-                      } else {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                        remainingContent.push({ ...item, text: afterSpace } as never);
+                        remainingContentItems.push(afterSpace);
+                      } else if (typeof item === 'object' && item !== null) {
+                        remainingContentItems.push({ ...item, text: afterSpace });
                       }
                     }
                     // Add all remaining items
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
+                    remainingContentItems.push(...blockContentArray.slice(i + 1) as typeof remainingContentItems);
                     break;
                   } else if (afterBracket) {
                     // There's content after "[]" but no space
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                     if (typeof item === 'string') {
-                      remainingContent.push(afterBracket as never);
-                    } else {
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                      remainingContent.push({ ...item, text: afterBracket } as never);
+                      remainingContentItems.push(afterBracket);
+                    } else if (typeof item === 'object' && item !== null) {
+                      remainingContentItems.push({ ...item, text: afterBracket });
                     }
                     // Add all remaining items
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
+                    remainingContentItems.push(...blockContentArray.slice(i + 1) as typeof remainingContentItems);
                     break;
                   } else {
                     // "[]" is at the end of this item, content starts in next items
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
+                    remainingContentItems.push(...blockContentArray.slice(i + 1) as typeof remainingContentItems);
                     break;
                   }
                 }
               }
               
               // If we couldn't parse it from structure, use the regex match as fallback
-              if (Array.isArray(remainingContent) && remainingContent.length === 0 && checkboxMatch[1]) {
+              if (remainingContentItems.length === 0 && checkboxMatch[1]) {
                 // Create content from the remaining text - BlockNote format
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                remainingContent = blockContent.filter((item) => {
-                  // Skip items that are part of "[]"
+                const filtered = blockContentArray.filter((item) => {
                   const itemText = typeof item === 'string' ? item : 
-                    (typeof item === 'object' && 'text' in item ? (item as { text?: string }).text ?? '' : '');
+                    (typeof item === 'object' && item !== null && 'text' in item && typeof item.text === 'string' ? item.text : '');
                   return itemText && !itemText.includes('[]');
-                }) as Block['content'];
-                
-                // If still empty, create a simple text content
-                if (Array.isArray(remainingContent) && remainingContent.length === 0) {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  remainingContent = [{ type: 'text', text: checkboxMatch[1] }] as Block['content'];
-                }
+                });
+                remainingContentItems.push(...filtered as typeof remainingContentItems);
               }
             }
             
             // Update the block to be a checkListItem with preserved content
+            // Get the exact type that updateBlock expects for content and extract only the array type
+            type UpdateBlockParams = Parameters<typeof editor.updateBlock>[1];
+            type UpdateBlockContentUnion = UpdateBlockParams extends { content?: infer C } ? C : never;
+            // Extract only the array type (PartialInlineContent), excluding string and PartialTableContent
+            type UpdateBlockContent = Extract<UpdateBlockContentUnion, unknown[]>;
+            
             editor.updateBlock(currentBlock.id, {
               type: 'checkListItem',
               props: { checked: false },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-              content: remainingContent as any
+              content: remainingContentItems as UpdateBlockContent
             });
             
             // Position cursor at the end of the checkbox content (or start if empty)
             setTimeout(() => {
               try {
-                if (Array.isArray(remainingContent) && remainingContent.length > 0) {
+                if (remainingContentItems.length > 0) {
                   editor.setTextCursorPosition(currentBlock.id, "end");
                 } else {
                   editor.setTextCursorPosition(currentBlock.id, "start");
@@ -617,9 +613,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         
         // Prevent any focus changes that might cause scrolling
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement?.blur) {
-          activeElement.blur();
-        }
+        activeElement?.blur?.();
         
         // Get the code content
         const preElement = codeBlock.querySelector('pre');
@@ -773,19 +767,36 @@ function EditorSkeleton() {
   );
 }
 
-function BlockNoteEditorInner({ 
-  pageId, 
-  title: initialTitle 
-}: { 
-  pageId: string, 
-  title: string 
+import { Button } from "@/components/ui/button";
+import { Pencil, Download, Image as ImageIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+function BlockNoteEditorInner({
+  pageId,
+  title: initialTitle,
+  coverImage: initialCoverImage,
+  bannerImage: initialBannerImage
+}: {
+  pageId: string,
+  title: string,
+  coverImage?: string | null,
+  bannerImage?: string | null
 }) {
   const router = useRouter();
   const utils = api.useUtils();
-  const isMobile = useIsMobile();
   const [title, setTitle] = useState(initialTitle);
+  const [coverImage, setCoverImage] = useState(initialCoverImage);
+  const [bannerImage, setBannerImage] = useState(initialBannerImage);
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
   
   // Stable callback for status updates
   const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
@@ -798,15 +809,26 @@ function BlockNoteEditorInner({
     },
     onSuccess: () => {
       setStatus("saved");
-      // Invalidate page cache to update breadcrumbs
       void utils.page.getPage.invalidate({ pageId });
-      // Invalidate workspace cache to update sidebar
       void utils.workspace.getWorkspace.invalidate();
-      // Refresh server-side data to update sidebar immediately
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save title", error);
+      setStatus("unsaved");
+    }
+  });
+
+  const updateCoverImage = api.page.updateCoverImage.useMutation({
+    onMutate: () => {
+      setStatus("saving");
+    },
+    onSuccess: () => {
+      setStatus("saved");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Failed to save cover image", error);
       setStatus("unsaved");
     }
   });
@@ -828,7 +850,30 @@ function BlockNoteEditorInner({
     }, 1000);
   };
 
-  // Cleanup title timeout
+  const handleCoverUpdate = (url: string | null) => {
+    setCoverImage(url);
+    updateCoverImage.mutate({ pageId, coverImage: url });
+  };
+
+  const updateBannerImage = api.page.updateBannerImage.useMutation({
+    onMutate: () => {
+      setStatus("saving");
+    },
+    onSuccess: () => {
+      setStatus("saved");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Failed to save banner image", error);
+      setStatus("unsaved");
+    }
+  });
+
+  const handleBannerUpdate = (url: string | null) => {
+    setBannerImage(url);
+    updateBannerImage.mutate({ pageId, bannerImage: url });
+  };
+
   useEffect(() => {
     return () => {
       if (saveTitleTimeoutRef.current) {
@@ -838,26 +883,116 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-3 md:space-y-4 relative overflow-hidden">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4 pl-0 md:pl-[54px] pr-4 md:pr-6">
-        <div className="flex-1 min-w-0 w-full md:w-auto">
+    <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+      {/* Banner Image - Full width at top, behind other content */}
+      {bannerImage && (
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
+          <BannerImage
+            url={bannerImage}
+            editable={false}
+            onUpdate={() => { /* read-only */ }}
+          />
+        </div>
+      )}
+
+      {/* Saved Status - Top Right */}
+      <div className="absolute top-4 right-6 text-xs text-muted-foreground z-10">
+        {status === "saving" && <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
+        {status === "saved" && "Saved"}
+        {status === "unsaved" && "Unsaved"}
+      </div>
+
+      {/* New Header Layout */}
+      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
+        {/* Cover Image - Smaller size (w-40 = 10rem) */}
+        <div className="w-40 h-40 flex-shrink-0">
+            <CoverImage
+              url={coverImage}
+              editable={false} // Read-only in main view
+              onUpdate={() => { /* read-only */ }}
+            />
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 min-w-0 pb-4">
+          {/* Title - Bricolage Grotesque (matches H1) */}
           <Input
             value={title}
             onChange={handleTitleChange}
-            className="font-serif font-medium border-none px-0 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full"
+            className="font-serif font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
             placeholder="Untitled"
-            style={{ fontSize: isMobile ? '1.25rem' : '2rem' }}
+            style={{ fontFamily: 'var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif', fontSize: '4.5rem', fontWeight: 700 }}
           />
-        </div>
-        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0 w-full md:w-auto justify-between md:justify-end">
-            <ShareDialog pageId={pageId} />
-            <div className="text-xs text-muted-foreground w-auto md:w-20 text-right">
-            {status === "saving" && <span className="flex items-center justify-end gap-1"><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden md:inline">Saving</span></span>}
-            {status === "saved" && <span className="hidden md:inline">Saved</span>}
-            {status === "unsaved" && <span className="hidden md:inline">Unsaved</span>}
-            </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-0.5 pl-2">
+             <ShareDialog pageId={pageId} />
+
+             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                   <Pencil className="h-6 w-6" />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent>
+                 <DialogHeader>
+                   <DialogTitle>Edit Page Details</DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-6 py-4">
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Cover Image</label>
+                     <div className="w-40 h-40 mx-auto">
+                       <CoverImage 
+                         url={coverImage} 
+                         editable={true} 
+                         onUpdate={handleCoverUpdate} 
+                       />
+                     </div>
+                   </div>
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Title</label>
+                     <Input 
+                       value={title} 
+                       onChange={handleTitleChange}
+                       className="font-serif"
+                     />
+                   </div>
+                 </div>
+               </DialogContent>
+             </Dialog>
+
+             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+               <Download className="h-6 w-6" />
+             </Button>
+
+             <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                   <ImageIcon className="h-6 w-6" />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent>
+                 <DialogHeader>
+                   <DialogTitle>Edit Banner Image</DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4 py-4">
+                   <div className="flex flex-col gap-2">
+                     <label className="text-sm font-medium">Banner Image</label>
+                     <div className="h-64">
+                       <BannerImage
+                         url={bannerImage}
+                         editable={true}
+                         onUpdate={handleBannerUpdate}
+                       />
+                     </div>
+                   </div>
+                 </div>
+               </DialogContent>
+             </Dialog>
+          </div>
         </div>
       </div>
+
       <div className="overflow-hidden">
         <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
       </div>
@@ -865,12 +1000,16 @@ function BlockNoteEditorInner({
   );
 }
 
-export function Editor({ 
-  pageId, 
-  title 
-}: { 
-  pageId: string, 
-  title: string 
+export function Editor({
+  pageId,
+  title,
+  coverImage,
+  bannerImage
+}: {
+  pageId: string,
+  title: string,
+  coverImage?: string | null,
+  bannerImage?: string | null
 }) {
   // Only initialize Liveblocks when editor is actually rendered
   // This defers the connection until the component is mounted
@@ -884,9 +1023,11 @@ export function Editor({
       <RoomProvider id={`page-${pageId}`} initialPresence={{}}>
         <ClientSideSuspense fallback={<EditorSkeleton />}>
           {() => (
-            <BlockNoteEditorInner 
+            <BlockNoteEditorInner
               pageId={pageId}
               title={title}
+              coverImage={coverImage}
+              bannerImage={bannerImage}
             />
           )}
         </ClientSideSuspense>
