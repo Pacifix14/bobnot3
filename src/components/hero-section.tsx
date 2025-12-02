@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AuthButtons } from "@/components/auth-buttons";
+import Threads from "@/components/Threads";
 
 export function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -27,8 +28,17 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-20 md:py-32 lg:py-40 xl:py-48 text-center">
-      <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+    <section className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-20 md:py-32 lg:py-40 xl:py-48 text-center relative overflow-hidden">
+      {/* Threads Background */}
+      <Threads
+        color={[2.5, 2.5, 2.5]}
+        amplitude={1}
+        distance={0.3}
+        enableMouseInteraction={true}
+        className="absolute inset-0"
+      />
+      
+      <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 relative z-10">
         {/* Logo and Brand Name */}
         <div 
           className="flex items-center justify-center gap-3 mb-4 md:mb-6"
