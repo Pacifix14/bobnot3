@@ -63,7 +63,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   }, [pageId, onStatusChange]);
 
   // Track toggle list content to prevent it from moving when Enter is pressed
-  const toggleListContentRef = useRef<{ blockId: string; content: any } | null>(null);
+  const toggleListContentRef = useRef<{ blockId: string; content: unknown } | null>(null);
 
   // Handle editor changes
   useEffect(() => {
@@ -85,7 +85,8 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             setTimeout(() => {
               try {
                 editor.updateBlock(blockId, {
-                  content: originalContent,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+                  content: originalContent as any,
                 });
                 toggleListContentRef.current = null;
               } catch (error) {
@@ -125,7 +126,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   useEffect(() => {
     if (!editor || !isReady) return;
 
-    const handleEnterKey = async (event: Event) => {
+    const handleEnterKey = (event: Event) => {
       const keyboardEvent = event as KeyboardEvent;
       
       if (keyboardEvent.key !== 'Enter' || keyboardEvent.shiftKey) return;
@@ -153,7 +154,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             keyboardEvent.stopImmediatePropagation();
             
             // Store the original content
-            const originalContent = JSON.parse(JSON.stringify(blockBeforeEnter.content));
+            const originalContent = JSON.parse(JSON.stringify(blockBeforeEnter.content)) as Block['content'];
             
             // Store in ref for onChange handler as backup
             toggleListContentRef.current = {
@@ -163,7 +164,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             
             // Manually insert a new empty toggle list item
             try {
-              await editor.insertBlocks(
+              void editor.insertBlocks(
                 [{
                   type: 'toggleListItem',
                   content: [],
@@ -173,22 +174,22 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
               );
               
               // Small delay to ensure the insert completed
-              await new Promise(resolve => setTimeout(resolve, 10));
-              
-              // Verify original block still has content, restore if needed
-              const blockAfterInsert = editor.getBlock(currentBlock.id);
-              if (blockAfterInsert) {
-                const contentAfterStr = JSON.stringify(blockAfterInsert.content || []);
-                const originalContentStr = JSON.stringify(originalContent);
-                
-                if (contentAfterStr !== originalContentStr && 
-                    (contentAfterStr === '[]' || contentAfterStr === 'null' || contentAfterStr === '""')) {
-                  // Content was moved, restore it
-                  editor.updateBlock(currentBlock.id, {
-                    content: originalContent,
-                  });
+              setTimeout(() => {
+                // Verify original block still has content, restore if needed
+                const blockAfterInsert = editor.getBlock(currentBlock.id);
+                if (blockAfterInsert) {
+                  const contentAfterStr = JSON.stringify(blockAfterInsert.content ?? []);
+                  const originalContentStr = JSON.stringify(originalContent);
+                  
+                  if (contentAfterStr !== originalContentStr && 
+                      (contentAfterStr === '[]' || contentAfterStr === 'null' || contentAfterStr === '""')) {
+                    // Content was moved, restore it
+                    editor.updateBlock(currentBlock.id, {
+                      content: originalContent,
+                    });
+                  }
                 }
-              }
+              }, 10);
               
               // Find and move cursor to the new toggle list item
               setTimeout(() => {
@@ -247,21 +248,21 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     
     // Add to multiple elements to ensure we catch it
     if (proseMirrorElement) {
-      proseMirrorElement.addEventListener('keydown', handleEnterKey, { capture: true, passive: false });
+      proseMirrorElement.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
     }
     if (editorElement) {
-      editorElement.addEventListener('keydown', handleEnterKey, { capture: true, passive: false });
+      editorElement.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
     }
-    document.addEventListener('keydown', handleEnterKey, { capture: true, passive: false });
+    document.addEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true, passive: false });
     
     return () => {
       if (proseMirrorElement) {
-        proseMirrorElement.removeEventListener('keydown', handleEnterKey, { capture: true });
+        proseMirrorElement.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
       }
       if (editorElement) {
-        editorElement.removeEventListener('keydown', handleEnterKey, { capture: true });
+        editorElement.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
       }
-      document.removeEventListener('keydown', handleEnterKey, { capture: true });
+      document.removeEventListener('keydown', handleEnterKey as (e: Event) => void, { capture: true });
     };
   }, [editor, isReady]);
 
@@ -431,7 +432,8 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         }).join('');
         
         // Check if the text starts with "[]" or "[] " (with or without space)
-        const checkboxMatch = textContent.match(/^\[\]\s*(.*)$/);
+        const checkboxRegex = /^\[\]\s*(.*)$/;
+        const checkboxMatch = checkboxRegex.exec(textContent);
         const isExactCheckbox = textContent === '[]';
         
         if (checkboxMatch || isExactCheckbox) {
@@ -445,15 +447,11 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             if (!editor?.isEditable) return;
             
             // Extract content after "[]" or "[] " from the original blockContent
-            let remainingContent: any[] = [];
+            let remainingContent: Block['content'] = [];
             
-            if (checkboxMatch && checkboxMatch[1] && checkboxMatch[1].trim()) {
+            if (checkboxMatch?.[1]?.trim()) {
               // There's content after "[] ", preserve it by extracting from blockContent
               // We need to find where "[]" ends in the content array and keep everything after
-              let foundBracketStart = false;
-              let foundBracketEnd = false;
-              let foundSpaceAfterBracket = false;
-              let remainingContentStartIndex = -1;
               
               // Iterate through blockContent to find where "[]" or "[] " ends
               for (let i = 0; i < blockContent.length; i++) {
@@ -466,60 +464,62 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
                 // Check if this item contains "[]" or "[] "
                 const bracketIndex = itemText.indexOf('[]');
                 if (bracketIndex !== -1) {
-                  foundBracketStart = true;
-                  foundBracketEnd = true;
-                  
                   // Check if there's a space after "[]"
                   const afterBracket = itemText.substring(bracketIndex + 2);
                   if (afterBracket.startsWith(' ') || afterBracket.startsWith('\u00A0')) {
-                    foundSpaceAfterBracket = true;
                     const afterSpace = afterBracket.substring(1);
                     
                     if (afterSpace) {
                       // There's content in this same item after "[] "
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                       if (typeof item === 'string') {
-                        remainingContent.push(afterSpace);
+                        remainingContent.push(afterSpace as never);
                       } else {
-                        remainingContent.push({ ...item, text: afterSpace });
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                        remainingContent.push({ ...item, text: afterSpace } as never);
                       }
                     }
                     // Add all remaining items
-                    remainingContent.push(...blockContent.slice(i + 1));
-                    remainingContentStartIndex = i + 1;
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
                     break;
                   } else if (afterBracket) {
                     // There's content after "[]" but no space
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                     if (typeof item === 'string') {
-                      remainingContent.push(afterBracket);
+                      remainingContent.push(afterBracket as never);
                     } else {
-                      remainingContent.push({ ...item, text: afterBracket });
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                      remainingContent.push({ ...item, text: afterBracket } as never);
                     }
                     // Add all remaining items
-                    remainingContent.push(...blockContent.slice(i + 1));
-                    remainingContentStartIndex = i + 1;
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
                     break;
                   } else {
                     // "[]" is at the end of this item, content starts in next items
-                    remainingContent.push(...blockContent.slice(i + 1));
-                    remainingContentStartIndex = i + 1;
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                    remainingContent.push(...(blockContent.slice(i + 1) as never[]));
                     break;
                   }
                 }
               }
               
               // If we couldn't parse it from structure, use the regex match as fallback
-              if (remainingContent.length === 0 && checkboxMatch[1]) {
+              if (Array.isArray(remainingContent) && remainingContent.length === 0 && checkboxMatch[1]) {
                 // Create content from the remaining text - BlockNote format
-                remainingContent = blockContent.filter((item, index) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                remainingContent = blockContent.filter((item) => {
                   // Skip items that are part of "[]"
                   const itemText = typeof item === 'string' ? item : 
                     (typeof item === 'object' && 'text' in item ? (item as { text?: string }).text ?? '' : '');
                   return itemText && !itemText.includes('[]');
-                });
+                }) as Block['content'];
                 
                 // If still empty, create a simple text content
-                if (remainingContent.length === 0) {
-                  remainingContent = [{ text: checkboxMatch[1] }];
+                if (Array.isArray(remainingContent) && remainingContent.length === 0) {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                  remainingContent = [{ type: 'text', text: checkboxMatch[1] }] as Block['content'];
                 }
               }
             }
@@ -528,18 +528,19 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
             editor.updateBlock(currentBlock.id, {
               type: 'checkListItem',
               props: { checked: false },
-              content: remainingContent
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+              content: remainingContent as any
             });
             
             // Position cursor at the end of the checkbox content (or start if empty)
             setTimeout(() => {
               try {
-                if (remainingContent.length > 0) {
+                if (Array.isArray(remainingContent) && remainingContent.length > 0) {
                   editor.setTextCursorPosition(currentBlock.id, "end");
                 } else {
                   editor.setTextCursorPosition(currentBlock.id, "start");
                 }
-              } catch (error) {
+              } catch {
                 // Fallback: just set to start to keep cursor in same block
                 editor.setTextCursorPosition(currentBlock.id, "start");
               }
@@ -616,7 +617,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         
         // Prevent any focus changes that might cause scrolling
         const activeElement = document.activeElement as HTMLElement;
-        if (activeElement && activeElement.blur) {
+        if (activeElement?.blur) {
           activeElement.blur();
         }
         
