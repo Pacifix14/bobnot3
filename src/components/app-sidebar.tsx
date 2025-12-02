@@ -23,7 +23,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
@@ -59,6 +58,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SmoothScrollContainer } from "@/components/smooth-scroll-container";
 
 type TreeItem = {
   id: string;
@@ -348,7 +348,12 @@ export function AppSidebar({
       <SidebarHeader>
         <TeamSwitcher teams={workspacesWithIcons} />
       </SidebarHeader>
-      <SidebarContent>
+      <SmoothScrollContainer 
+        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden group-data-[collapsible=icon]:overflow-hidden"
+        duration={1.0}
+        wheelMultiplier={1.2}
+        touchMultiplier={2.0}
+      >
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center justify-between pr-2">
             <span>Platform</span>
@@ -441,7 +446,7 @@ export function AppSidebar({
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>
+      </SmoothScrollContainer>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
