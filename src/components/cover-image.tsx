@@ -95,7 +95,10 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    handleContainerClick();
+  };
+
+  const handleContainerClick = () => {
     // If there's a custom onClick handler (e.g., to open dialog), use it
     if (onClick) {
       onClick();
@@ -117,10 +120,12 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
         hasNoImage && "bg-muted border-muted-foreground/20",
         hasNoImage && editable && !isUploading && "hover:border-primary/50",
         url && "border-transparent bg-background",
+        (onClick || editable) && "cursor-pointer",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleContainerClick}
     >
       {url ? (
         <>
@@ -133,7 +138,7 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
             unoptimized
           />
           {editable && isHovered && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity">
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity pointer-events-none">
               <Button 
                 size="sm" 
                 variant="secondary" 
@@ -141,6 +146,7 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
+                className="pointer-events-auto"
               >
                 Change
               </Button>
@@ -151,6 +157,7 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
                   e.stopPropagation();
                   removeCover();
                 }}
+                className="pointer-events-auto"
               >
                 <X className="w-4 h-4" />
               </Button>

@@ -910,7 +910,7 @@ function BlockNoteEditorInner({
               url={coverImage}
               editable={false} // Read-only in main view
               onUpdate={() => { /* read-only */ }}
-              onClick={!coverImage ? () => setIsEditDialogOpen(true) : undefined}
+              onClick={() => setIsEditDialogOpen(true)}
             />
         </div>
 
