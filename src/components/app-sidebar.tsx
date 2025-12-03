@@ -37,6 +37,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -489,16 +490,21 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <TeamSwitcher teams={workspacesWithIcons} />
+      <SidebarHeader className="h-16 min-h-16">
+        <div className="flex items-center gap-2 h-full">
+          <SidebarTrigger className="shrink-0" />
+          <div className="transition-all duration-300 ease-in-out opacity-100 translate-x-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:translate-x-[-8px] group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:overflow-hidden">
+            <TeamSwitcher teams={workspacesWithIcons} />
+          </div>
+        </div>
       </SidebarHeader>
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col transition-all duration-300 ease-in-out">
         {/* Fixed Platform header */}
         <SidebarGroup className="shrink-0">
           <SidebarGroupLabel className="flex items-center justify-between pr-2">
             <span>Platform</span>
             {isOwner && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 transition-opacity duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none">
               <button 
                 onClick={handleCreatePage} 
                 disabled={createPage.isPending}
@@ -526,7 +532,7 @@ export function AppSidebar({
           wheelMultiplier={1.2}
           touchMultiplier={2.0}
         >
-          <SidebarGroup>
+          <SidebarGroup className="group-data-[collapsible=icon]:p-0">
           <SidebarGroupContent>
             <DndContext
                 sensors={sensors}
@@ -545,7 +551,7 @@ export function AppSidebar({
                     }
                   }}
             >
-                <SidebarMenu className="ml-2">
+                <SidebarMenu className="ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
                     <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         {items.map((item) => (
                               <TreeItemRenderer 
@@ -592,34 +598,34 @@ export function AppSidebar({
 
         {/* Fixed Shared with me section at bottom */}
         <SidebarSeparator className="mx-2 my-2 shrink-0" />
-        <SidebarGroup className="shrink-0">
+        <SidebarGroup className="shrink-0 group-data-[collapsible=icon]:p-0">
             <SidebarGroupLabel className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 <span>Shared with me</span>
             </SidebarGroupLabel>
             <SidebarGroupContent>
-                <SidebarMenu className="ml-2">
+                <SidebarMenu className="ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
                     {sharedPages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-6 px-2 text-center border border-dashed border-sidebar-border/50 rounded-md m-1">
                             <span className="text-xs text-muted-foreground">No pages shared with you</span>
                         </div>
                     ) : (
                         sharedPages.map((page) => (
-                            <SidebarMenuItem key={page.id}>
+                            <SidebarMenuItem key={page.id} className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
                                 <SidebarMenuButton 
                                     asChild 
                                     isActive={pathname === `/dashboard/${page.workspaceId}/${page.id}`}
-                                    className="h-auto py-2.5 items-start"
+                                    className="h-auto py-2.5 items-start transition-opacity duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                     tooltip={`${page.title} • ${page.workspaceName}`}
                                 >
                                     <Link 
                                         href={`/dashboard/${page.workspaceId}/${page.id}`} 
-                                        className="flex items-center gap-2"
+                                        className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:w-auto"
                                         onMouseEnter={() => prefetchPage(page.id)}
                                     onClick={handlePageClick}
                                     >
                                         <FileText className="h-4 w-4 shrink-0 mt-0.5" />
-                                        <div className="flex flex-col gap-0.5 overflow-hidden">
+                                        <div className="flex flex-col gap-0.5 overflow-hidden group-data-[collapsible=icon]:hidden">
                                             <span className="truncate font-medium leading-none">{page.title}</span>
                                             <span className="truncate text-[10px] text-muted-foreground">
                                                 {page.workspaceName}
@@ -922,12 +928,12 @@ function TreeItemRenderer({
         )}
       >
         <Collapsible defaultOpen className="group/collapsible">
-            <SidebarMenuItem>
-              <div className="flex items-center w-full group/folder-row relative">
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <div className="flex items-center w-full group/folder-row relative group-data-[collapsible=icon]:justify-center">
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton 
                     tooltip="Toggle Folder"
-                    className="h-8 w-6 p-1 shrink-0"
+                    className="h-8 w-6 p-1 shrink-0 group-data-[collapsible=icon]:mx-auto"
                   >
                     <div className="relative w-4 h-4">
                         <div className="absolute inset-0 flex items-center justify-center transition-all duration-200 group-hover/folder-row:opacity-0 group-hover/folder-row:scale-75">
@@ -953,7 +959,7 @@ function TreeItemRenderer({
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 {isRenaming ? (
-                    <div className="flex-1 px-2">
+                    <div className="flex-1 px-2 group-data-[collapsible=icon]:hidden">
                          <Input
                             value={renameName}
                             onChange={(e) => setRenameName(e.target.value)}
@@ -972,12 +978,12 @@ function TreeItemRenderer({
                         />
                     </div>
                 ) : (
-                    <SidebarMenuButton asChild tooltip={item.name} className="cursor-grab active:cursor-grabbing flex-1 pr-2 group/row relative overflow-hidden">
+                    <SidebarMenuButton asChild tooltip={item.name} className="cursor-grab active:cursor-grabbing flex-1 pr-2 group/row relative overflow-hidden transition-opacity duration-300 ease-in-out group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:overflow-hidden">
                         <Link href={`/dashboard/${workspaceId}/folder/${item.id}`} className="flex items-center gap-2 w-full">
-                            <span className="truncate transition-all duration-200 group-hover/row:pr-16">{item.name}</span>
+                            <span className="truncate transition-all duration-300 ease-in-out opacity-100 group-hover/row:pr-16 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:pr-0">{item.name}</span>
                             
                             {isOwner && (
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 translate-x-2 transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0">
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 translate-x-2 transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0 group-data-[collapsible=icon]:hidden">
                                     <ActionButton icon={Pencil} onClick={() => setIsRenaming(true)} />
                                     <ActionButton icon={Trash2} onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10" />
                                 </div>
@@ -1042,19 +1048,19 @@ function TreeItemRenderer({
         isInReorderMode && "animate-shake"
       )}
     >
-        <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive} tooltip={item.name} className="cursor-grab active:cursor-grabbing group/row relative overflow-hidden">
+        <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton asChild isActive={isActive} tooltip={item.name} className="cursor-grab active:cursor-grabbing group/row relative overflow-hidden group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
                 <Link 
                     href={`/dashboard/${workspaceId}/${item.id}`} 
-                    className={`flex items-center gap-2 w-full ${isActive ? '' : 'text-muted-foreground/70 hover:text-foreground transition-colors'}`}
+                    className={`flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:w-auto ${isActive ? '' : 'text-muted-foreground/70 hover:text-foreground transition-colors'}`}
                     onMouseEnter={() => prefetchPage(item.id)}
                     onClick={handlePageClick}
                 >
                     <FileText className="flex-shrink-0" />
-                    <span className="truncate transition-all duration-200 group-hover/row:pr-8">{item.name}</span>
+                    <span className="truncate transition-all duration-300 ease-in-out opacity-100 group-hover/row:pr-8 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">{item.name}</span>
                     
                     {isOwner && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 translate-x-2 transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0">
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 translate-x-2 transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0 group-data-[collapsible=icon]:hidden">
                             <ActionButton icon={Trash2} onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10" />
                         </div>
                     )}
