@@ -481,13 +481,9 @@ export function AppSidebar({
       <SidebarHeader>
         <TeamSwitcher teams={workspacesWithIcons} />
       </SidebarHeader>
-      <SmoothScrollContainer 
-        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden group-data-[collapsible=icon]:overflow-hidden"
-        duration={1.0}
-        wheelMultiplier={1.2}
-        touchMultiplier={2.0}
-      >
-        <SidebarGroup>
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Fixed Platform header */}
+        <SidebarGroup className="shrink-0">
           <SidebarGroupLabel className="flex items-center justify-between pr-2">
             <span>Platform</span>
             {isOwner && (
@@ -510,70 +506,82 @@ export function AppSidebar({
             </div>
             )}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-                onDragCancel={() => {
-                  setActiveId(null);
-                  setReorderModeItems(new Set());
-                  
-                  // Clean up edge scrolling
-                  if (edgeScrollIntervalRef.current) {
-                    clearInterval(edgeScrollIntervalRef.current);
-                    edgeScrollIntervalRef.current = null;
-                  }
-                }}
-            >
-                <SidebarMenu className="ml-2">
-                    <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                        {items.map((item) => (
-                            <TreeItemRenderer 
-                                key={item.id} 
-                                item={item} 
-                                workspaceId={workspaceId} 
-                                isOwner={isOwner} 
-                                prefetchPage={prefetchPage} 
-                                utils={utils} 
-                                onItemDeleted={(itemId) => setItems(prev => removeItemFromTree(prev, itemId))}
-                                isInReorderMode={reorderModeItems.has(item.id)}
-                                onReorderModeChange={(itemId, isActive) => {
-                                    setReorderModeItems(prev => {
-                                        const next = new Set(prev);
-                                        if (isActive) {
-                                            next.add(itemId);
-                                        } else {
-                                            next.delete(itemId);
-                                        }
-                                        return next;
-                                    });
-                                }}
-                            />
-                        ))}
-                    </SortableContext>
-                </SidebarMenu>
-                <DragOverlay 
-                  dropAnimation={dropAnimationConfig}
-                  modifiers={[snapCenterToCursor]}
-                >
-                    {activeItem ? (
-                        <div className="opacity-80 bg-sidebar-accent rounded-md p-2">
-                            <div className="flex items-center gap-2">
-                                {activeItem.type === 'folder' ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                                <span>{activeItem.name}</span>
-                            </div>
-                        </div>
-                    ) : null}
-                </DragOverlay>
-            </DndContext>
-          </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="mx-2 my-2 mt-auto" />
-        <SidebarGroup>
+        {/* Scrollable Platform content */}
+        <SmoothScrollContainer 
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden group-data-[collapsible=icon]:overflow-hidden"
+          duration={1.0}
+          wheelMultiplier={1.2}
+          touchMultiplier={2.0}
+        >
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                  onDragCancel={() => {
+                    setActiveId(null);
+                    setReorderModeItems(new Set());
+                    
+                    // Clean up edge scrolling
+                    if (edgeScrollIntervalRef.current) {
+                      clearInterval(edgeScrollIntervalRef.current);
+                      edgeScrollIntervalRef.current = null;
+                    }
+                  }}
+              >
+                  <SidebarMenu className="ml-2">
+                      <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                          {items.map((item) => (
+                              <TreeItemRenderer 
+                                  key={item.id} 
+                                  item={item} 
+                                  workspaceId={workspaceId} 
+                                  isOwner={isOwner} 
+                                  prefetchPage={prefetchPage} 
+                                  utils={utils} 
+                                  onItemDeleted={(itemId) => setItems(prev => removeItemFromTree(prev, itemId))}
+                                  isInReorderMode={reorderModeItems.has(item.id)}
+                                  onReorderModeChange={(itemId, isActive) => {
+                                      setReorderModeItems(prev => {
+                                          const next = new Set(prev);
+                                          if (isActive) {
+                                              next.add(itemId);
+                                          } else {
+                                              next.delete(itemId);
+                                          }
+                                          return next;
+                                      });
+                                  }}
+                              />
+                          ))}
+                      </SortableContext>
+                  </SidebarMenu>
+                  <DragOverlay 
+                    dropAnimation={dropAnimationConfig}
+                    modifiers={[snapCenterToCursor]}
+                  >
+                      {activeItem ? (
+                          <div className="opacity-80 bg-sidebar-accent rounded-md p-2">
+                              <div className="flex items-center gap-2">
+                                  {activeItem.type === 'folder' ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                                  <span>{activeItem.name}</span>
+                              </div>
+                          </div>
+                      ) : null}
+                  </DragOverlay>
+              </DndContext>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SmoothScrollContainer>
+
+        {/* Fixed Shared with me section at bottom */}
+        <SidebarSeparator className="mx-2 my-2 shrink-0" />
+        <SidebarGroup className="shrink-0">
             <SidebarGroupLabel className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 <span>Shared with me</span>
@@ -613,7 +621,7 @@ export function AppSidebar({
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>
-      </SmoothScrollContainer>
+      </div>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
