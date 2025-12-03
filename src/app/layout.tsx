@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/toast-provider";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { SuppressWarnings } from "@/components/suppress-warnings";
 
 export const metadata: Metadata = {
   title: "bobnot3",
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bricolage.variable}`} suppressHydrationWarning>
       <body>
+        <SuppressWarnings />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

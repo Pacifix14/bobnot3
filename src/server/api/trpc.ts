@@ -88,8 +88,8 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-  // Only log slow queries (>100ms) to reduce console noise
-  if (end - start > 100) {
+  // Only log slow queries (>100ms) in development to reduce console noise
+  if (process.env.NODE_ENV === "development" && end - start > 100) {
     console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
   }
 

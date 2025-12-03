@@ -43,9 +43,12 @@ export const authConfig = {
       name: "Email",
       options: {},
       sendVerificationRequest: async ({ identifier, url }) => {
-        console.log("----------------------------------------------");
-        console.log(`LOGIN LINK FOR ${identifier}: ${url}`);
-        console.log("----------------------------------------------");
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.log("----------------------------------------------");
+          console.log(`LOGIN LINK FOR ${identifier}: ${url}`);
+          console.log("----------------------------------------------");
+        }
       },
     },
   ],
