@@ -94,8 +94,8 @@ export function SmoothScrollContainer({
     
     // Also recalculate when images and other resources load
     const handleLoad = () => {
-      requestAnimationFrame(() => {
-        lenis.resize();
+    requestAnimationFrame(() => {
+      lenis.resize();
       });
     };
     
@@ -126,7 +126,7 @@ export function SmoothScrollContainer({
     const resizeObserver = new ResizeObserver(() => {
       // Use requestAnimationFrame to batch resize calls
       requestAnimationFrame(() => {
-        lenis.resize();
+      lenis.resize();
       });
     });
     

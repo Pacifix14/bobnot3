@@ -527,13 +527,13 @@ export function AppSidebar({
           touchMultiplier={2.0}
         >
           <SidebarGroup>
-            <SidebarGroupContent>
-              <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
+          <SidebarGroupContent>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
                   onDragOver={handleDragOver}
-                  onDragEnd={handleDragEnd}
+                onDragEnd={handleDragEnd}
                   onDragCancel={() => {
                     setActiveId(null);
                     setReorderModeItems(new Set());
@@ -544,10 +544,10 @@ export function AppSidebar({
                       edgeScrollIntervalRef.current = null;
                     }
                   }}
-              >
-                  <SidebarMenu className="ml-2">
-                      <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                          {items.map((item) => (
+            >
+                <SidebarMenu className="ml-2">
+                    <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                        {items.map((item) => (
                               <TreeItemRenderer 
                                   key={item.id} 
                                   item={item} 
@@ -569,25 +569,25 @@ export function AppSidebar({
                                       });
                                   }}
                               />
-                          ))}
-                      </SortableContext>
-                  </SidebarMenu>
+                        ))}
+                    </SortableContext>
+                </SidebarMenu>
                   <DragOverlay 
                     dropAnimation={dropAnimationConfig}
                     modifiers={[snapCenterToCursor]}
                   >
-                      {activeItem ? (
-                          <div className="opacity-80 bg-sidebar-accent rounded-md p-2">
-                              <div className="flex items-center gap-2">
-                                  {activeItem.type === 'folder' ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                                  <span>{activeItem.name}</span>
-                              </div>
-                          </div>
-                      ) : null}
-                  </DragOverlay>
-              </DndContext>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                    {activeItem ? (
+                        <div className="opacity-80 bg-sidebar-accent rounded-md p-2">
+                            <div className="flex items-center gap-2">
+                                {activeItem.type === 'folder' ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                                <span>{activeItem.name}</span>
+                            </div>
+                        </div>
+                    ) : null}
+                </DragOverlay>
+            </DndContext>
+          </SidebarGroupContent>
+        </SidebarGroup>
         </SmoothScrollContainer>
 
         {/* Fixed Shared with me section at bottom */}
@@ -612,12 +612,12 @@ export function AppSidebar({
                                     className="h-auto py-2.5 items-start"
                                     tooltip={`${page.title} • ${page.workspaceName}`}
                                 >
-                                <Link 
-                                    href={`/dashboard/${page.workspaceId}/${page.id}`} 
-                                    className="flex items-center gap-2"
-                                    onMouseEnter={() => prefetchPage(page.id)}
+                                    <Link 
+                                        href={`/dashboard/${page.workspaceId}/${page.id}`} 
+                                        className="flex items-center gap-2"
+                                        onMouseEnter={() => prefetchPage(page.id)}
                                     onClick={handlePageClick}
-                                >
+                                    >
                                         <FileText className="h-4 w-4 shrink-0 mt-0.5" />
                                         <div className="flex flex-col gap-0.5 overflow-hidden">
                                             <span className="truncate font-medium leading-none">{page.title}</span>
