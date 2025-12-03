@@ -677,6 +677,72 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, [showToast]);
 
+  // Disable spellcheck on all contenteditable elements in the editor
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const disableSpellcheck = () => {
+      // Find all contenteditable elements - check multiple selectors
+      const editorElement = document.querySelector('.bn-editor');
+      const proseMirrorElement = document.querySelector('.ProseMirror');
+      
+      // Check both .bn-editor and .ProseMirror containers
+      const containers = [editorElement, proseMirrorElement].filter(Boolean) as Element[];
+      
+      containers.forEach((container) => {
+        // Find all contenteditable elements
+        const contenteditables = container.querySelectorAll('[contenteditable="true"], [contenteditable=""]');
+        contenteditables.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          htmlEl.setAttribute('spellcheck', 'false');
+          // Also set the property directly (some browsers need this)
+          htmlEl.spellcheck = false;
+        });
+      });
+    };
+
+    // Run immediately
+    disableSpellcheck();
+
+    // Set up MutationObserver to catch dynamically added elements
+    const observer = new MutationObserver(() => {
+      disableSpellcheck();
+    });
+
+    // Observe the entire document body to catch any editor elements
+    const editorElement = document.querySelector('.bn-editor');
+    if (editorElement) {
+      observer.observe(editorElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['contenteditable', 'spellcheck'],
+      });
+    }
+
+    // Also set up a periodic check as a backup (every 500ms)
+    const intervalId = setInterval(() => {
+      disableSpellcheck();
+    }, 500);
+
+    // Also disable spellcheck when elements receive focus
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.contentEditable === 'true' || target.hasAttribute('contenteditable'))) {
+        target.setAttribute('spellcheck', 'false');
+        target.spellcheck = false;
+      }
+    };
+
+    document.addEventListener('focusin', handleFocus, true);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      document.removeEventListener('focusin', handleFocus, true);
+    };
+  }, [editor, isReady]);
+
   // Add action buttons to code blocks using CSS approach
   useEffect(() => {
     if (!editor) return;
@@ -920,6 +986,7 @@ function BlockNoteEditorInner({
           <Input
             value={title}
             onChange={handleTitleChange}
+            spellCheck={false}
             className="font-serif font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
             placeholder="Untitled"
             style={{ fontFamily: 'var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif', fontSize: '4.5rem', fontWeight: 700 }}
