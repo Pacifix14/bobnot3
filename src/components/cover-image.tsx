@@ -120,7 +120,7 @@ export function CoverImage({ url, editable, onUpdate, className, onClick }: Cove
         hasNoImage && "bg-muted border-muted-foreground/20",
         hasNoImage && editable && !isUploading && "hover:border-primary/50",
         url && "border-transparent bg-background",
-        (onClick || editable) && "cursor-pointer",
+        (onClick ?? editable) && "cursor-pointer",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}

@@ -36,12 +36,13 @@ function getErrorMessage(error: unknown): string {
             }
             // Check for form errors
             if (zodError.formErrors && zodError.formErrors.length > 0) {
-                return zodError.formErrors[0];
+                const firstError = zodError.formErrors[0];
+                return firstError ?? "Please enter a valid email address";
             }
         }
 
         // Map TRPC error codes to user-friendly messages
-        const code = trpcError.data?.code || trpcError.code;
+        const code = trpcError.data?.code ?? trpcError.code;
         const message = trpcError.message;
 
         switch (code) {
@@ -53,7 +54,7 @@ function getErrorMessage(error: unknown): string {
                 if (message?.includes("Owner is already")) {
                     return "The workspace owner is already a collaborator";
                 }
-                return message || "Invalid request. Please try again.";
+                return message ?? "Invalid request. Please try again.";
             
             case "NOT_FOUND":
                 if (message?.includes("User with this email")) {
@@ -62,13 +63,13 @@ function getErrorMessage(error: unknown): string {
                 if (message?.includes("Page not found")) {
                     return "Page not found. It may have been deleted.";
                 }
-                return message || "Resource not found.";
+                return message ?? "Resource not found.";
             
             case "FORBIDDEN":
                 if (message?.includes("Only the owner can")) {
                     return "Only the workspace owner can manage collaborators";
                 }
-                return message || "You don't have permission to perform this action.";
+                return message ?? "You don't have permission to perform this action.";
             
             case "UNAUTHORIZED":
                 return "Please sign in to continue.";
