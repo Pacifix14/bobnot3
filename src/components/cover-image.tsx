@@ -12,9 +12,10 @@ interface CoverImageProps {
   editable: boolean;
   onUpdate: (url: string | null) => void;
   className?: string;
+  onClick?: () => void; // Optional click handler for non-editable instances
 }
 
-export function CoverImage({ url, editable, onUpdate, className }: CoverImageProps) {
+export function CoverImage({ url, editable, onUpdate, className, onClick }: CoverImageProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,24 +79,48 @@ export function CoverImage({ url, editable, onUpdate, className }: CoverImagePro
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) void handleUpload(file);
+    if (file && editable && !isUploading) {
+      void handleUpload(file);
+    }
+    // Reset the input value so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const removeCover = () => {
     onUpdate(null);
   };
 
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // If there's a custom onClick handler (e.g., to open dialog), use it
+    if (onClick) {
+      onClick();
+      return;
+    }
+    
+    // Otherwise, handle file upload if editable
+    if (!isUploading && fileInputRef.current && editable) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const hasNoImage = !url || url === "";
+
   return (
     <div 
       className={cn(
         "group relative w-full aspect-square rounded-lg shadow-2xl overflow-hidden transition-all border-2 border-dashed",
-        !url && "bg-muted flex items-center justify-center border-muted-foreground/20 hover:border-primary/50 cursor-pointer",
+        hasNoImage && "bg-muted border-muted-foreground/20",
+        hasNoImage && editable && !isUploading && "hover:border-primary/50",
         url && "border-transparent bg-background",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => !url && editable && fileInputRef.current?.click()}
     >
       {url ? (
         <>
@@ -133,16 +158,23 @@ export function CoverImage({ url, editable, onUpdate, className }: CoverImagePro
           )}
         </>
       ) : (
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          {isUploading ? (
-            <Loader2 className="w-8 h-8 animate-spin" />
-          ) : (
-            <>
-              <ImageIcon className="w-8 h-8 opacity-50" />
-              <span className="text-sm font-medium">Add Cover</span>
-            </>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+          className="w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg"
+        >
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            {isUploading ? (
+              <Loader2 className="w-8 h-8 animate-spin" />
+            ) : (
+              <>
+                <ImageIcon className="w-8 h-8 opacity-50" />
+                <span className="text-sm font-medium">Add Cover</span>
+              </>
+            )}
+          </div>
+        </button>
       )}
       
       <input 
@@ -151,7 +183,6 @@ export function CoverImage({ url, editable, onUpdate, className }: CoverImagePro
         className="hidden" 
         accept="image/*" 
         onChange={onFileChange}
-        disabled={!editable || isUploading}
       />
     </div>
   );

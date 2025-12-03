@@ -910,6 +910,7 @@ function BlockNoteEditorInner({
               url={coverImage}
               editable={false} // Read-only in main view
               onUpdate={() => { /* read-only */ }}
+              onClick={!coverImage ? () => setIsEditDialogOpen(true) : undefined}
             />
         </div>
 
@@ -941,13 +942,14 @@ function BlockNoteEditorInner({
                  <div className="space-y-6 py-4">
                    <div className="flex flex-col gap-2">
                      <label className="text-sm font-medium">Cover Image</label>
-                     <div className="w-40 h-40 mx-auto">
-                       <CoverImage 
-                         url={coverImage} 
-                         editable={true} 
-                         onUpdate={handleCoverUpdate} 
-                       />
-                     </div>
+                    <div className="w-40 h-40 mx-auto">
+                      <CoverImage 
+                        key="edit-dialog-cover"
+                        url={coverImage} 
+                        editable={true} 
+                        onUpdate={handleCoverUpdate} 
+                      />
+                    </div>
                    </div>
                    <div className="flex flex-col gap-2">
                      <label className="text-sm font-medium">Title</label>
