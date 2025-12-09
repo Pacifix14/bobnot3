@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/components/toast-provider";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import { LiveblocksProvider } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
@@ -17,6 +16,7 @@ import { CoverImage } from "@/components/cover-image";
 import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { setPageStatus } from "@/lib/page-status-ref";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -24,11 +24,9 @@ import "./editor-styles";
 
 // Memoized Editor Component to prevent re-renders
 const BlockNoteEditor = memo(function BlockNoteEditor({ 
-  pageId, 
-  onStatusChange 
+  pageId
 }: { 
-  pageId: string, 
-  onStatusChange: (status: "saved" | "saving" | "unsaved") => void 
+  pageId: string
 }) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -49,19 +47,19 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToDatabase = useCallback(async (content: Block[]) => {
-    onStatusChange("saving");
+    setPageStatus("saving");
     try {
       await fetch(`/api/pages/${pageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });
-      onStatusChange("saved");
+      setPageStatus("saved");
     } catch (error) {
       console.error("Failed to save content", error);
-      onStatusChange("unsaved");
+      setPageStatus("unsaved");
     }
-  }, [pageId, onStatusChange]);
+  }, [pageId]);
 
   // Track toggle list content to prevent it from moving when Enter is pressed
   const toggleListContentRef = useRef<{ blockId: string; content: Block["content"] } | null>(null);
@@ -103,7 +101,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         }
       }
       
-      onStatusChange("unsaved");
+      setPageStatus("unsaved");
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -120,7 +118,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [editor, saveToDatabase, onStatusChange]);
+  }, [editor, saveToDatabase]);
 
   // Enable bulk indentation for multiple selected bullet points
   useEffect(() => {
@@ -677,6 +675,72 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, [showToast]);
 
+  // Disable spellcheck on all contenteditable elements in the editor
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const disableSpellcheck = () => {
+      // Find all contenteditable elements - check multiple selectors
+      const editorElement = document.querySelector('.bn-editor');
+      const proseMirrorElement = document.querySelector('.ProseMirror');
+      
+      // Check both .bn-editor and .ProseMirror containers
+      const containers = [editorElement, proseMirrorElement].filter(Boolean) as Element[];
+      
+      containers.forEach((container) => {
+        // Find all contenteditable elements
+        const contenteditables = container.querySelectorAll('[contenteditable="true"], [contenteditable=""]');
+        contenteditables.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          htmlEl.setAttribute('spellcheck', 'false');
+          // Also set the property directly (some browsers need this)
+          htmlEl.spellcheck = false;
+        });
+      });
+    };
+
+    // Run immediately
+    disableSpellcheck();
+
+    // Set up MutationObserver to catch dynamically added elements
+    const observer = new MutationObserver(() => {
+      disableSpellcheck();
+    });
+
+    // Observe the entire document body to catch any editor elements
+    const editorElement = document.querySelector('.bn-editor');
+    if (editorElement) {
+      observer.observe(editorElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['contenteditable', 'spellcheck'],
+      });
+    }
+
+    // Also set up a periodic check as a backup (every 500ms)
+    const intervalId = setInterval(() => {
+      disableSpellcheck();
+    }, 500);
+
+    // Also disable spellcheck when elements receive focus
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.contentEditable === 'true' || target.hasAttribute('contenteditable'))) {
+        target.setAttribute('spellcheck', 'false');
+        target.spellcheck = false;
+      }
+    };
+
+    document.addEventListener('focusin', handleFocus, true);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      document.removeEventListener('focusin', handleFocus, true);
+    };
+  }, [editor, isReady]);
+
   // Add action buttons to code blocks using CSS approach
   useEffect(() => {
     if (!editor) return;
@@ -793,43 +857,37 @@ function BlockNoteEditorInner({
   const [title, setTitle] = useState(initialTitle);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [bannerImage, setBannerImage] = useState(initialBannerImage);
-  const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
-  
-  // Stable callback for status updates
-  const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
-    setStatus(newStatus);
-  }, []);
 
   const updateTitle = api.page.updateTitle.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       void utils.page.getPage.invalidate({ pageId });
       void utils.workspace.getWorkspace.invalidate();
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save title", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
   const updateCoverImage = api.page.updateCoverImage.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save cover image", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
@@ -840,7 +898,7 @@ function BlockNoteEditorInner({
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    setStatus("unsaved");
+    setPageStatus("unsaved");
     
     if (saveTitleTimeoutRef.current) {
       clearTimeout(saveTitleTimeoutRef.current);
@@ -857,15 +915,15 @@ function BlockNoteEditorInner({
 
   const updateBannerImage = api.page.updateBannerImage.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save banner image", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
@@ -895,13 +953,6 @@ function BlockNoteEditorInner({
         </div>
       )}
 
-      {/* Saved Status - Top Right */}
-      <div className="absolute top-4 right-6 text-xs text-muted-foreground z-10">
-        {status === "saving" && <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
-        {status === "saved" && "Saved"}
-        {status === "unsaved" && "Unsaved"}
-      </div>
-
       {/* New Header Layout */}
       <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
         {/* Cover Image - Smaller size (w-40 = 10rem) */}
@@ -920,6 +971,7 @@ function BlockNoteEditorInner({
           <Input
             value={title}
             onChange={handleTitleChange}
+            spellCheck={false}
             className="font-serif font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
             placeholder="Untitled"
             style={{ fontFamily: 'var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif', fontSize: '4.5rem', fontWeight: 700 }}
@@ -996,7 +1048,7 @@ function BlockNoteEditorInner({
       </div>
 
       <div className="overflow-hidden">
-        <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
+        <BlockNoteEditor pageId={pageId} />
       </div>
     </div>
   );

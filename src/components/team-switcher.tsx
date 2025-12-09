@@ -57,9 +57,9 @@ export function TeamSwitcher({
                 </span>
                 <span className="truncate text-sm text-muted-foreground">{activeTeam.plan}</span>
               </div>
-              <MotionChevronsUpDown 
+              <MotionChevronsUpDown
                 layoutId="workspace-switcher-chevron"
-                className="ml-auto size-4" 
+                className="ml-auto size-4"
               />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
