@@ -84,7 +84,7 @@
     "lenis": "^1.3.15",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.554.0",
-    "next": "^15.2.3",
+    "next": "15.2.6",
     "next-auth": "5.0.0-beta.30",
     "next-themes": "^0.4.6",
     "ogl": "^1.0.11",
