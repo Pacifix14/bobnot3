@@ -241,19 +241,35 @@ function TreeItemRenderer({
       }
   };
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!isOwner) return;
-    setPointerStartPos({ x: e.clientX, y: e.clientY });
-    const timer = setTimeout(() => {
-      if (onReorderModeChange) {
-        onReorderModeChange(item.id, true);
-      }
-    }, 500); // 500ms long press
-    setLongPressTimer(timer);
-  };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (pointerStartPos && (Math.abs(e.clientX - pointerStartPos.x) > 5 || Math.abs(e.clientY - pointerStartPos.y) > 5)) {
+    // Store initial pointer position
+    setPointerStartPos({ x: e.clientX, y: e.clientY });
+
+    // Only start long press timer if not already in reorder mode
+    if (!isInReorderMode) {
+      const timer = setTimeout(() => {
+        onReorderModeChange?.(item.id, true);
+        // Haptic feedback when reorder mode activates
+        if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+          navigator.vibrate([50, 30, 50]);
+        }
+      }, 500); // 500ms long press
+      setLongPressTimer(timer);
+    }
+  }, [isOwner, isInReorderMode, item.id, onReorderModeChange]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isOwner || !pointerStartPos) return;
+
+    // Calculate distance moved
+    const deltaX = Math.abs(e.clientX - pointerStartPos.x);
+    const deltaY = Math.abs(e.clientY - pointerStartPos.y);
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    // If user moved more than 10px, cancel long press (they're scrolling)
+    if (distance > 10) {
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         setLongPressTimer(null);
@@ -263,7 +279,7 @@ function TreeItemRenderer({
       }
       setPointerStartPos(null);
     }
-  };
+  }, [isOwner, pointerStartPos, longPressTimer, isInReorderMode, item.id, onReorderModeChange]);
 
   const handlePointerUp = useCallback(() => {
     if (longPressTimer) {
@@ -307,10 +323,22 @@ function TreeItemRenderer({
 
   const enhancedListeners = isOwner ? {
       ...listeners,
-      onPointerDown: handlePointerDown,
-      onPointerMove: handlePointerMove,
-      onPointerUp: handlePointerUp,
-      onPointerCancel: handlePointerCancel,
+      onPointerDown: (e: React.PointerEvent) => {
+        handlePointerDown(e);
+        listeners?.onPointerDown?.(e);
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        handlePointerMove(e);
+        listeners?.onPointerMove?.(e);
+      },
+      onPointerUp: (e: React.PointerEvent) => {
+        handlePointerUp();
+        listeners?.onPointerUp?.(e);
+      },
+      onPointerCancel: (e: React.PointerEvent) => {
+        handlePointerCancel();
+        listeners?.onPointerCancel?.(e);
+      },
   } : {};
 
   const style = {
@@ -322,19 +350,18 @@ function TreeItemRenderer({
 
   if (item.type === "folder") {
     return (
-      <Collapsible
-        key={item.id}
-        asChild
-        defaultOpen={false}
-        className="group/collapsible"
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...(isOwner ? enhancedListeners : {})}
+        className={cn(
+          "group/item",
+          isInReorderMode && "animate-shake"
+        )}
       >
-        <SidebarMenuItem 
-            ref={setNodeRef} 
-            style={style} 
-            {...attributes} 
-            {...(isOwner ? enhancedListeners : {})}
-            className={cn(isInReorderMode && "animate-shake")}
-        >
+        <Collapsible defaultOpen className="group/collapsible">
+            <SidebarMenuItem>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton tooltip={item.name} className="group/row relative overflow-hidden">
                 {isRenaming ? (
@@ -419,6 +446,7 @@ function TreeItemRenderer({
         </Dialog>
         </SidebarMenuItem>
       </Collapsible>
+      </div>
     );
   }
 
