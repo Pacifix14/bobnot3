@@ -2,6 +2,7 @@ import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebarV2 } from "@/components/app-sidebar-v2";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Inter } from "next/font/google";
 
@@ -35,9 +36,15 @@ export default async function WorkspaceLayout({
   }
 
   // Fetch user's own workspaces first
+  // Fetch user's own workspaces and memberships
   const userWorkspaces = await db.workspace.findMany({
-      where: { ownerId: session.user.id },
-      select: { id: true, name: true }
+      where: { 
+        OR: [
+          { ownerId: session.user.id },
+          { members: { some: { id: session.user.id } } }
+        ]
+      },
+      select: { id: true, name: true, ownerId: true }
   });
 
   const isUrlOwner = urlWorkspace.ownerId === session.user.id;
@@ -168,6 +175,36 @@ export default async function WorkspaceLayout({
       workspaceName: p.workspace.name
   }));
 
+  // Fetch folders shared with me (excluding those in context workspace)
+  const otherSharedFolders = await db.folder.findMany({
+      where: {
+          collaborators: { some: { id: session.user.id } },
+          workspaceId: { not: contextWorkspaceId }
+      },
+      include: {
+          workspace: true,
+          pages: {
+            orderBy: { order: 'asc' }
+          }
+      },
+      orderBy: { updatedAt: 'desc' }
+  });
+
+  const formattedSharedFolders = otherSharedFolders.map(f => ({
+      id: f.id,
+      name: f.name,
+      workspaceId: f.workspaceId,
+      workspaceName: f.workspace.name,
+      // We might need to recursively format children if we want deep nesting in shared view,
+      // but for now let's keep it simple: just the shared folder itself.
+      // If the user has access to a folder, they likely have access to its children too,
+      // but the `findMany` above only gets folders explicitly shared with them OR we need a recursive query.
+      // For MVP, let's assume "Shared with me" lists the *root* of the share.
+      // If I share Folder A, and it has Child B, Child B isn't explicitly shared, but accessible via A.
+      // The Sidebar component will need to handle fetching children of shared folders if they aren't loaded.
+      // For now, let's just pass the folder info.
+  }));
+
   const user = {
     name: session.user.name ?? "User",
     email: session.user.email ?? "user@example.com",
@@ -176,7 +213,7 @@ export default async function WorkspaceLayout({
 
   const ownedWorkspaceParams = userWorkspaces.map(w => ({
       name: w.name,
-      plan: "Enterprise",
+      plan: w.ownerId === session.user.id ? "Owner" : "Member",
       id: w.id
   }));
 
@@ -190,19 +227,42 @@ export default async function WorkspaceLayout({
       return 0;
   });
 
-  return (
-    <div className={`${inter.variable} font-sans`}>
+  // Fetch user settings
+  const userSettings = await db.userSettings.findUnique({
+    where: { userId: session.user.id },
+  });
+
+  const useSidebarV2 = userSettings?.sidebarVersion === "v2";
+  const backgroundImage = userSettings?.backgroundImage ?? null;
+
+   return (
+    <div
+      className={`${inter.variable} font-sans min-h-screen w-full bg-cover bg-center bg-no-repeat`}
+      style={{ backgroundImage: backgroundImage ? `url("${backgroundImage}")` : undefined }}
+    >
       <SidebarProvider>
-        <AppSidebar 
-          workspaceId={contextWorkspaceId} 
-          items={treeItems} 
-          user={user}
-          workspaces={allWorkspaces}
-          isOwner={isContextOwner}
-          sharedPages={formattedSharedPages}
-        />
-        <SidebarInset>
-          <div className="flex-1">
+        {useSidebarV2 ? (
+           <AppSidebarV2
+              workspaceId={contextWorkspaceId}
+              items={treeItems}
+              user={user}
+              workspaces={allWorkspaces}
+              isOwner={isContextOwner}
+              sharedPages={formattedSharedPages}
+              sharedFolders={formattedSharedFolders}
+           />
+        ) : (
+          <AppSidebar 
+            workspaceId={contextWorkspaceId} 
+            items={treeItems} 
+            user={user}
+            workspaces={allWorkspaces}
+            isOwner={isContextOwner}
+            sharedPages={formattedSharedPages}
+          />
+        )}
+        <SidebarInset className="bg-transparent">
+          <div className="flex-1 h-full w-full">
             {children}
           </div>
         </SidebarInset>

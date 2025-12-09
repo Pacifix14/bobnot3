@@ -44,15 +44,28 @@ model Session {
 }
 
 model User {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?     @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   workspaces    Workspace[]
-  sharedPages   Page[]      @relation("PageCollaborators")
+  sharedPages   Page[]        @relation("PageCollaborators")
+  memberships   Workspace[]   @relation("WorkspaceMembers")
+  sharedFolders Folder[]      @relation("FolderCollaborators")
+  settings      UserSettings?
+}
+
+model UserSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sidebarVersion  String   @default("v1") // "v1" or "v2"
+  backgroundImage String? // URL or null for no background
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Workspace {
@@ -63,6 +76,7 @@ model Workspace {
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members User[] @relation("WorkspaceMembers")
 
   folders Folder[]
   pages   Page[]
@@ -85,7 +99,8 @@ model Folder {
   parent   Folder?  @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
   children Folder[] @relation("FolderToFolder")
 
-  pages Page[]
+  pages         Page[]
+  collaborators User[] @relation("FolderCollaborators")
 
   order Int @default(0)
 

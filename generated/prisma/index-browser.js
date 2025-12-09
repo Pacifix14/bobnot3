@@ -152,6 +152,15 @@ exports.Prisma.UserScalarFieldEnum = {
   image: 'image'
 };
 
+exports.Prisma.UserSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sidebarVersion: 'sidebarVersion',
+  backgroundImage: 'backgroundImage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.WorkspaceScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -220,6 +229,7 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Session: 'Session',
   User: 'User',
+  UserSettings: 'UserSettings',
   Workspace: 'Workspace',
   Folder: 'Folder',
   Page: 'Page',

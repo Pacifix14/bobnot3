@@ -20,6 +20,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { motion } from "framer-motion"
+
 export function TeamSwitcher({
   teams,
 }: {
@@ -38,6 +40,8 @@ export function TeamSwitcher({
     return null
   }
 
+  const MotionChevronsUpDown = motion.create(ChevronsUpDown)
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -45,18 +49,18 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-transparent data-[state=open]:text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground h-auto py-2"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-lg leading-tight">
                 <span className="truncate font-semibold font-serif">
                   {activeTeam.name}
                 </span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate text-sm text-muted-foreground">{activeTeam.plan}</span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <MotionChevronsUpDown
+                layoutId="workspace-switcher-chevron"
+                className="ml-auto size-4"
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
