@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,10 @@ export default function SettingsPage() {
   const [backgroundUrl, setBackgroundUrl] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    document.title = "Settings | bobnot3";
+  }, []);
 
   if (isLoading) {
     return (

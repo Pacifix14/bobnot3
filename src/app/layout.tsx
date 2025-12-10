@@ -10,7 +10,10 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { SuppressWarnings } from "@/components/suppress-warnings";
 
 export const metadata: Metadata = {
-  title: "bobnot3",
+  title: {
+    default: "bobnot3",
+    template: "%s | bobnot3",
+  },
   description: "Collaborative note-taking workspace",
   icons: [
     { rel: "icon", url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

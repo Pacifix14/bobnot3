@@ -4,8 +4,24 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { FileText, Folder } from "lucide-react";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
+import { type Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ workspaceId: string; folderId: string }>;
+}): Promise<Metadata> {
+  const { folderId } = await params;
+  const folder = await db.folder.findUnique({
+    where: { id: folderId },
+  });
+
+  return {
+    title: folder?.name ?? "Folder",
+  };
+}
 
 export default async function FolderPage({
   params,

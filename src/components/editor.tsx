@@ -940,6 +940,12 @@ function BlockNoteEditorInner({
     };
   }, []);
 
+  // Update document title when page title changes
+  useEffect(() => {
+    const pageTitle = title || "Untitled";
+    document.title = `${pageTitle} | bobnot3`;
+  }, [title]);
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
       {/* Banner Image - Full width at top, behind other content */}
