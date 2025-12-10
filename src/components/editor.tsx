@@ -1234,116 +1234,139 @@ function BlockNoteEditorInner({
   }, [title]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+    <>
       {/* Banner Image - Full width at top, behind other content */}
-      {bannerImage && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
-          <BannerImage
-            url={bannerImage}
-            editable={false}
-            onUpdate={() => { /* read-only */ }}
-          />
-        </div>
-      )}
-
-      {/* New Header Layout */}
-      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
-        {/* Cover Image - Smaller size (w-40 = 10rem) */}
-        <div className="w-40 h-40 flex-shrink-0">
-            <CoverImage
-              url={coverImage}
-              editable={false} // Read-only in main view
+      <div className="relative">
+        {bannerImage && (
+          <div className="w-full h-55 relative">
+            <BannerImage
+              url={bannerImage}
+              editable={false}
               onUpdate={() => { /* read-only */ }}
-              onClick={() => setIsEditDialogOpen(true)}
             />
-        </div>
+          </div>
+        )}
 
-        {/* Content */}
-        <div className="flex flex-col flex-1 min-w-0 pb-4">
-          {/* Title - Inter */}
-          <Input
-            value={title}
-            onChange={handleTitleChange}
-            spellCheck={false}
-            className="font-sans font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
-            placeholder="Untitled"
-            style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif', fontSize: '4.5rem', fontWeight: 700 }}
-          />
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-0.5 pl-2">
-             <ShareDialog pageId={pageId} />
+        {/* Header content overlaying the banner */}
+        <div
+          className="transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          style={{
+            paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+            marginTop: bannerImage ? '-6rem' : '0',
+          }}
+        >
+          <div className="max-w-5xl mx-auto px-4 md:px-8">
+            {/* New Header Layout */}
+            <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pb-6' : 'pt-12 pb-6'}`}>
+              {/* Cover Image - Smaller size (w-40 = 10rem) */}
+              <div className="w-40 h-40 flex-shrink-0">
+                <CoverImage
+                  url={coverImage}
+                  editable={false} // Read-only in main view
+                  onUpdate={() => { /* read-only */ }}
+                  onClick={() => setIsEditDialogOpen(true)}
+                />
+              </div>
 
-             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-               <DialogTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                   <Pencil className="h-6 w-6" />
-                 </Button>
-               </DialogTrigger>
-               <DialogContent>
-                 <DialogHeader>
-                   <DialogTitle>Edit Page Details</DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-6 py-4">
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Cover Image</label>
-                    <div className="w-40 h-40 mx-auto">
-                      <CoverImage 
-                        key="edit-dialog-cover"
-                        url={coverImage} 
-                        editable={true} 
-                        onUpdate={handleCoverUpdate} 
-                      />
-                    </div>
-                   </div>
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Title</label>
-                     <Input 
-                       value={title} 
-                       onChange={handleTitleChange}
-                       className="font-serif"
-                     />
-                   </div>
-                 </div>
-               </DialogContent>
-             </Dialog>
+              {/* Content */}
+              <div className="flex flex-col flex-1 min-w-0 pb-4">
+                {/* Title - Inter */}
+                <Input
+                  value={title}
+                  onChange={handleTitleChange}
+                  spellCheck={false}
+                  className="font-sans font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
+                  placeholder="Untitled"
+                  style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif', fontSize: '4.5rem', fontWeight: 700 }}
+                />
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-0.5 pl-2">
+                  <ShareDialog pageId={pageId} />
 
-             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-               <Download className="h-6 w-6" />
-             </Button>
+                  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Pencil className="h-6 w-6" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Page Details</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-6 py-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Cover Image</label>
+                          <div className="w-40 h-40 mx-auto">
+                            <CoverImage 
+                              key="edit-dialog-cover"
+                              url={coverImage} 
+                              editable={true} 
+                              onUpdate={handleCoverUpdate} 
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Title</label>
+                          <Input 
+                            value={title} 
+                            onChange={handleTitleChange}
+                            className="font-serif"
+                          />
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-             <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
-               <DialogTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                   <ImageIcon className="h-6 w-6" />
-                 </Button>
-               </DialogTrigger>
-               <DialogContent>
-                 <DialogHeader>
-                   <DialogTitle>Edit Banner Image</DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4 py-4">
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Banner Image</label>
-                     <div className="h-64">
-                       <BannerImage
-                         url={bannerImage}
-                         editable={true}
-                         onUpdate={handleBannerUpdate}
-                       />
-                     </div>
-                   </div>
-                 </div>
-               </DialogContent>
-             </Dialog>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <Download className="h-6 w-6" />
+                  </Button>
+
+                  <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <ImageIcon className="h-6 w-6" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Banner Image</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Banner Image</label>
+                          <div className="h-64">
+                            <BannerImage
+                              url={bannerImage}
+                              editable={true}
+                              onUpdate={handleBannerUpdate}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-hidden">
-        <BlockNoteEditor pageId={pageId} />
+      {/* Editor content with sidebar padding */}
+      <div
+        className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        style={{
+          paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+        }}
+      >
+        <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+          <div className="overflow-hidden">
+            <BlockNoteEditor pageId={pageId} />
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
