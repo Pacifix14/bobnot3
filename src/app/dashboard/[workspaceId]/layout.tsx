@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppSidebarV2 } from "@/components/app-sidebar-v2";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarV2ContentWrapper } from "@/components/sidebar-v2-content-wrapper";
 import { Inter } from "next/font/google";
 
 export const dynamic = 'force-dynamic';
@@ -252,9 +253,9 @@ export default async function WorkspaceLayout({
               sharedFolders={formattedSharedFolders}
            />
         ) : (
-          <AppSidebar 
-            workspaceId={contextWorkspaceId} 
-            items={treeItems} 
+          <AppSidebar
+            workspaceId={contextWorkspaceId}
+            items={treeItems}
             user={user}
             workspaces={allWorkspaces}
             isOwner={isContextOwner}
@@ -262,9 +263,15 @@ export default async function WorkspaceLayout({
           />
         )}
         <SidebarInset className="bg-transparent">
-          <div className="flex-1 h-full w-full">
-            {children}
-          </div>
+          {useSidebarV2 ? (
+            <SidebarV2ContentWrapper>
+              {children}
+            </SidebarV2ContentWrapper>
+          ) : (
+            <div className="flex-1 h-full w-full">
+              {children}
+            </div>
+          )}
         </SidebarInset>
       </SidebarProvider>
     </div>

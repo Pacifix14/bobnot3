@@ -17,6 +17,7 @@ import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { setPageStatus } from "@/lib/page-status-ref";
+import { useSidebar } from "@/components/ui/sidebar";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -1139,6 +1140,7 @@ function BlockNoteEditorInner({
 }) {
   const router = useRouter();
   const utils = api.useUtils();
+  const { open } = useSidebar();
   const [title, setTitle] = useState(initialTitle);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [bannerImage, setBannerImage] = useState(initialBannerImage);
