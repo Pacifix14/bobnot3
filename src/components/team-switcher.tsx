@@ -49,17 +49,17 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-transparent data-[state=open]:text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground h-auto py-2"
+              className="data-[state=open]:bg-transparent data-[state=open]:text-sidebar-foreground hover:bg-transparent hover:text-sidebar-foreground h-auto py-2 justify-between w-full text-base!"
             >
-              <div className="grid flex-1 text-left text-lg leading-tight">
-                <span className="truncate font-semibold font-sans" style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif' }}>
+              <div className="grid text-left leading-tight">
+                <span className="truncate font-semibold font-sans" style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif', fontSize: '1.5rem', lineHeight: '1.75rem' }}>
                   {activeTeam.name}
                 </span>
                 <span className="truncate text-sm text-muted-foreground">{activeTeam.plan}</span>
               </div>
               <MotionChevronsUpDown
                 layoutId="workspace-switcher-chevron"
-                className="ml-auto size-4"
+                className="size-4 shrink-0"
               />
             </SidebarMenuButton>
           </DropdownMenuTrigger>

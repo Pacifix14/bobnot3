@@ -491,9 +491,9 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="h-16 min-h-16">
-        <div className="flex items-center gap-2 h-full">
+        <div className="flex items-center gap-2 h-full w-full">
           <SidebarTrigger className="shrink-0" />
-          <div className="transition-all duration-300 ease-in-out opacity-100 translate-x-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:translate-x-[-8px] group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:overflow-hidden">
+          <div className="flex-1 transition-all duration-300 ease-in-out opacity-100 translate-x-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:translate-x-[-8px] group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:overflow-hidden">
             <TeamSwitcher teams={workspacesWithIcons} />
           </div>
         </div>
