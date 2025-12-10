@@ -956,6 +956,36 @@ div[data-id="blocknote-editor"] {
 .bn-editor [data-content-type="checkListItem"] {
   position: relative;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Fix checkbox input alignment */
+.bn-editor [data-content-type="checkListItem"] input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  align-self: center;
+  vertical-align: middle;
+}
+
+/* Fix checkbox text alignment - adjust paragraph to align with checkbox */
+.bn-editor [data-content-type="checkListItem"] .bn-inline-content {
+  display: inline-block;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  margin-top: -0.1rem; /* Slight upward adjustment to align with checkbox */
+}
+
+/* Adjust paragraph inside inline content for better alignment */
+.bn-editor [data-content-type="checkListItem"] .bn-inline-content p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  display: inline;
+  vertical-align: baseline;
 }
 
 /* When checkbox is checked, grey out the text content with strikethrough */
