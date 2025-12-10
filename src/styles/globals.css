@@ -658,14 +658,14 @@ div[data-id="blocknote-editor"] {
   left: 0 !important;
   right: 0 !important;
   height: 2.75rem !important;
-  background-color: var(--muted) !important;
-  border-bottom: 1px solid var(--border) !important;
+  background-color: hsl(var(--muted)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
   border-radius: 8px 8px 0 0 !important;
   padding: 0.875rem 1rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  color: var(--muted-foreground) !important;
+  color: hsl(var(--muted-foreground)) !important;
   font-size: 0.75rem !important;
   font-weight: 500 !important;
   text-transform: lowercase !important;
