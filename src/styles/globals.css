@@ -1,86 +1,98 @@
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
-@plugin "@tailwindcss/typography";
+@import "./glass-sidebar.css";
+
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --font-sans: "Cascadia Code", "Cascadia Mono", ui-monospace, "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
-  --font-serif: var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
 @theme inline {
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Crimson Pro", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
 :root {
-  --radius: 0.5rem;
-
-  /* "Resend" Vibe: Cool, crisp, technical but approachable */
-  /* Light Mode: Slightly cool white, not stark */
-  --background: oklch(0.985 0.002 240);
-  --foreground: oklch(0.12 0.01 240);
-
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.12 0.01 240);
-
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.01 240);
-
-  /* Primary: Deep Obsidian/Midnight */
-  --primary: oklch(0.12 0.02 240);
-  --primary-foreground: oklch(0.98 0.002 240);
-
-  /* Secondary: Subtle cool gray */
-  --secondary: oklch(0.96 0.005 240);
-  --secondary-foreground: oklch(0.12 0.01 240);
-
-  --muted: oklch(0.96 0.005 240);
-  --muted-foreground: oklch(0.45 0.02 240);
-
-  --accent: oklch(0.95 0.01 240);
-  --accent-foreground: oklch(0.12 0.01 240);
-
-  --destructive: oklch(0.6 0.15 25);
-  --destructive-foreground: oklch(0.98 0.01 85);
-
-  --border: oklch(0.92 0.005 240);
-  --input: oklch(0.92 0.005 240);
-  --ring: oklch(0.12 0.02 240);
+  /* "Clean Intellectual" Aesthetic (Anthropic/Resend inspired) */
+  
+  /* Base: Warm Stone / Paper */
+  --background: 60 5% 96%; /* #F5F5F4 - Warm off-white */
+  --foreground: 240 4% 16%; /* #27272A - Soft Black */
+  
+  /* Cards: Pure White with subtle borders */
+  --card: 0 0% 100%;
+  --card-foreground: 240 4% 16%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 4% 16%;
+  
+  /* Primary: Deep Forest / Technical Black */
+  --primary: 240 4% 10%; 
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary: Soft Beige/Stone */
+  --secondary: 40 6% 90%; 
+  --secondary-foreground: 240 4% 16%;
+  
+  --muted: 60 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  
+  /* Accent: Muted Clay/Orange (Subtle highlights) */
+  --accent: 25 20% 90%; 
+  --accent-foreground: 25 70% 45%; /* Burnt Orange Text */
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  
+  --border: 240 6% 90%; /* Very subtle borders */
+  --input: 240 6% 90%;
+  --ring: 240 4% 10%;
+  
+  --radius: 0.5rem; /* Standard, friendly radius */
 
   --chart-1: oklch(0.65 0.15 50);
   --chart-2: oklch(0.6 0.1 150);
@@ -88,14 +100,14 @@
   --chart-4: oklch(0.8 0.1 80);
   --chart-5: oklch(0.7 0.15 30);
 
-  --sidebar: oklch(0.98 0.002 240);
-  --sidebar-foreground: oklch(0.12 0.01 240);
-  --sidebar-primary: oklch(0.12 0.02 240);
-  --sidebar-primary-foreground: oklch(0.98 0.002 240);
-  --sidebar-accent: oklch(0.95 0.01 240);
-  --sidebar-accent-foreground: oklch(0.12 0.01 240);
-  --sidebar-border: oklch(0.92 0.005 240);
-  --sidebar-ring: oklch(0.12 0.02 240);
+  --sidebar: 60 5% 96%;
+  --sidebar-foreground: 240 4% 16%;
+  --sidebar-primary: 240 4% 10%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 25 20% 90%;
+  --sidebar-accent-foreground: 240 4% 16%;
+  --sidebar-border: 240 6% 90%;
+  --sidebar-ring: 240 4% 10%;
 }
 
 .dark {
@@ -155,25 +167,20 @@
     -moz-osx-font-smoothing: grayscale;
     /* Disable default smooth scroll when using Lenis */
     scroll-behavior: auto;
+    font-size: 1.0625rem; /* 17px - slightly larger than default 16px */
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-black/10 selection:text-black;
     font-weight: 300;
     overflow-x: hidden;
     /* Disable default smooth scroll when using Lenis */
     scroll-behavior: auto;
-    /* Subtle dot grid pattern with a slight radial fade */
-    background-image:
-      radial-gradient(circle at center, transparent 0%, var(--color-background) 100%),
-      radial-gradient(var(--color-border) 1px, transparent 1px);
-    background-size: 100% 100%, 24px 24px;
-    background-position: center, 0 0;
-    background-attachment: fixed;
   }
 
   /* Optimize scroll performance with hardware acceleration */
-  html, body {
+  html,
+  body {
     -webkit-overflow-scrolling: touch;
     will-change: scroll-position;
     /* Enable momentum scrolling on iOS */
@@ -182,6 +189,7 @@
 
   /* Smooth scrolling for landing page (handled by Lenis) */
   @media (prefers-reduced-motion: no-preference) {
+
     html.lenis,
     html.lenis body {
       height: auto;
@@ -209,7 +217,7 @@
     html {
       scroll-behavior: auto;
     }
-    
+
     * {
       scroll-behavior: auto;
       animation-duration: 0.01ms !important;
@@ -224,7 +232,28 @@
   h4,
   h5,
   h6 {
-    @apply font-serif tracking-tight;
+    @apply font-serif tracking-tight font-medium;
+  }
+
+  /* Sidebar uses Inter font with increased weight and smaller size */
+  [data-sidebar],
+  [data-sidebar] *,
+  .sidebar,
+  .sidebar * {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.8125rem !important; /* 13px - smaller than default */
+  }
+
+  /* Sidebar menu items specifically */
+  [data-sidebar] button,
+  [data-sidebar] a,
+  [data-sidebar] span,
+  .sidebar button,
+  .sidebar a,
+  .sidebar span {
+    font-weight: 500 !important;
+    font-size: 0.8125rem !important;
   }
 }
 
@@ -235,16 +264,50 @@ div[data-id="blocknote-editor"] {
   background-color: transparent !important;
 }
 
-/* Explicitly force text color to match foreground if needed */
+/* Explicitly force text color to match foreground */
 .bn-editor,
 .bn-editor * {
   color: var(--foreground);
 }
 
+/* Ensure ProseMirror editor content uses Crimson Pro with larger size and dark grey color */
+.bn-editor .ProseMirror,
+.bn-editor .bn-block-content,
+.bn-editor .bn-inline-content,
+.bn-editor .ProseMirror p,
+.bn-editor .bn-block-content p,
+.bn-editor .bn-inline-content p,
+.bn-editor .ProseMirror h1,
+.bn-editor .bn-block-content h1,
+.bn-editor .bn-inline-content h1,
+.bn-editor .ProseMirror h2,
+.bn-editor .bn-block-content h2,
+.bn-editor .bn-inline-content h2,
+.bn-editor .ProseMirror h3,
+.bn-editor .bn-block-content h3,
+.bn-editor .bn-inline-content h3,
+.bn-editor .ProseMirror li,
+.bn-editor .bn-block-content li,
+.bn-editor .bn-inline-content li {
+  font-family: var(--font-crimson-pro), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+  font-size: 18px !important;
+  line-height: 1.7 !important;
+  color: oklch(0.35 0.01 240) !important; /* Dark grey instead of black */
+}
+
+/* Exclude buttons and UI elements from dark grey color */
+.bn-editor button,
+.bn-editor .bn-button,
+.bn-editor [role="button"],
+.bn-editor .copy-btn {
+  color: var(--foreground) !important;
+}
+
 /* Hyperlink styling for BlockNote editor */
 .bn-editor a,
 .bn-editor a[href] {
-  color: #2563eb !important; /* Blue-600 for light mode */
+  color: #2563eb !important;
+  /* Blue-600 for light mode */
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
   transition: all 0.2s ease !important;
@@ -253,36 +316,42 @@ div[data-id="blocknote-editor"] {
 
 .bn-editor a:hover,
 .bn-editor a[href]:hover {
-  color: #1d4ed8 !important; /* Blue-700 for hover in light mode */
+  color: #1d4ed8 !important;
+  /* Blue-700 for hover in light mode */
   text-decoration: underline !important;
 }
 
 .bn-editor a:visited,
 .bn-editor a[href]:visited {
-  color: #7c3aed !important; /* Purple-600 for visited links in light mode */
+  color: #7c3aed !important;
+  /* Purple-600 for visited links in light mode */
 }
 
 /* Dark mode link styling */
 .dark .bn-editor a,
 .dark .bn-editor a[href] {
-  color: #60a5fa !important; /* Blue-400 for dark mode */
+  color: #60a5fa !important;
+  /* Blue-400 for dark mode */
 }
 
 .dark .bn-editor a:hover,
 .dark .bn-editor a[href]:hover {
-  color: #93c5fd !important; /* Blue-300 for hover in dark mode */
+  color: #93c5fd !important;
+  /* Blue-300 for hover in dark mode */
 }
 
 .dark .bn-editor a:visited,
 .dark .bn-editor a[href]:visited {
-  color: #a78bfa !important; /* Purple-400 for visited links in dark mode */
+  color: #a78bfa !important;
+  /* Purple-400 for visited links in dark mode */
 }
 
 /* BlockNote specific link elements */
 .bn-editor .bn-inline-content a,
 .bn-editor [data-link],
 .bn-editor .ProseMirror a {
-  color: #2563eb !important; /* Blue-600 for light mode */
+  color: #2563eb !important;
+  /* Blue-600 for light mode */
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
   transition: all 0.2s ease !important;
@@ -292,44 +361,51 @@ div[data-id="blocknote-editor"] {
 .bn-editor .bn-inline-content a:hover,
 .bn-editor [data-link]:hover,
 .bn-editor .ProseMirror a:hover {
-  color: #1d4ed8 !important; /* Blue-700 for hover in light mode */
+  color: #1d4ed8 !important;
+  /* Blue-700 for hover in light mode */
 }
 
 /* Dark mode for BlockNote specific elements */
 .dark .bn-editor .bn-inline-content a,
 .dark .bn-editor [data-link],
 .dark .bn-editor .ProseMirror a {
-  color: #60a5fa !important; /* Blue-400 for dark mode */
+  color: #60a5fa !important;
+  /* Blue-400 for dark mode */
 }
 
 .dark .bn-editor .bn-inline-content a:hover,
 .dark .bn-editor [data-link]:hover,
 .dark .bn-editor .ProseMirror a:hover {
-  color: #93c5fd !important; /* Blue-300 for hover in dark mode */
+  color: #93c5fd !important;
+  /* Blue-300 for hover in dark mode */
 }
 
 /* Ensure links are distinguishable in all block types */
 .bn-editor [data-content-type] a,
 .bn-editor .bn-block-content a {
-  color: #2563eb !important; /* Blue-600 for light mode */
+  color: #2563eb !important;
+  /* Blue-600 for light mode */
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
 }
 
 .dark .bn-editor [data-content-type] a,
 .dark .bn-editor .bn-block-content a {
-  color: #60a5fa !important; /* Blue-400 for dark mode */
+  color: #60a5fa !important;
+  /* Blue-400 for dark mode */
 }
 
 /* Override any conflicting styles that might hide link appearance */
 .bn-editor a:not(.bn-button):not(.copy-btn) {
-  color: #2563eb !important; /* Blue-600 for light mode */
+  color: #2563eb !important;
+  /* Blue-600 for light mode */
   text-decoration: underline !important;
   font-weight: 500 !important;
 }
 
 .dark .bn-editor a:not(.bn-button):not(.copy-btn) {
-  color: #60a5fa !important; /* Blue-400 for dark mode */
+  color: #60a5fa !important;
+  /* Blue-400 for dark mode */
 }
 
 /* Focus state for accessibility */
@@ -374,15 +450,18 @@ div[data-id="blocknote-editor"] {
 .collaboration-cursor__label,
 .collaboration-carets__label {
   border-radius: 6px 6px 6px 0;
-  color: #ffffff !important; /* Use white text for better contrast */
+  color: #ffffff !important;
+  /* Use white text for better contrast */
   font-size: 11px;
   font-style: normal;
   font-weight: 600;
   left: -1px;
   line-height: 1.3;
-  padding: 0.3rem 0.6rem !important; /* Generous padding for better coverage */
+  padding: 0.3rem 0.6rem !important;
+  /* Generous padding for better coverage */
   position: absolute;
-  top: -1.8em; /* Adjusted for increased padding */
+  top: -1.8em;
+  /* Adjusted for increased padding */
   user-select: none;
   white-space: nowrap;
   z-index: 10;
@@ -412,8 +491,10 @@ div[data-id="blocknote-editor"] {
 /* Additional styling for better visibility and coverage */
 .collaboration-cursor__label,
 .collaboration-carets__label {
-  letter-spacing: 0.02em; /* Slight letter spacing for better readability */
-  max-width: 120px; /* Prevent extremely long names from breaking layout */
+  letter-spacing: 0.02em;
+  /* Slight letter spacing for better readability */
+  max-width: 120px;
+  /* Prevent extremely long names from breaking layout */
   overflow: hidden;
   text-overflow: ellipsis;
   /* Subtle border for better definition */
@@ -434,14 +515,24 @@ div[data-id="blocknote-editor"] {
 /* Handle very long usernames gracefully */
 .collaboration-cursor__label[title],
 .collaboration-carets__label[title] {
-  cursor: help; /* Show that there's more info on hover */
+  cursor: help;
+  /* Show that there's more info on hover */
+}
+
+/* Text selection/highlighting for page editor */
+.bn-editor ::selection,
+.bn-editor .ProseMirror ::selection,
+.bn-editor .bn-block-content ::selection,
+.bn-editor .bn-inline-content ::selection {
+  background-color: hsl(25 35% 94%) !important; /* Brighter muted clay/orange */
+  color: hsl(25 70% 40%) !important; /* Text color for better contrast */
 }
 
 /* Override selection background color if it's too aggressive */
 /* This might be .tiptap-selection or similar depending on implementation */
-.ProseMirror-selectednode,
-::selection {
-  background-color: var(--sidebar-accent); /* Use a theme color for consistency */
+.ProseMirror-selectednode {
+  background-color: var(--sidebar-accent);
+  /* Use a theme color for consistency */
   color: inherit;
 }
 
@@ -522,8 +613,8 @@ div[data-id="blocknote-editor"] {
 /* Fix any parent containers that might be causing vertical display */
 .bn-editor [data-content-type="toggleListItem"],
 .bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"],
-.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"] > *,
-.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"] > button.bn-toggle-add-block-button {
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"]>*,
+.bn-editor [data-content-type="toggleListItem"] [class*="bn-block-content"]>button.bn-toggle-add-block-button {
   writing-mode: horizontal-tb !important;
   text-orientation: mixed !important;
 }
@@ -553,7 +644,7 @@ div[data-id="blocknote-editor"] {
   border-radius: 8px !important;
   padding: 0 !important;
   margin: 1rem 0 !important;
-  font-family: var(--font-sans) !important;
+  font-family: var(--font-mono) !important;
   overflow: hidden !important;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
   position: relative !important;
@@ -567,14 +658,14 @@ div[data-id="blocknote-editor"] {
   left: 0 !important;
   right: 0 !important;
   height: 2.75rem !important;
-  background-color: var(--muted) !important;
-  border-bottom: 1px solid var(--border) !important;
+  background-color: hsl(var(--muted)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
   border-radius: 8px 8px 0 0 !important;
   padding: 0.875rem 1rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  color: var(--muted-foreground) !important;
+  color: hsl(var(--muted-foreground)) !important;
   font-size: 0.75rem !important;
   font-weight: 500 !important;
   text-transform: lowercase !important;
@@ -602,9 +693,17 @@ div[data-id="blocknote-editor"] {
 }
 
 @keyframes copy-success {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1.1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
 }
 
 /* Removed tick CSS - using toast notification instead */
@@ -628,10 +727,11 @@ div[data-id="blocknote-editor"] {
   border: none !important;
   border-radius: 0 !important;
   padding: 1.25rem !important;
-  padding-top: 4rem !important; /* Account for header height */
+  padding-top: 4rem !important;
+  /* Account for header height */
   margin: 0 !important;
   overflow-x: auto !important;
-  font-family: var(--font-sans) !important;
+  font-family: var(--font-mono) !important;
   font-size: 0.875rem !important;
   line-height: 1.6 !important;
   font-weight: 400 !important;
@@ -650,64 +750,78 @@ div[data-id="blocknote-editor"] {
 
 /* Syntax highlighting colors for light theme */
 .bn-editor [data-content-type="codeBlock"] .token.keyword {
-  color: #d73a49 !important; /* Red for keywords like const, new, if */
+  color: #d73a49 !important;
+  /* Red for keywords like const, new, if */
   font-weight: 600 !important;
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.string {
-  color: #032f62 !important; /* Blue for strings */
+  color: #032f62 !important;
+  /* Blue for strings */
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.number {
-  color: #005cc5 !important; /* Blue for numbers */
+  color: #005cc5 !important;
+  /* Blue for numbers */
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.function {
-  color: #6f42c1 !important; /* Purple for functions */
+  color: #6f42c1 !important;
+  /* Purple for functions */
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.comment {
-  color: #6a737d !important; /* Gray for comments */
+  color: #6a737d !important;
+  /* Gray for comments */
   font-style: italic !important;
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.operator {
-  color: #d73a49 !important; /* Red for operators */
+  color: #d73a49 !important;
+  /* Red for operators */
 }
 
 .bn-editor [data-content-type="codeBlock"] .token.punctuation {
-  color: #24292e !important; /* Dark gray for punctuation */
+  color: #24292e !important;
+  /* Dark gray for punctuation */
 }
 
 /* Syntax highlighting colors for dark theme */
 .dark .bn-editor [data-content-type="codeBlock"] .token.keyword {
-  color: #ff7b72 !important; /* Light red for keywords */
+  color: #ff7b72 !important;
+  /* Light red for keywords */
   font-weight: 600 !important;
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.string {
-  color: #a5d6ff !important; /* Light blue for strings */
+  color: #a5d6ff !important;
+  /* Light blue for strings */
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.number {
-  color: #79c0ff !important; /* Light blue for numbers */
+  color: #79c0ff !important;
+  /* Light blue for numbers */
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.function {
-  color: #d2a8ff !important; /* Light purple for functions */
+  color: #d2a8ff !important;
+  /* Light purple for functions */
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.comment {
-  color: #8b949e !important; /* Light gray for comments */
+  color: #8b949e !important;
+  /* Light gray for comments */
   font-style: italic !important;
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.operator {
-  color: #ff7b72 !important; /* Light red for operators */
+  color: #ff7b72 !important;
+  /* Light red for operators */
 }
 
 .dark .bn-editor [data-content-type="codeBlock"] .token.punctuation {
-  color: #e6edf3 !important; /* Light gray for punctuation */
+  color: #e6edf3 !important;
+  /* Light gray for punctuation */
 }
 
 /* Inline code styling */
@@ -716,7 +830,7 @@ div[data-id="blocknote-editor"] {
   color: var(--foreground) !important;
   padding: 0.125rem 0.375rem !important;
   border-radius: 4px !important;
-  font-family: var(--font-sans) !important;
+  font-family: var(--font-mono) !important;
   font-size: 0.875em !important;
   font-weight: 500 !important;
   border: 1px solid var(--border) !important;
@@ -737,7 +851,7 @@ div[data-id="blocknote-editor"] {
 
 /* Dark mode adjustments for code block icons */
 .dark .bn-editor [data-content-type="codeBlock"]::after {
-  background: 
+  background:
     /* Copy icon - lighter for dark mode */
     url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
     /* Menu icon - darker grey for dark mode */
@@ -748,7 +862,7 @@ div[data-id="blocknote-editor"] {
 }
 
 .dark .bn-editor [data-content-type="codeBlock"]:hover::after {
-  background: 
+  background:
     /* Copy icon - brighter on hover in dark mode */
     url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3e%3crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3e%3c/svg%3e") no-repeat right center,
     /* Menu and download stay the same */
@@ -842,66 +956,104 @@ div[data-id="blocknote-editor"] {
 .bn-editor [data-content-type="checkListItem"] {
   position: relative;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Fix checkbox input alignment */
+.bn-editor [data-content-type="checkListItem"] input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  align-self: center;
+  vertical-align: middle;
+}
+
+/* Fix checkbox text alignment - adjust paragraph to align with checkbox */
+.bn-editor [data-content-type="checkListItem"] .bn-inline-content {
+  display: inline-block;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  margin-top: -0.1rem; /* Slight upward adjustment to align with checkbox */
+}
+
+/* Adjust paragraph inside inline content for better alignment */
+.bn-editor [data-content-type="checkListItem"] .bn-inline-content p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  display: inline;
+  vertical-align: baseline;
 }
 
 /* When checkbox is checked, grey out the text content with strikethrough */
 .bn-editor [data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+  color: #9ca3af !important;
+  /* grey-400 - same as strikethrough */
   text-decoration: line-through;
-  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+  opacity: 1;
+  /* Remove opacity to match strikethrough color exactly */
   transition: all 0.2s ease;
 }
 
 /* Grey out nested bullet points when parent checkbox is checked */
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"],
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
-  color: #9ca3af !important; /* grey-400 - same as strikethrough */
-  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"],
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
+  color: #9ca3af !important;
+  /* grey-400 - same as strikethrough */
+  opacity: 1;
+  /* Remove opacity to match strikethrough color exactly */
   text-decoration: line-through;
   transition: all 0.2s ease;
 }
 
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
-  color: #9ca3af !important; /* grey-400 - same as strikethrough */
-  opacity: 1; /* Remove opacity to match strikethrough color exactly */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
+  color: #9ca3af !important;
+  /* grey-400 - same as strikethrough */
+  opacity: 1;
+  /* Remove opacity to match strikethrough color exactly */
   text-decoration: line-through;
   transition: all 0.2s ease;
 }
 
 /* Grey out the bullet point symbol itself */
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
-  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
+  color: #9ca3af !important;
+  /* grey-400 - same as strikethrough */
   text-decoration: line-through;
 }
 
 /* Grey out nested checked checkboxes when parent checkbox is checked */
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #9ca3af !important; /* grey-400 - same as strikethrough */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #9ca3af !important;
+  /* grey-400 - same as strikethrough */
   opacity: 1;
   text-decoration: line-through;
   transition: all 0.2s ease;
 }
 
 /* Keep unchecked nested checkboxes completely normal (black text) - HIGHEST PRIORITY */
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
   color: var(--foreground) !important;
   opacity: 1 !important;
   text-decoration: none !important;
 }
 
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
   color: var(--foreground) !important;
   text-decoration: none !important;
   opacity: 1 !important;
 }
 
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
   color: var(--foreground) !important;
   text-decoration: none !important;
   opacity: 1 !important;
@@ -910,91 +1062,105 @@ div[data-id="blocknote-editor"] {
 
 /* Dark mode adjustments */
 .dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #6b7280 !important; /* grey-500 for dark mode */
+  color: #6b7280 !important;
+  /* grey-500 for dark mode */
 }
 
 /* Dark mode - Grey out nested bullet points when parent checkbox is checked */
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"],
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
-  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"],
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"] {
+  color: #6b7280 !important;
+  /* grey-500 - same as strikethrough in dark mode */
   opacity: 1;
   text-decoration: line-through;
 }
 
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
-  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"] .bn-inline-content {
+  color: #6b7280 !important;
+  /* grey-500 - same as strikethrough in dark mode */
   opacity: 1;
   text-decoration: line-through;
 }
 
 /* Dark mode - Grey out the bullet point symbol itself */
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
-  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="bulletListItem"]::before {
+  color: #6b7280 !important;
+  /* grey-500 - same as strikethrough in dark mode */
   text-decoration: line-through;
 }
 
 /* Dark mode - Grey out nested checked checkboxes when parent checkbox is checked */
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #6b7280 !important; /* grey-500 - same as strikethrough in dark mode */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #6b7280 !important;
+  /* grey-500 - same as strikethrough in dark mode */
   opacity: 1;
   text-decoration: line-through;
 }
 
 /* Keep unchecked nested checkboxes normal in dark mode too - HIGHEST PRIORITY */
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"],
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] {
   color: var(--foreground) !important;
   opacity: 1 !important;
   text-decoration: none !important;
 }
 
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] *,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] * {
   color: var(--foreground) !important;
   text-decoration: none !important;
   opacity: 1 !important;
 }
 
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="false"] .bn-inline-content {
   color: var(--foreground) !important;
   text-decoration: none !important;
   opacity: 1 !important;
 }
 
 /* Ensure checked nested checkboxes still show as checked (darker grey) */
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
-.bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #6b7280 !important; /* darker grey for checked nested items */
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #6b7280 !important;
+  /* darker grey for checked nested items */
   text-decoration: line-through !important;
   opacity: 0.8 !important;
 }
 
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] ~ .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
-.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"] + .bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
-  color: #4b5563 !important; /* darker grey for dark mode */
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]~.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content,
+.dark .bn-editor [data-content-type="checkListItem"][data-checked="true"]+.bn-block-group .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content {
+  color: #4b5563 !important;
+  /* darker grey for dark mode */
 }
 
 /* Landing Page Animations */
 @keyframes blob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
 }
 
 @keyframes gradient {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -1024,17 +1190,38 @@ div[data-id="blocknote-editor"] {
 
 /* Shake animation for reorder mode feedback */
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-2px);
   }
-  20%, 40%, 60%, 80% {
+
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(2px);
   }
 }
 
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+.font-feature-settings {
+  font-feature-settings: "ss01", "ss02", "cv01";
+}
+
+/* Subtle Dot Pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
 }

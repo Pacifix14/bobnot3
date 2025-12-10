@@ -1,7 +1,23 @@
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 import { db } from "@/server/db";
+import { type Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ workspaceId: string }>;
+}): Promise<Metadata> {
+  const { workspaceId } = await params;
+  const workspace = await db.workspace.findUnique({
+    where: { id: workspaceId },
+  });
+
+  return {
+    title: workspace?.name ?? "Workspace",
+  };
+}
 
 export default async function WorkspacePage({
   params,
@@ -19,7 +35,12 @@ export default async function WorkspacePage({
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className="flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+      style={{
+        paddingLeft: 'var(--sidebar-push-offset, 0px)',
+      }}
+    >
       <DashboardBreadcrumb items={breadcrumbItems} />
       <div className="flex items-center justify-center h-full text-muted-foreground px-4">
         <div className="text-center space-y-2 max-w-md">

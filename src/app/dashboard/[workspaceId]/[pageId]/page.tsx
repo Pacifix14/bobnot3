@@ -46,7 +46,12 @@ export default function PageEditor() {
   // This improves perceived performance by using cached data immediately
   if (isLoading && !page) {
     return (
-      <div className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden">
+      <div
+        className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        style={{
+          paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+        }}
+      >
         <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
           <div className="pl-0 md:pl-[54px] pr-4 md:pr-6">
             <Skeleton className="h-10 md:h-12 w-1/2" />
@@ -66,23 +71,10 @@ export default function PageEditor() {
   }
 
   return (
-    <div className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden">
-      <Suspense
-        fallback={
-          <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
-            <div className="pl-0 md:pl-[54px] pr-4 md:pr-6">
-              <Skeleton className="h-10 md:h-12 w-1/2" />
-            </div>
-            <div className="pl-0 md:pl-[54px] pr-4 md:pr-6 space-y-4">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-5/6" />
-            </div>
-          </div>
-        }
-      >
+    <>
+      <Suspense fallback={null}>
         <Editor pageId={page.id} title={page.title} coverImage={page.coverImage} bannerImage={page.bannerImage} />
       </Suspense>
-    </div>
+    </>
   );
 }

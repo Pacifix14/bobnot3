@@ -46,7 +46,7 @@ export function Sidebar({ workspaceId, folders, pages }: SidebarProps) {
   return (
     <aside className="w-64 border-r border-border/40 bg-sidebar h-screen flex flex-col">
       <div className="p-4 border-b border-sidebar-border/40">
-        <div className="flex items-center gap-2 font-serif font-medium text-sidebar-foreground">
+        <div className="flex items-center gap-2 font-sans font-medium text-sidebar-foreground" style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif' }}>
           <div className="h-6 w-6 bg-sidebar-primary rounded-md flex items-center justify-center text-sidebar-primary-foreground text-xs">
             A
           </div>

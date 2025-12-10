@@ -4,8 +4,13 @@ import { FeaturesSection } from "@/components/features-section";
 import { HowItWorksSection } from "@/components/how-it-works-section";
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
+import { type Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: "Home",
+};
 
 export default async function Home() {
   // Check if user is already authenticated

@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/components/toast-provider";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import { LiveblocksProvider } from "@liveblocks/react/suspense";
 import type { Block } from "@blocknote/core";
@@ -17,6 +16,8 @@ import { CoverImage } from "@/components/cover-image";
 import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { setPageStatus } from "@/lib/page-status-ref";
+import { useSidebar } from "@/components/ui/sidebar";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -24,11 +25,9 @@ import "./editor-styles";
 
 // Memoized Editor Component to prevent re-renders
 const BlockNoteEditor = memo(function BlockNoteEditor({ 
-  pageId, 
-  onStatusChange 
+  pageId
 }: { 
-  pageId: string, 
-  onStatusChange: (status: "saved" | "saving" | "unsaved") => void 
+  pageId: string
 }) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -49,22 +48,25 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveToDatabase = useCallback(async (content: Block[]) => {
-    onStatusChange("saving");
+    setPageStatus("saving");
     try {
       await fetch(`/api/pages/${pageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });
-      onStatusChange("saved");
+      setPageStatus("saved");
     } catch (error) {
       console.error("Failed to save content", error);
-      onStatusChange("unsaved");
+      setPageStatus("unsaved");
     }
-  }, [pageId, onStatusChange]);
+  }, [pageId]);
 
   // Track toggle list content to prevent it from moving when Enter is pressed
   const toggleListContentRef = useRef<{ blockId: string; content: Block["content"] } | null>(null);
+  
+  // Track previous document state to detect block deletions
+  const previousDocumentRef = useRef<Block[] | null>(null);
 
   // Handle editor changes
   useEffect(() => {
@@ -102,8 +104,88 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
           toggleListContentRef.current = null;
         }
       }
+
+      // Preserve indentation when parent block is deleted
+      const currentDocument = editor.document;
+      const previousDocument = previousDocumentRef.current;
+
+      if (previousDocument && currentDocument) {
+        // Helper function to find parent of a block in the document
+        const findParentBlock = (blocks: Block[], targetId: string): Block | null => {
+          for (const block of blocks) {
+            if (block.children) {
+              const childIds = block.children.map(c => c.id);
+              if (childIds.includes(targetId)) {
+                return block;
+              }
+              const found = findParentBlock(block.children, targetId);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        // Find blocks that were deleted (exist in previous but not in current)
+        const currentBlockIds = new Set(
+          currentDocument.map(block => block.id)
+        );
+        
+        const deletedBlocks = previousDocument.filter(
+          block => !currentBlockIds.has(block.id) && block.children && block.children.length > 0
+        );
+
+        // For each deleted block with children, preserve children's indentation
+        // BUT only if the children are actually orphaned (not just moved with a parent)
+        for (const deletedBlock of deletedBlocks) {
+          if (deletedBlock.children && deletedBlock.children.length > 0) {
+            // Check if children are orphaned (no longer have a parent) or if they're still nested
+            const orphanedChildren = deletedBlock.children.filter(child => {
+              const currentChild = editor.getBlock(child.id);
+              if (!currentChild) return false;
+              
+              // Check if this child still has a parent in the current document
+              const parent = findParentBlock(currentDocument, child.id);
+              // If no parent found, the child is orphaned and needs indentation preservation
+              return !parent;
+            });
+
+            // Only preserve indentation for truly orphaned children
+            if (orphanedChildren.length > 0) {
+              setTimeout(async () => {
+                try {
+                  if (!editor?.isEditable) return;
+                  
+                  // Indent each orphaned child to preserve their relative indentation
+                  for (const child of orphanedChildren) {
+                    const currentChild = editor.getBlock(child.id);
+                    if (currentChild) {
+                      // Set cursor to the child block and indent it using nestBlock
+                      editor.setTextCursorPosition(child.id, "start");
+                      await new Promise(resolve => setTimeout(resolve, 10));
+                      
+                      try {
+                        // Use nestBlock to indent (same as Tab key)
+                        editor.nestBlock();
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                      } catch (error) {
+                        // If nestBlock doesn't work, continue to next child
+                        console.error('Error indenting child block:', error);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error preserving indentation after block deletion:', error);
+                }
+              }, 100);
+            }
+          }
+        }
+      }
+
+      // Update previous document reference
+      previousDocumentRef.current = JSON.parse(JSON.stringify(currentDocument));
       
-      onStatusChange("unsaved");
+      setPageStatus("unsaved");
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -111,6 +193,11 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         void saveToDatabase(editor.document);
       }, 1000);
     };
+
+    // Initialize previous document reference
+    if (editor.document) {
+      previousDocumentRef.current = JSON.parse(JSON.stringify(editor.document));
+    }
 
     // Subscribe to updates
     const unsubscribe = editor.onChange(handleChange);
@@ -120,7 +207,7 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [editor, saveToDatabase, onStatusChange]);
+  }, [editor, saveToDatabase]);
 
   // Enable bulk indentation for multiple selected bullet points
   useEffect(() => {
@@ -133,53 +220,240 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         try {
           if (!editor?.isEditable) return;
 
+          // Check if we're in the editor area
+          const target = keyboardEvent.target as HTMLElement;
+          const isInEditor = target?.closest('.bn-editor, .ProseMirror, [data-id="blocknote-editor"]');
+          if (!isInEditor) return;
+
+          // Check if we're in a list block context by checking the current block
+          const textCursorPosition = editor.getTextCursorPosition();
+          const currentBlock = textCursorPosition?.block;
+          const isInListBlock = currentBlock && (
+            currentBlock.type === 'bulletListItem' || 
+            currentBlock.type === 'numberedListItem' || 
+            currentBlock.type === 'checkListItem'
+          );
+
           const selection = editor.getSelection();
           
-          if (selection?.blocks && selection.blocks.length > 1) {
+          // Also check DOM selection to detect highlighted blocks
+          const domSelection = window.getSelection();
+          const hasTextSelection = domSelection && domSelection.toString().trim().length > 0;
+          
+          // Check if DOM selection contains list blocks
+          let domListBlocks: Element[] = [];
+          if (hasTextSelection && domSelection && domSelection.rangeCount > 0) {
+            const range = domSelection.getRangeAt(0);
+            
+            // Find the start and end containers
+            const startContainer = range.startContainer;
+            const endContainer = range.endContainer;
+            
+            // Find the list block elements that contain the selection
+            const startBlock = startContainer.nodeType === Node.TEXT_NODE 
+              ? startContainer.parentElement?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')
+              : (startContainer as Element)?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]');
+            
+            const endBlock = endContainer.nodeType === Node.TEXT_NODE
+              ? endContainer.parentElement?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')
+              : (endContainer as Element)?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]');
+            
+            if (startBlock || endBlock) {
+              // If we have start and end blocks, find all blocks between them
+              if (startBlock && endBlock && startBlock !== endBlock) {
+                const allBlocks: Element[] = [];
+                let current: Element | null = startBlock as Element;
+                const visited = new Set<Element>();
+                
+                // Walk from start to end block
+                while (current && allBlocks.length < 20 && !visited.has(current)) {
+                  visited.add(current);
+                  if (current.matches('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')) {
+                    allBlocks.push(current);
+                  }
+                  if (current === endBlock) break;
+                  
+                  // Try next sibling first
+                  const nextSibling: Element | null = current.nextElementSibling;
+                  if (nextSibling) {
+                    current = nextSibling;
+                  } else {
+                    // Go up to parent and try next sibling
+                    const parent: HTMLElement | null = current.parentElement;
+                    current = parent?.nextElementSibling || null;
+                  }
+                }
+                domListBlocks = allBlocks;
+              } else if (startBlock) {
+                domListBlocks = [startBlock as Element];
+              } else if (endBlock) {
+                domListBlocks = [endBlock as Element];
+              }
+            }
+          }
+          
+          // If we're in a list block context OR have list blocks selected, prevent default immediately
+          const hasListContext = isInListBlock || 
+            (selection?.blocks && selection.blocks.some(b => 
+              b.type === 'bulletListItem' || b.type === 'numberedListItem' || b.type === 'checkListItem'
+            )) ||
+            domListBlocks.length > 0;
+          
+          if (!hasListContext) return; // Not in list context, allow default Tab behavior
+          
+          // Prevent default Tab behavior immediately
+          keyboardEvent.preventDefault();
+          keyboardEvent.stopPropagation();
+          keyboardEvent.stopImmediatePropagation();
+          
+          // Helper function to check if a block is a descendant of another block
+          const isDescendantOf = (childId: string, parentId: string, document: Block[]): boolean => {
+            const findBlock = (blocks: Block[], targetId: string): Block | null => {
+              for (const block of blocks) {
+                if (block.id === targetId) return block;
+                if (block.children) {
+                  const found = findBlock(block.children, targetId);
+                  if (found) return found;
+                }
+              }
+              return null;
+            };
+
+            const parentBlock = findBlock(document, parentId);
+            if (!parentBlock) return false;
+
+            const checkDescendants = (block: Block): boolean => {
+              if (block.id === childId) return true;
+              if (block.children) {
+                return block.children.some(child => checkDescendants(child));
+              }
+              return false;
+            };
+
+            return checkDescendants(parentBlock);
+          };
+
+          // Helper to process blocks for indentation
+          const processBlocks = async (blockIds: string[], isOutdent: boolean) => {
+            for (const blockId of blockIds) {
+              try {
+                await new Promise(resolve => setTimeout(resolve, 5));
+                
+                if (editor?.isEditable) {
+                  editor.focus();
+                  editor.setTextCursorPosition(blockId, "end");
+                  await new Promise(resolve => setTimeout(resolve, 5));
+                  
+                  if (isOutdent) {
+                    editor.unnestBlock();
+                  } else {
+                    editor.nestBlock();
+                  }
+                }
+              } catch (error) {
+                console.error(`Error ${isOutdent ? 'outdenting' : 'indenting'} block:`, error);
+              }
+            }
+          };
+
+          // Try BlockNote selection first
+          if (selection?.blocks && selection.blocks.length > 0) {
             const listBlocks = selection.blocks.filter(block => 
               block.type === 'bulletListItem' || block.type === 'numberedListItem' || block.type === 'checkListItem'
             );
             
             if (listBlocks.length > 0) {
-              // Prevent toolbar from capturing Tab key
-              keyboardEvent.preventDefault();
-              keyboardEvent.stopPropagation();
-              keyboardEvent.stopImmediatePropagation();
-              
-              setTimeout(() => {
-                try {
-                  if (!editor?.isEditable) return;
+              const document = editor.document;
+              const topLevelBlocks = listBlocks.filter(block => {
+                const isChildOfSelected = listBlocks.some(otherBlock => 
+                  otherBlock.id !== block.id && isDescendantOf(block.id, otherBlock.id, document)
+                );
+                return !isChildOfSelected;
+              });
 
-                  const processBlocks = async (blocks: typeof listBlocks, isOutdent: boolean) => {
-                    for (const block of blocks) {
-                      try {
-                        await new Promise(resolve => setTimeout(resolve, 5));
-                        
-                        if (editor?.isEditable) {
-                          editor.focus();
-                          editor.setTextCursorPosition(block.id, "end");
-                          await new Promise(resolve => setTimeout(resolve, 5));
-                          
-                          if (isOutdent) {
-                            editor.unnestBlock();
-                          } else {
-                            editor.nestBlock();
-                          }
-                        }
-                      } catch (error) {
-                        console.error(`Error ${isOutdent ? 'outdenting' : 'indenting'} block:`, error);
-                      }
+              const needsBulkHandling = listBlocks.length > 1 || topLevelBlocks.length !== listBlocks.length;
+              
+              if (needsBulkHandling && topLevelBlocks.length > 0) {
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    void processBlocks(topLevelBlocks.map(b => b.id), keyboardEvent.shiftKey);
+                  } catch (error) {
+                    console.error('Error in bulk indentation:', error);
+                  }
+                }, 0);
+                return false;
+              } else if (listBlocks.length === 1 && isInListBlock) {
+                // Single block indentation
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    const block = listBlocks[0]!;
+                    editor.setTextCursorPosition(block.id, "end");
+                    if (keyboardEvent.shiftKey) {
+                      editor.unnestBlock();
+                    } else {
+                      editor.nestBlock();
                     }
-                  };
-
-                  void processBlocks(listBlocks, keyboardEvent.shiftKey);
-                } catch (error) {
-                  console.error('Error in bulk indentation:', error);
-                }
-              }, 0);
-              
-              return false;
+                  } catch (error) {
+                    console.error('Error indenting single block:', error);
+                  }
+                }, 0);
+                return false;
+              }
             }
+          }
+          
+          // Fallback: Check DOM selection for highlighted list blocks
+          if (hasTextSelection && domListBlocks.length > 0) {
+            // Get block IDs from DOM elements
+            const blockIds = domListBlocks
+              .map(block => {
+                const blockOuter = block.closest('[data-node-type="blockOuter"]');
+                return blockOuter?.getAttribute('data-id') || null;
+              })
+              .filter((id): id is string => id !== null);
+            
+            if (blockIds.length > 0) {
+              // Filter out children that are nested under selected parents
+              const document = editor.document;
+              const topLevelBlockIds = blockIds.filter(blockId => {
+                const isChildOfSelected = blockIds.some(otherId => 
+                  otherId !== blockId && isDescendantOf(blockId, otherId, document)
+                );
+                return !isChildOfSelected;
+              });
+              
+              if (topLevelBlockIds.length > 0) {
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    void processBlocks(topLevelBlockIds, keyboardEvent.shiftKey);
+                  } catch (error) {
+                    console.error('Error in bulk indentation via DOM selection:', error);
+                  }
+                }, 0);
+                return false;
+              }
+            }
+          }
+          
+          // If we're in a list block but no selection, handle single block indentation
+          if (isInListBlock && currentBlock) {
+            setTimeout(() => {
+              try {
+                if (!editor?.isEditable) return;
+                editor.setTextCursorPosition(currentBlock.id, "end");
+                if (keyboardEvent.shiftKey) {
+                  editor.unnestBlock();
+                } else {
+                  editor.nestBlock();
+                }
+              } catch (error) {
+                console.error('Error indenting current block:', error);
+              }
+            }, 0);
+            return false;
           }
         } catch (error) {
           console.error('Error handling bulk indentation:', error);
@@ -188,17 +462,27 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
 
     // Capture Tab events before toolbar can intercept them
-    document.addEventListener('keydown', handleKeyDown, true);
+    // Use capture phase with highest priority
+    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
     
     const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+    const proseMirrorElement = editorElement?.querySelector('.ProseMirror');
+    
     if (editorElement) {
-      editorElement.addEventListener('keydown', handleKeyDown, true);
+      editorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+    }
+    
+    if (proseMirrorElement) {
+      proseMirrorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
     }
     
     return () => {
-      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
       if (editorElement) {
-        editorElement.removeEventListener('keydown', handleKeyDown, true);
+        editorElement.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
+      }
+      if (proseMirrorElement) {
+        proseMirrorElement.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
       }
     };
   }, [editor, isReady]);
@@ -677,6 +961,72 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
   }, [showToast]);
 
+  // Disable spellcheck on all contenteditable elements in the editor
+  useEffect(() => {
+    if (!editor || !isReady) return;
+
+    const disableSpellcheck = () => {
+      // Find all contenteditable elements - check multiple selectors
+      const editorElement = document.querySelector('.bn-editor');
+      const proseMirrorElement = document.querySelector('.ProseMirror');
+      
+      // Check both .bn-editor and .ProseMirror containers
+      const containers = [editorElement, proseMirrorElement].filter(Boolean) as Element[];
+      
+      containers.forEach((container) => {
+        // Find all contenteditable elements
+        const contenteditables = container.querySelectorAll('[contenteditable="true"], [contenteditable=""]');
+        contenteditables.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          htmlEl.setAttribute('spellcheck', 'false');
+          // Also set the property directly (some browsers need this)
+          htmlEl.spellcheck = false;
+        });
+      });
+    };
+
+    // Run immediately
+    disableSpellcheck();
+
+    // Set up MutationObserver to catch dynamically added elements
+    const observer = new MutationObserver(() => {
+      disableSpellcheck();
+    });
+
+    // Observe the entire document body to catch any editor elements
+    const editorElement = document.querySelector('.bn-editor');
+    if (editorElement) {
+      observer.observe(editorElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['contenteditable', 'spellcheck'],
+      });
+    }
+
+    // Also set up a periodic check as a backup (every 500ms)
+    const intervalId = setInterval(() => {
+      disableSpellcheck();
+    }, 500);
+
+    // Also disable spellcheck when elements receive focus
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.contentEditable === 'true' || target.hasAttribute('contenteditable'))) {
+        target.setAttribute('spellcheck', 'false');
+        target.spellcheck = false;
+      }
+    };
+
+    document.addEventListener('focusin', handleFocus, true);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      document.removeEventListener('focusin', handleFocus, true);
+    };
+  }, [editor, isReady]);
+
   // Add action buttons to code blocks using CSS approach
   useEffect(() => {
     if (!editor) return;
@@ -790,46 +1140,41 @@ function BlockNoteEditorInner({
 }) {
   const router = useRouter();
   const utils = api.useUtils();
+  const { open } = useSidebar();
   const [title, setTitle] = useState(initialTitle);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [bannerImage, setBannerImage] = useState(initialBannerImage);
-  const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const saveTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
-  
-  // Stable callback for status updates
-  const handleStatusChange = useCallback((newStatus: "saved" | "saving" | "unsaved") => {
-    setStatus(newStatus);
-  }, []);
 
   const updateTitle = api.page.updateTitle.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       void utils.page.getPage.invalidate({ pageId });
       void utils.workspace.getWorkspace.invalidate();
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save title", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
   const updateCoverImage = api.page.updateCoverImage.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save cover image", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
@@ -840,7 +1185,7 @@ function BlockNoteEditorInner({
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    setStatus("unsaved");
+    setPageStatus("unsaved");
     
     if (saveTitleTimeoutRef.current) {
       clearTimeout(saveTitleTimeoutRef.current);
@@ -857,15 +1202,15 @@ function BlockNoteEditorInner({
 
   const updateBannerImage = api.page.updateBannerImage.useMutation({
     onMutate: () => {
-      setStatus("saving");
+      setPageStatus("saving");
     },
     onSuccess: () => {
-      setStatus("saved");
+      setPageStatus("saved");
       router.refresh();
     },
     onError: (error) => {
       console.error("Failed to save banner image", error);
-      setStatus("unsaved");
+      setPageStatus("unsaved");
     }
   });
 
@@ -882,123 +1227,146 @@ function BlockNoteEditorInner({
     };
   }, []);
 
+  // Update document title when page title changes
+  useEffect(() => {
+    const pageTitle = title || "Untitled";
+    document.title = `${pageTitle} | bobnot3`;
+  }, [title]);
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+    <>
       {/* Banner Image - Full width at top, behind other content */}
-      {bannerImage && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
-          <BannerImage
-            url={bannerImage}
-            editable={false}
-            onUpdate={() => { /* read-only */ }}
-          />
-        </div>
-      )}
-
-      {/* Saved Status - Top Right */}
-      <div className="absolute top-4 right-6 text-xs text-muted-foreground z-10">
-        {status === "saving" && <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving</span>}
-        {status === "saved" && "Saved"}
-        {status === "unsaved" && "Unsaved"}
-      </div>
-
-      {/* New Header Layout */}
-      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
-        {/* Cover Image - Smaller size (w-40 = 10rem) */}
-        <div className="w-40 h-40 flex-shrink-0">
-            <CoverImage
-              url={coverImage}
-              editable={false} // Read-only in main view
+      <div className="relative">
+        {bannerImage && (
+          <div className="w-full h-55 relative">
+            <BannerImage
+              url={bannerImage}
+              editable={false}
               onUpdate={() => { /* read-only */ }}
-              onClick={() => setIsEditDialogOpen(true)}
             />
-        </div>
+          </div>
+        )}
 
-        {/* Content */}
-        <div className="flex flex-col flex-1 min-w-0 pb-4">
-          {/* Title - Bricolage Grotesque (matches H1) */}
-          <Input
-            value={title}
-            onChange={handleTitleChange}
-            className="font-serif font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
-            placeholder="Untitled"
-            style={{ fontFamily: 'var(--font-bricolage), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif', fontSize: '4.5rem', fontWeight: 700 }}
-          />
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-0.5 pl-2">
-             <ShareDialog pageId={pageId} />
+        {/* Header content overlaying the banner */}
+        <div
+          className="transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          style={{
+            paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+            marginTop: bannerImage ? '-6rem' : '0',
+          }}
+        >
+          <div className="max-w-5xl mx-auto px-4 md:px-8">
+            {/* New Header Layout */}
+            <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pb-6' : 'pt-12 pb-6'}`}>
+              {/* Cover Image - Smaller size (w-40 = 10rem) */}
+              <div className="w-40 h-40 flex-shrink-0">
+                <CoverImage
+                  url={coverImage}
+                  editable={false} // Read-only in main view
+                  onUpdate={() => { /* read-only */ }}
+                  onClick={() => setIsEditDialogOpen(true)}
+                />
+              </div>
 
-             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-               <DialogTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                   <Pencil className="h-6 w-6" />
-                 </Button>
-               </DialogTrigger>
-               <DialogContent>
-                 <DialogHeader>
-                   <DialogTitle>Edit Page Details</DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-6 py-4">
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Cover Image</label>
-                    <div className="w-40 h-40 mx-auto">
-                      <CoverImage 
-                        key="edit-dialog-cover"
-                        url={coverImage} 
-                        editable={true} 
-                        onUpdate={handleCoverUpdate} 
-                      />
-                    </div>
-                   </div>
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Title</label>
-                     <Input 
-                       value={title} 
-                       onChange={handleTitleChange}
-                       className="font-serif"
-                     />
-                   </div>
-                 </div>
-               </DialogContent>
-             </Dialog>
+              {/* Content */}
+              <div className="flex flex-col flex-1 min-w-0 pb-4">
+                {/* Title - Inter */}
+                <Input
+                  value={title}
+                  onChange={handleTitleChange}
+                  spellCheck={false}
+                  className="font-sans font-black tracking-tight border-none px-0 -mb-2 shadow-none focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent w-full text-6xl md:text-9xl"
+                  placeholder="Untitled"
+                  style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif', fontSize: '4.5rem', fontWeight: 700 }}
+                />
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-0.5 pl-2">
+                  <ShareDialog pageId={pageId} />
 
-             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-               <Download className="h-6 w-6" />
-             </Button>
+                  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Pencil className="h-6 w-6" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Page Details</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-6 py-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Cover Image</label>
+                          <div className="w-40 h-40 mx-auto">
+                            <CoverImage 
+                              key="edit-dialog-cover"
+                              url={coverImage} 
+                              editable={true} 
+                              onUpdate={handleCoverUpdate} 
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Title</label>
+                          <Input 
+                            value={title} 
+                            onChange={handleTitleChange}
+                            className="font-serif"
+                          />
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-             <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
-               <DialogTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                   <ImageIcon className="h-6 w-6" />
-                 </Button>
-               </DialogTrigger>
-               <DialogContent>
-                 <DialogHeader>
-                   <DialogTitle>Edit Banner Image</DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4 py-4">
-                   <div className="flex flex-col gap-2">
-                     <label className="text-sm font-medium">Banner Image</label>
-                     <div className="h-64">
-                       <BannerImage
-                         url={bannerImage}
-                         editable={true}
-                         onUpdate={handleBannerUpdate}
-                       />
-                     </div>
-                   </div>
-                 </div>
-               </DialogContent>
-             </Dialog>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <Download className="h-6 w-6" />
+                  </Button>
+
+                  <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <ImageIcon className="h-6 w-6" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Banner Image</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Banner Image</label>
+                          <div className="h-64">
+                            <BannerImage
+                              url={bannerImage}
+                              editable={true}
+                              onUpdate={handleBannerUpdate}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-hidden">
-        <BlockNoteEditor pageId={pageId} onStatusChange={handleStatusChange} />
+      {/* Editor content with sidebar padding */}
+      <div
+        className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        style={{
+          paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+        }}
+      >
+        <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+          <div className="overflow-hidden">
+            <BlockNoteEditor pageId={pageId} />
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

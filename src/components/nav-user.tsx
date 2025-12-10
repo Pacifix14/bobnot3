@@ -1,6 +1,7 @@
 "use client"
 
 import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 import {
   BadgeCheck,
@@ -43,6 +44,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
 
   return (
     <SidebarMenu>
@@ -58,7 +60,7 @@ export function NavUser({
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold font-serif">{user.name}</span>
+                <span className="truncate font-semibold font-sans" style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif' }}>{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -77,7 +79,7 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold font-serif">{user.name}</span>
+                  <span className="truncate font-semibold font-sans" style={{ fontFamily: 'var(--font-inter), ui-sans-serif, system-ui, sans-serif' }}>{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
@@ -91,7 +93,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
                 <Settings />
                 Settings
               </DropdownMenuItem>

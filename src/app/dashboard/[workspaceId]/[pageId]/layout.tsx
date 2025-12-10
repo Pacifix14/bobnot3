@@ -4,6 +4,30 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PageLayoutClient } from "./page-layout-client";
 import { TRPCError } from "@trpc/server";
+import { type Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ workspaceId: string; pageId: string }>;
+}): Promise<Metadata> {
+  const { pageId } = await params;
+  const headersList = await headers();
+  
+  try {
+    const ctx = await createTRPCContext({ headers: headersList });
+    const caller = createCaller(ctx);
+    const page = await caller.page.getPage({ pageId });
+    
+    return {
+      title: page.title || "Untitled",
+    };
+  } catch (error) {
+    return {
+      title: "Page",
+    };
+  }
+}
 
 export default async function PageLayout({
   children,

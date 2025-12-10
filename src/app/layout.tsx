@@ -1,7 +1,8 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Bricolage_Grotesque } from "next/font/google";
+import { Crimson_Pro } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -10,7 +11,10 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { SuppressWarnings } from "@/components/suppress-warnings";
 
 export const metadata: Metadata = {
-  title: "bobnot3",
+  title: {
+    default: "bobnot3",
+    template: "%s | bobnot3",
+  },
   description: "Collaborative note-taking workspace",
   icons: [
     { rel: "icon", url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -19,17 +23,21 @@ export const metadata: Metadata = {
   ],
 };
 
-const bricolage = Bricolage_Grotesque({
+const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
-  variable: "--font-bricolage",
-  // Bricolage is variable, supports axes.
+  variable: "--font-crimson-pro",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${bricolage.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${crimsonPro.variable} ${inter.variable}`} suppressHydrationWarning>
       <body>
         <SuppressWarnings />
         <ThemeProvider

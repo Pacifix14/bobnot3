@@ -61,9 +61,15 @@ export function SmoothScrollContainer({
     // Ensure content has proper height calculation for Lenis
     content.style.minHeight = '100%';
 
+    // Smooth cubic ease-out for balanced smoothness and responsiveness
+    // Provides smooth deceleration while still stopping relatively quickly
+    const smoothEasing = (t: number) => {
+      return 1 - Math.pow(1 - t, 3);
+    };
+
     const lenis = new Lenis({
       duration,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: smoothEasing,
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
@@ -77,16 +83,34 @@ export function SmoothScrollContainer({
 
     lenisRef.current = lenis;
 
-    // Force Lenis to recalculate scroll dimensions multiple times
-    // This ensures it works with dynamically loaded content
+    // Throttle function to limit resize calls
+    let pendingResize = false;
+    const throttledResize = () => {
+      if (!pendingResize) {
+        pendingResize = true;
+        requestAnimationFrame(() => {
+          lenis.resize();
+          pendingResize = false;
+        });
+      }
+    };
+
+    // Debounce function for mutation observer (less frequent updates)
+    let mutationTimeout: NodeJS.Timeout | null = null;
+    const debouncedResize = () => {
+      if (mutationTimeout) {
+        clearTimeout(mutationTimeout);
+      }
+      mutationTimeout = setTimeout(() => {
+        throttledResize();
+      }, 150);
+    };
+
+    // Force Lenis to recalculate scroll dimensions
+    // Single resize call is sufficient - Lenis handles dynamic content well
     const recalculateHeight = () => {
       requestAnimationFrame(() => {
         lenis.resize();
-        // Recalculate multiple times to catch late-loading content
-        setTimeout(() => {
-          lenis.resize();
-          setTimeout(() => lenis.resize(), 200);
-        }, 100);
       });
     };
 
@@ -94,9 +118,7 @@ export function SmoothScrollContainer({
     
     // Also recalculate when images and other resources load
     const handleLoad = () => {
-      requestAnimationFrame(() => {
-        lenis.resize();
-      });
+      throttledResize();
     };
     
     window.addEventListener('load', handleLoad);
@@ -117,17 +139,14 @@ export function SmoothScrollContainer({
 
     requestAnimationFrame(raf);
 
-    // Handle window resize and content changes
+    // Handle window resize with throttling
     const handleResize = () => {
-      lenis.resize();
+      throttledResize();
     };
     
-    // Use ResizeObserver to detect content size changes
+    // Use ResizeObserver to detect content size changes with throttling
     const resizeObserver = new ResizeObserver(() => {
-      // Use requestAnimationFrame to batch resize calls
-      requestAnimationFrame(() => {
-        lenis.resize();
-      });
+      throttledResize();
     });
     
     resizeObserver.observe(content);
@@ -135,11 +154,9 @@ export function SmoothScrollContainer({
     resizeObserver.observe(container);
     window.addEventListener('resize', handleResize);
     
-    // Recalculate on content mutations (for dynamically loaded content)
+    // Recalculate on content mutations with debouncing
     const mutationObserver = new MutationObserver(() => {
-      requestAnimationFrame(() => {
-        lenis.resize();
-      });
+      debouncedResize();
     });
     
     mutationObserver.observe(content, {
@@ -150,6 +167,10 @@ export function SmoothScrollContainer({
     });
 
     return () => {
+      // Clear any pending timeouts
+      if (mutationTimeout) {
+        clearTimeout(mutationTimeout);
+      }
       resizeObserver.disconnect();
       mutationObserver.disconnect();
       window.removeEventListener('resize', handleResize);
