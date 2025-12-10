@@ -219,53 +219,240 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         try {
           if (!editor?.isEditable) return;
 
+          // Check if we're in the editor area
+          const target = keyboardEvent.target as HTMLElement;
+          const isInEditor = target?.closest('.bn-editor, .ProseMirror, [data-id="blocknote-editor"]');
+          if (!isInEditor) return;
+
+          // Check if we're in a list block context by checking the current block
+          const textCursorPosition = editor.getTextCursorPosition();
+          const currentBlock = textCursorPosition?.block;
+          const isInListBlock = currentBlock && (
+            currentBlock.type === 'bulletListItem' || 
+            currentBlock.type === 'numberedListItem' || 
+            currentBlock.type === 'checkListItem'
+          );
+
           const selection = editor.getSelection();
           
-          if (selection?.blocks && selection.blocks.length > 1) {
+          // Also check DOM selection to detect highlighted blocks
+          const domSelection = window.getSelection();
+          const hasTextSelection = domSelection && domSelection.toString().trim().length > 0;
+          
+          // Check if DOM selection contains list blocks
+          let domListBlocks: Element[] = [];
+          if (hasTextSelection && domSelection && domSelection.rangeCount > 0) {
+            const range = domSelection.getRangeAt(0);
+            
+            // Find the start and end containers
+            const startContainer = range.startContainer;
+            const endContainer = range.endContainer;
+            
+            // Find the list block elements that contain the selection
+            const startBlock = startContainer.nodeType === Node.TEXT_NODE 
+              ? startContainer.parentElement?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')
+              : (startContainer as Element)?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]');
+            
+            const endBlock = endContainer.nodeType === Node.TEXT_NODE
+              ? endContainer.parentElement?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')
+              : (endContainer as Element)?.closest('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]');
+            
+            if (startBlock || endBlock) {
+              // If we have start and end blocks, find all blocks between them
+              if (startBlock && endBlock && startBlock !== endBlock) {
+                const allBlocks: Element[] = [];
+                let current: Element | null = startBlock as Element;
+                const visited = new Set<Element>();
+                
+                // Walk from start to end block
+                while (current && allBlocks.length < 20 && !visited.has(current)) {
+                  visited.add(current);
+                  if (current.matches('[data-content-type="checkListItem"], [data-content-type="bulletListItem"], [data-content-type="numberedListItem"]')) {
+                    allBlocks.push(current);
+                  }
+                  if (current === endBlock) break;
+                  
+                  // Try next sibling first
+                  const nextSibling = current.nextElementSibling;
+                  if (nextSibling) {
+                    current = nextSibling;
+                  } else {
+                    // Go up to parent and try next sibling
+                    const parent = current.parentElement;
+                    current = parent?.nextElementSibling || null;
+                  }
+                }
+                domListBlocks = allBlocks;
+              } else if (startBlock) {
+                domListBlocks = [startBlock as Element];
+              } else if (endBlock) {
+                domListBlocks = [endBlock as Element];
+              }
+            }
+          }
+          
+          // If we're in a list block context OR have list blocks selected, prevent default immediately
+          const hasListContext = isInListBlock || 
+            (selection?.blocks && selection.blocks.some(b => 
+              b.type === 'bulletListItem' || b.type === 'numberedListItem' || b.type === 'checkListItem'
+            )) ||
+            domListBlocks.length > 0;
+          
+          if (!hasListContext) return; // Not in list context, allow default Tab behavior
+          
+          // Prevent default Tab behavior immediately
+          keyboardEvent.preventDefault();
+          keyboardEvent.stopPropagation();
+          keyboardEvent.stopImmediatePropagation();
+          
+          // Helper function to check if a block is a descendant of another block
+          const isDescendantOf = (childId: string, parentId: string, document: Block[]): boolean => {
+            const findBlock = (blocks: Block[], targetId: string): Block | null => {
+              for (const block of blocks) {
+                if (block.id === targetId) return block;
+                if (block.children) {
+                  const found = findBlock(block.children, targetId);
+                  if (found) return found;
+                }
+              }
+              return null;
+            };
+
+            const parentBlock = findBlock(document, parentId);
+            if (!parentBlock) return false;
+
+            const checkDescendants = (block: Block): boolean => {
+              if (block.id === childId) return true;
+              if (block.children) {
+                return block.children.some(child => checkDescendants(child));
+              }
+              return false;
+            };
+
+            return checkDescendants(parentBlock);
+          };
+
+          // Helper to process blocks for indentation
+          const processBlocks = async (blockIds: string[], isOutdent: boolean) => {
+            for (const blockId of blockIds) {
+              try {
+                await new Promise(resolve => setTimeout(resolve, 5));
+                
+                if (editor?.isEditable) {
+                  editor.focus();
+                  editor.setTextCursorPosition(blockId, "end");
+                  await new Promise(resolve => setTimeout(resolve, 5));
+                  
+                  if (isOutdent) {
+                    editor.unnestBlock();
+                  } else {
+                    editor.nestBlock();
+                  }
+                }
+              } catch (error) {
+                console.error(`Error ${isOutdent ? 'outdenting' : 'indenting'} block:`, error);
+              }
+            }
+          };
+
+          // Try BlockNote selection first
+          if (selection?.blocks && selection.blocks.length > 0) {
             const listBlocks = selection.blocks.filter(block => 
               block.type === 'bulletListItem' || block.type === 'numberedListItem' || block.type === 'checkListItem'
             );
             
             if (listBlocks.length > 0) {
-              // Prevent toolbar from capturing Tab key
-              keyboardEvent.preventDefault();
-              keyboardEvent.stopPropagation();
-              keyboardEvent.stopImmediatePropagation();
-              
-              setTimeout(() => {
-                try {
-                  if (!editor?.isEditable) return;
+              const document = editor.document;
+              const topLevelBlocks = listBlocks.filter(block => {
+                const isChildOfSelected = listBlocks.some(otherBlock => 
+                  otherBlock.id !== block.id && isDescendantOf(block.id, otherBlock.id, document)
+                );
+                return !isChildOfSelected;
+              });
 
-                  const processBlocks = async (blocks: typeof listBlocks, isOutdent: boolean) => {
-                    for (const block of blocks) {
-                      try {
-                        await new Promise(resolve => setTimeout(resolve, 5));
-                        
-                        if (editor?.isEditable) {
-                          editor.focus();
-                          editor.setTextCursorPosition(block.id, "end");
-                          await new Promise(resolve => setTimeout(resolve, 5));
-                          
-                          if (isOutdent) {
-                            editor.unnestBlock();
-                          } else {
-                            editor.nestBlock();
-                          }
-                        }
-                      } catch (error) {
-                        console.error(`Error ${isOutdent ? 'outdenting' : 'indenting'} block:`, error);
-                      }
+              const needsBulkHandling = listBlocks.length > 1 || topLevelBlocks.length !== listBlocks.length;
+              
+              if (needsBulkHandling && topLevelBlocks.length > 0) {
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    void processBlocks(topLevelBlocks.map(b => b.id), keyboardEvent.shiftKey);
+                  } catch (error) {
+                    console.error('Error in bulk indentation:', error);
+                  }
+                }, 0);
+                return false;
+              } else if (listBlocks.length === 1 && isInListBlock) {
+                // Single block indentation
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    const block = listBlocks[0]!;
+                    editor.setTextCursorPosition(block.id, "end");
+                    if (keyboardEvent.shiftKey) {
+                      editor.unnestBlock();
+                    } else {
+                      editor.nestBlock();
                     }
-                  };
-
-                  void processBlocks(listBlocks, keyboardEvent.shiftKey);
-                } catch (error) {
-                  console.error('Error in bulk indentation:', error);
-                }
-              }, 0);
-              
-              return false;
+                  } catch (error) {
+                    console.error('Error indenting single block:', error);
+                  }
+                }, 0);
+                return false;
+              }
             }
+          }
+          
+          // Fallback: Check DOM selection for highlighted list blocks
+          if (hasTextSelection && domListBlocks.length > 0) {
+            // Get block IDs from DOM elements
+            const blockIds = domListBlocks
+              .map(block => {
+                const blockOuter = block.closest('[data-node-type="blockOuter"]');
+                return blockOuter?.getAttribute('data-id') || null;
+              })
+              .filter((id): id is string => id !== null);
+            
+            if (blockIds.length > 0) {
+              // Filter out children that are nested under selected parents
+              const document = editor.document;
+              const topLevelBlockIds = blockIds.filter(blockId => {
+                const isChildOfSelected = blockIds.some(otherId => 
+                  otherId !== blockId && isDescendantOf(blockId, otherId, document)
+                );
+                return !isChildOfSelected;
+              });
+              
+              if (topLevelBlockIds.length > 0) {
+                setTimeout(() => {
+                  try {
+                    if (!editor?.isEditable) return;
+                    void processBlocks(topLevelBlockIds, keyboardEvent.shiftKey);
+                  } catch (error) {
+                    console.error('Error in bulk indentation via DOM selection:', error);
+                  }
+                }, 0);
+                return false;
+              }
+            }
+          }
+          
+          // If we're in a list block but no selection, handle single block indentation
+          if (isInListBlock && currentBlock) {
+            setTimeout(() => {
+              try {
+                if (!editor?.isEditable) return;
+                editor.setTextCursorPosition(currentBlock.id, "end");
+                if (keyboardEvent.shiftKey) {
+                  editor.unnestBlock();
+                } else {
+                  editor.nestBlock();
+                }
+              } catch (error) {
+                console.error('Error indenting current block:', error);
+              }
+            }, 0);
+            return false;
           }
         } catch (error) {
           console.error('Error handling bulk indentation:', error);
@@ -274,17 +461,27 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
     };
 
     // Capture Tab events before toolbar can intercept them
-    document.addEventListener('keydown', handleKeyDown, true);
+    // Use capture phase with highest priority
+    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
     
     const editorElement = document.querySelector('[data-id="blocknote-editor"]');
+    const proseMirrorElement = editorElement?.querySelector('.ProseMirror');
+    
     if (editorElement) {
-      editorElement.addEventListener('keydown', handleKeyDown, true);
+      editorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+    }
+    
+    if (proseMirrorElement) {
+      proseMirrorElement.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
     }
     
     return () => {
-      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
       if (editorElement) {
-        editorElement.removeEventListener('keydown', handleKeyDown, true);
+        editorElement.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
+      }
+      if (proseMirrorElement) {
+        proseMirrorElement.removeEventListener('keydown', handleKeyDown, { capture: true } as EventListenerOptions);
       }
     };
   }, [editor, isReady]);
