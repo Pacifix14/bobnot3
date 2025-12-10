@@ -63,6 +63,9 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
 
   // Track toggle list content to prevent it from moving when Enter is pressed
   const toggleListContentRef = useRef<{ blockId: string; content: Block["content"] } | null>(null);
+  
+  // Track previous document state to detect block deletions
+  const previousDocumentRef = useRef<Block[] | null>(null);
 
   // Handle editor changes
   useEffect(() => {
@@ -100,6 +103,86 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
           toggleListContentRef.current = null;
         }
       }
+
+      // Preserve indentation when parent block is deleted
+      const currentDocument = editor.document;
+      const previousDocument = previousDocumentRef.current;
+
+      if (previousDocument && currentDocument) {
+        // Helper function to find parent of a block in the document
+        const findParentBlock = (blocks: Block[], targetId: string): Block | null => {
+          for (const block of blocks) {
+            if (block.children) {
+              const childIds = block.children.map(c => c.id);
+              if (childIds.includes(targetId)) {
+                return block;
+              }
+              const found = findParentBlock(block.children, targetId);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        // Find blocks that were deleted (exist in previous but not in current)
+        const currentBlockIds = new Set(
+          currentDocument.map(block => block.id)
+        );
+        
+        const deletedBlocks = previousDocument.filter(
+          block => !currentBlockIds.has(block.id) && block.children && block.children.length > 0
+        );
+
+        // For each deleted block with children, preserve children's indentation
+        // BUT only if the children are actually orphaned (not just moved with a parent)
+        for (const deletedBlock of deletedBlocks) {
+          if (deletedBlock.children && deletedBlock.children.length > 0) {
+            // Check if children are orphaned (no longer have a parent) or if they're still nested
+            const orphanedChildren = deletedBlock.children.filter(child => {
+              const currentChild = editor.getBlock(child.id);
+              if (!currentChild) return false;
+              
+              // Check if this child still has a parent in the current document
+              const parent = findParentBlock(currentDocument, child.id);
+              // If no parent found, the child is orphaned and needs indentation preservation
+              return !parent;
+            });
+
+            // Only preserve indentation for truly orphaned children
+            if (orphanedChildren.length > 0) {
+              setTimeout(async () => {
+                try {
+                  if (!editor?.isEditable) return;
+                  
+                  // Indent each orphaned child to preserve their relative indentation
+                  for (const child of orphanedChildren) {
+                    const currentChild = editor.getBlock(child.id);
+                    if (currentChild) {
+                      // Set cursor to the child block and indent it using nestBlock
+                      editor.setTextCursorPosition(child.id, "start");
+                      await new Promise(resolve => setTimeout(resolve, 10));
+                      
+                      try {
+                        // Use nestBlock to indent (same as Tab key)
+                        editor.nestBlock();
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                      } catch (error) {
+                        // If nestBlock doesn't work, continue to next child
+                        console.error('Error indenting child block:', error);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error preserving indentation after block deletion:', error);
+                }
+              }, 100);
+            }
+          }
+        }
+      }
+
+      // Update previous document reference
+      previousDocumentRef.current = JSON.parse(JSON.stringify(currentDocument));
       
       setPageStatus("unsaved");
       if (saveTimeoutRef.current) {
@@ -109,6 +192,11 @@ const BlockNoteEditor = memo(function BlockNoteEditor({
         void saveToDatabase(editor.document);
       }, 1000);
     };
+
+    // Initialize previous document reference
+    if (editor.document) {
+      previousDocumentRef.current = JSON.parse(JSON.stringify(editor.document));
+    }
 
     // Subscribe to updates
     const unsubscribe = editor.onChange(handleChange);
