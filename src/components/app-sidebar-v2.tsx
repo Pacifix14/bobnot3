@@ -544,8 +544,15 @@ export function AppSidebarV2({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const edgeScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Dispatch event when sidebar open state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('sidebarv2-state-change', { detail: { open } });
+      window.dispatchEvent(event);
+    }
+  }, [open]);
 
-  
+
   useEffect(() => {
     setItems(initialItems);
   }, [initialItems]);
@@ -907,7 +914,7 @@ export function AppSidebarV2({
         {!open && (
           <motion.div
             key="closed-sidebar"
-            className="fixed top-4 left-4 z-[60] flex items-center gap-1 rounded-lg border border-white/10 bg-sidebar/40 p-1 shadow-sm"
+            className="fixed top-4 left-4 z-[60] flex flex-row items-center gap-1 rounded-lg border border-white/10 bg-sidebar/40 p-1 shadow-sm"
             style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -972,32 +979,32 @@ export function AppSidebarV2({
             key="open-sidebar"
             className="fixed top-4 left-4 z-50 flex flex-col rounded-lg border border-white/10 bg-sidebar/40 shadow-sm overflow-hidden"
             style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
-            initial={{ 
-              width: 72, // Starting width (same as closed state)
-              height: 42, // Starting height
-              opacity: 1 
+            initial={{
+              width: 72,
+              height: 42,
+              opacity: 1
             }}
-            animate={{ 
-              width: animationStage === 'closed' ? 72 : 288, // 72px to 288px (w-72 = 18rem = 288px)
-              height: animationStage === 'open' || animationStage === 'expanding-vertical' 
-                ? 'calc(100vh - 2rem)' 
+            animate={{
+              width: animationStage === 'closed' ? 72 : 288,
+              height: animationStage === 'open' || animationStage === 'expanding-vertical'
+                ? 'calc(100vh - 2rem)'
                 : 42,
-              opacity: 1 
+              opacity: 1
             }}
-            exit={{ 
-              opacity: 0, 
+            exit={{
+              opacity: 0,
               scale: 0.95,
               width: 72,
               height: 42
             }}
-            transition={{ 
-              width: { 
-                duration: 0.3, 
+            transition={{
+              width: {
+                duration: 0.3,
                 ease: [0.32, 0.72, 0, 1]
               },
-              height: { 
-                duration: 0.3, 
-                ease: [0.32, 0.72, 0, 1], 
+              height: {
+                duration: 0.3,
+                ease: [0.32, 0.72, 0, 1],
                 delay: animationStage === 'expanding-horizontal' ? 0.225 : 0
               },
               opacity: { duration: 0.2 },

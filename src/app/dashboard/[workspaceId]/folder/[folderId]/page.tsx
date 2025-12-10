@@ -40,7 +40,12 @@ export default async function FolderPage({
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className="flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+      style={{
+        paddingLeft: 'var(--sidebar-push-offset, 0px)',
+      }}
+    >
       <DashboardBreadcrumb items={breadcrumbItems} />
       <div className="flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto space-y-6 md:space-y-8">

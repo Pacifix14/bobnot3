@@ -19,7 +19,12 @@ export default async function WorkspacePage({
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className="flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+      style={{
+        paddingLeft: 'var(--sidebar-push-offset, 0px)',
+      }}
+    >
       <DashboardBreadcrumb items={breadcrumbItems} />
       <div className="flex items-center justify-center h-full text-muted-foreground px-4">
         <div className="text-center space-y-2 max-w-md">

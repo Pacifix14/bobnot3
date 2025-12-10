@@ -17,6 +17,7 @@ import { BannerImage } from "@/components/banner-image";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { setPageStatus } from "@/lib/page-status-ref";
+import { useSidebar } from "@/components/ui/sidebar";
 
 // Dynamically import BlockNote styles to avoid blocking lazy load
 // This ensures CSS only loads when the editor component is actually used
@@ -854,6 +855,7 @@ function BlockNoteEditorInner({
 }) {
   const router = useRouter();
   const utils = api.useUtils();
+  const { open } = useSidebar();
   const [title, setTitle] = useState(initialTitle);
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [bannerImage, setBannerImage] = useState(initialBannerImage);
@@ -941,20 +943,30 @@ function BlockNoteEditorInner({
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+    <>
       {/* Banner Image - Full width at top, behind other content */}
-      {bannerImage && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-screen h-55 z-0">
-          <BannerImage
-            url={bannerImage}
-            editable={false}
-            onUpdate={() => { /* read-only */ }}
-          />
-        </div>
-      )}
+      <div className="relative">
+        {bannerImage && (
+          <div className="w-full h-55 relative">
+            <BannerImage
+              url={bannerImage}
+              editable={false}
+              onUpdate={() => { /* read-only */ }}
+            />
+          </div>
+        )}
 
-      {/* New Header Layout */}
-      <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pt-24.5' : 'pt-12'}`}>
+        {/* Header content overlaying the banner */}
+        <div
+          className="transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          style={{
+            paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+            marginTop: bannerImage ? '-6rem' : '0',
+          }}
+        >
+          <div className="max-w-5xl mx-auto px-4 md:px-8">
+            {/* New Header Layout */}
+            <div className={`flex flex-col md:flex-row gap-6 items-end px-[54px] relative z-10 ${bannerImage ? 'pb-6' : 'pt-12 pb-6'}`}>
         {/* Cover Image - Smaller size (w-40 = 10rem) */}
         <div className="w-40 h-40 flex-shrink-0">
             <CoverImage
@@ -1043,14 +1055,27 @@ function BlockNoteEditorInner({
                  </div>
                </DialogContent>
              </Dialog>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="overflow-hidden">
-        <BlockNoteEditor pageId={pageId} />
       </div>
-    </div>
+
+      {/* Editor content with sidebar padding */}
+      <div
+        className="py-6 md:py-12 px-4 md:px-8 min-h-full overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        style={{
+          paddingLeft: 'calc(1rem + var(--sidebar-push-offset, 0px))',
+        }}
+      >
+        <div className="max-w-5xl mx-auto space-y-8 relative overflow-visible pb-20">
+          <div className="overflow-hidden">
+            <BlockNoteEditor pageId={pageId} />
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
