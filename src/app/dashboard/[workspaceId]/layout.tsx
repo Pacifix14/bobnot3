@@ -39,13 +39,13 @@ export default async function WorkspaceLayout({
   // Fetch user's own workspaces first
   // Fetch user's own workspaces and memberships
   const userWorkspaces = await db.workspace.findMany({
-      where: { 
-        OR: [
-          { ownerId: session.user.id },
-          { members: { some: { id: session.user.id } } }
-        ]
-      },
-      select: { id: true, name: true, ownerId: true }
+    where: {
+      OR: [
+        { ownerId: session.user.id },
+        { members: { some: { id: session.user.id } } }
+      ]
+    },
+    select: { id: true, name: true, ownerId: true }
   });
 
   const isUrlOwner = urlWorkspace.ownerId === session.user.id;
@@ -54,7 +54,7 @@ export default async function WorkspaceLayout({
   // If I am the owner of the URL workspace, show it.
   // If I am NOT the owner, ALWAYS use my own workspace as context (even for shared pages)
   let contextWorkspaceId = urlWorkspaceId;
-  
+
   if (!isUrlOwner) {
     // For non-owners, always use their own workspace as context
     if (userWorkspaces.length > 0) {
@@ -63,7 +63,7 @@ export default async function WorkspaceLayout({
       // If user has no workspaces, redirect to dashboard to create one
       redirect("/dashboard");
     }
-    
+
     // Verify they actually have access to the shared page (security check)
     const hasSharedAccess = await db.page.findFirst({
       where: {
@@ -86,14 +86,14 @@ export default async function WorkspaceLayout({
   // Fetch data for CONTEXT workspace
   const allFolders = await db.folder.findMany({
     where: { workspaceId: contextWorkspaceId },
-    include: { 
+    include: {
       pages: {
         orderBy: { order: 'asc' }
-      } 
+      }
     },
     orderBy: { order: 'asc' }
   });
-  
+
   const rootPages = await db.page.findMany({
     where: { workspaceId: contextWorkspaceId, folderId: null },
     orderBy: { order: 'asc' }
@@ -115,12 +115,12 @@ export default async function WorkspaceLayout({
 
   const folderMap = new Map<string, FolderNode>();
   const treeItems: Array<FolderNode | PageNode> = [];
-  
+
   allFolders.forEach(f => {
-    folderMap.set(f.id, { 
-      id: f.id, 
-      name: f.name, 
-      type: 'folder', 
+    folderMap.set(f.id, {
+      id: f.id,
+      name: f.name,
+      type: 'folder',
       children: [],
       isOpen: false
     });
@@ -159,51 +159,51 @@ export default async function WorkspaceLayout({
   // Fetch pages shared with me (excluding those in context workspace)
   // If context is MY workspace, shared pages from OTHER workspaces (like urlWorkspaceId) will appear here.
   const otherSharedPages = await db.page.findMany({
-      where: {
-          collaborators: { some: { id: session.user.id } },
-          workspaceId: { not: contextWorkspaceId }
-      },
-      include: {
-          workspace: true
-      },
-      orderBy: { updatedAt: 'desc' }
+    where: {
+      collaborators: { some: { id: session.user.id } },
+      workspaceId: { not: contextWorkspaceId }
+    },
+    include: {
+      workspace: true
+    },
+    orderBy: { updatedAt: 'desc' }
   });
 
   const formattedSharedPages = otherSharedPages.map(p => ({
-      id: p.id,
-      title: p.title,
-      workspaceId: p.workspaceId,
-      workspaceName: p.workspace.name
+    id: p.id,
+    title: p.title,
+    workspaceId: p.workspaceId,
+    workspaceName: p.workspace.name
   }));
 
   // Fetch folders shared with me (excluding those in context workspace)
   const otherSharedFolders = await db.folder.findMany({
-      where: {
-          collaborators: { some: { id: session.user.id } },
-          workspaceId: { not: contextWorkspaceId }
-      },
-      include: {
-          workspace: true,
-          pages: {
-            orderBy: { order: 'asc' }
-          }
-      },
-      orderBy: { updatedAt: 'desc' }
+    where: {
+      collaborators: { some: { id: session.user.id } },
+      workspaceId: { not: contextWorkspaceId }
+    },
+    include: {
+      workspace: true,
+      pages: {
+        orderBy: { order: 'asc' }
+      }
+    },
+    orderBy: { updatedAt: 'desc' }
   });
 
   const formattedSharedFolders = otherSharedFolders.map(f => ({
-      id: f.id,
-      name: f.name,
-      workspaceId: f.workspaceId,
-      workspaceName: f.workspace.name,
-      // We might need to recursively format children if we want deep nesting in shared view,
-      // but for now let's keep it simple: just the shared folder itself.
-      // If the user has access to a folder, they likely have access to its children too,
-      // but the `findMany` above only gets folders explicitly shared with them OR we need a recursive query.
-      // For MVP, let's assume "Shared with me" lists the *root* of the share.
-      // If I share Folder A, and it has Child B, Child B isn't explicitly shared, but accessible via A.
-      // The Sidebar component will need to handle fetching children of shared folders if they aren't loaded.
-      // For now, let's just pass the folder info.
+    id: f.id,
+    name: f.name,
+    workspaceId: f.workspaceId,
+    workspaceName: f.workspace.name,
+    // We might need to recursively format children if we want deep nesting in shared view,
+    // but for now let's keep it simple: just the shared folder itself.
+    // If the user has access to a folder, they likely have access to its children too,
+    // but the `findMany` above only gets folders explicitly shared with them OR we need a recursive query.
+    // For MVP, let's assume "Shared with me" lists the *root* of the share.
+    // If I share Folder A, and it has Child B, Child B isn't explicitly shared, but accessible via A.
+    // The Sidebar component will need to handle fetching children of shared folders if they aren't loaded.
+    // For now, let's just pass the folder info.
   }));
 
   const user = {
@@ -213,19 +213,19 @@ export default async function WorkspaceLayout({
   };
 
   const ownedWorkspaceParams = userWorkspaces.map(w => ({
-      name: w.name,
-      plan: w.ownerId === session.user.id ? "Owner" : "Member",
-      id: w.id
+    name: w.name,
+    plan: w.ownerId === session.user.id ? "Owner" : "Member",
+    id: w.id
   }));
 
   // Switcher only shows MY workspaces (since I'm in my context)
   let allWorkspaces = [...ownedWorkspaceParams];
-  
+
   // Sort to put context workspace first
   allWorkspaces = allWorkspaces.sort((a, b) => {
-      if (a.id === contextWorkspaceId) return -1;
-      if (b.id === contextWorkspaceId) return 1;
-      return 0;
+    if (a.id === contextWorkspaceId) return -1;
+    if (b.id === contextWorkspaceId) return 1;
+    return 0;
   });
 
   // Fetch user settings
@@ -236,22 +236,25 @@ export default async function WorkspaceLayout({
   const useSidebarV2 = userSettings?.sidebarVersion === "v2";
   const backgroundImage = userSettings?.backgroundImage ?? null;
 
-   return (
+  return (
     <div
-      className={`${inter.variable} font-sans min-h-screen w-full bg-cover bg-center bg-no-repeat`}
+      className={`${inter.variable} font-sans h-screen overflow-hidden w-full bg-cover bg-center bg-no-repeat`}
       style={{ backgroundImage: backgroundImage ? `url("${backgroundImage}")` : undefined }}
     >
-      <SidebarProvider>
+      <SidebarProvider
+        style={{ transform: "translate3d(0,0,0)" }}
+        className="m-2 md:m-3 h-[calc(100svh-1rem)] md:h-[calc(100svh-1.5rem)] !min-h-0 border border-sidebar-border rounded-xl shadow-sm overflow-hidden bg-sidebar w-auto"
+      >
         {useSidebarV2 ? (
-           <AppSidebarV2
-              workspaceId={contextWorkspaceId}
-              items={treeItems}
-              user={user}
-              workspaces={allWorkspaces}
-              isOwner={isContextOwner}
-              sharedPages={formattedSharedPages}
-              sharedFolders={formattedSharedFolders}
-           />
+          <AppSidebarV2
+            workspaceId={contextWorkspaceId}
+            items={treeItems}
+            user={user}
+            workspaces={allWorkspaces}
+            isOwner={isContextOwner}
+            sharedPages={formattedSharedPages}
+            sharedFolders={formattedSharedFolders}
+          />
         ) : (
           <AppSidebar
             workspaceId={contextWorkspaceId}
