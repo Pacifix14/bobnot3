@@ -243,7 +243,7 @@ export default async function WorkspaceLayout({
     >
       <SidebarProvider
         style={{ transform: "translate3d(0,0,0)" }}
-        className="m-2 md:m-3 h-[calc(100svh-1rem)] md:h-[calc(100svh-1.5rem)] !min-h-0 border border-sidebar-border rounded-xl shadow-sm overflow-hidden bg-background w-auto"
+        className="m-2 md:m-3 h-[calc(100svh-1rem)] md:h-[calc(100svh-1.5rem)] !min-h-0 border border-sidebar-border rounded-xl shadow-sm overflow-hidden bg-sidebar w-auto"
       >
         {useSidebarV2 ? (
           <AppSidebarV2

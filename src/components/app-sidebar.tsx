@@ -578,7 +578,7 @@ export function AppSidebar({
         <div className="group-data-[collapsible=icon]:hidden pt-1 px-0">
           <TeamSwitcher teams={workspacesWithIcons} />
         </div>
-        <SidebarSeparator className="mx-0" />
+        <SidebarSeparator className="mx-0 mb-2" />
       </SidebarHeader>
 
       <div className="flex min-h-0 flex-1 flex-col transition-all duration-300 ease-in-out mt-0">
