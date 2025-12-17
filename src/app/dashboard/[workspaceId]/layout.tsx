@@ -1,11 +1,10 @@
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { redirect } from "next/navigation";
-import { AppSidebar } from "@/components/app-sidebar";
-import { AppSidebarV2 } from "@/components/app-sidebar-v2";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarV2ContentWrapper } from "@/components/sidebar-v2-content-wrapper";
 import { Inter } from "next/font/google";
+import { SidebarWrapper } from "./sidebar-wrapper";
 
 export const dynamic = 'force-dynamic';
 
@@ -245,26 +244,16 @@ export default async function WorkspaceLayout({
         style={{ transform: "translate3d(0,0,0)" }}
         className="m-2 md:m-3 h-[calc(100svh-1rem)] md:h-[calc(100svh-1.5rem)] !min-h-0 border border-sidebar-border rounded-xl shadow-sm overflow-hidden bg-sidebar w-auto"
       >
-        {useSidebarV2 ? (
-          <AppSidebarV2
-            workspaceId={contextWorkspaceId}
-            items={treeItems}
-            user={user}
-            workspaces={allWorkspaces}
-            isOwner={isContextOwner}
-            sharedPages={formattedSharedPages}
-            sharedFolders={formattedSharedFolders}
-          />
-        ) : (
-          <AppSidebar
-            workspaceId={contextWorkspaceId}
-            items={treeItems}
-            user={user}
-            workspaces={allWorkspaces}
-            isOwner={isContextOwner}
-            sharedPages={formattedSharedPages}
-          />
-        )}
+        <SidebarWrapper
+          useSidebarV2={useSidebarV2}
+          workspaceId={contextWorkspaceId}
+          items={treeItems}
+          user={user}
+          workspaces={allWorkspaces}
+          isOwner={isContextOwner}
+          sharedPages={formattedSharedPages}
+          sharedFolders={formattedSharedFolders}
+        />
         <SidebarInset className="bg-transparent">
           {useSidebarV2 ? (
             <SidebarV2ContentWrapper>

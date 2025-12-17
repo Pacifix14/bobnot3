@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SmoothScrollContainer } from "@/components/smooth-scroll-container";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 function SettingsContent() {
   const router = useRouter();
@@ -114,20 +115,36 @@ function SettingsContent() {
     return '/dashboard';
   };
 
+  const [isNavigatingBack, setIsNavigatingBack] = useState(false);
+
   const handleBack = () => {
+    // Prevent multiple clicks
+    if (isNavigatingBack) return;
+    
+    setIsNavigatingBack(true);
+    
+    // Mark that we're navigating back from settings (for page animations)
+    sessionStorage.setItem('navigating-from-settings', 'true');
+    
     // Get stored return path
     const returnPath = sessionStorage.getItem('settings-return-path');
     
     // Validate and use stored path
     if (returnPath && isValidDashboardRoute(returnPath)) {
       sessionStorage.removeItem('settings-return-path'); // Clean up
-      router.push(returnPath);
+      
+      // Add a small delay for smooth transition
+      setTimeout(() => {
+        router.push(returnPath);
+      }, 150);
       return;
     }
     
     // Fallback: navigate to workspace or dashboard
     const fallbackPath = getFallbackPath();
-    router.push(fallbackPath);
+    setTimeout(() => {
+      router.push(fallbackPath);
+    }, 150);
   };
 
   if (!isMounted) {
@@ -166,15 +183,29 @@ function SettingsContent() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
         >
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleBack}
-            className="shrink-0 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-sm group"
+          <motion.div
+            initial={false}
+            animate={isNavigatingBack ? { scale: 0.95 } : { scale: 1 }}
+            transition={{ duration: 0.2 }}
           >
-            <ArrowLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            <span className="sr-only">Back</span>
-          </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleBack}
+              disabled={isNavigatingBack}
+              className={cn(
+                "shrink-0 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-sm group relative",
+                isNavigatingBack && "cursor-wait opacity-70"
+              )}
+            >
+              {isNavigatingBack ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <ArrowLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+              )}
+              <span className="sr-only">Back</span>
+            </Button>
+          </motion.div>
         </motion.div>
         <motion.div 
           initial={{ opacity: 0, x: -10 }}

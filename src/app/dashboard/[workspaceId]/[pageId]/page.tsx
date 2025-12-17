@@ -4,7 +4,8 @@ import { useParams } from "next/navigation";
 import { api } from "@/trpc/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react";
+import { motion } from "framer-motion";
 
 // Lazy load the heavy Editor component to improve initial page load
 const Editor = lazy(() => import("@/components/editor").then(module => ({ default: module.Editor })));
@@ -13,6 +14,21 @@ export default function PageEditor() {
   const params = useParams();
   const router = useRouter();
   const pageId = params.pageId as string;
+  
+  // Check sessionStorage synchronously on mount (client-side only)
+  const [isFromSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const fromSettings = sessionStorage.getItem('navigating-from-settings');
+      if (fromSettings === 'true') {
+        // Clean up after a delay
+        setTimeout(() => {
+          sessionStorage.removeItem('navigating-from-settings');
+        }, 500);
+        return true;
+      }
+    }
+    return false;
+  });
 
   // Use the cached page data from layout - React Query will share the cache
   // This avoids duplicate network requests
@@ -71,10 +87,16 @@ export default function PageEditor() {
   }
 
   return (
-    <>
+    <motion.div
+      key={pageId}
+      initial={isFromSettings ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="h-full"
+    >
       <Suspense fallback={null}>
         <Editor pageId={page.id} title={page.title} coverImage={page.coverImage} bannerImage={page.bannerImage} />
       </Suspense>
-    </>
+    </motion.div>
   );
 }

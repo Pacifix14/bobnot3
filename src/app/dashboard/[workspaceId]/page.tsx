@@ -1,6 +1,7 @@
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 import { db } from "@/server/db";
 import { type Metadata } from "next";
+import { WorkspacePageClient } from "./workspace-page-client";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,19 +36,6 @@ export default async function WorkspacePage({
   ];
 
   return (
-    <div
-      className="flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-      style={{
-        paddingLeft: 'var(--sidebar-push-offset, 0px)',
-      }}
-    >
-      <DashboardBreadcrumb items={breadcrumbItems} />
-      <div className="flex items-center justify-center h-full text-muted-foreground px-4">
-        <div className="text-center space-y-2 max-w-md">
-          <h2 className="text-lg md:text-xl font-serif text-foreground">Welcome to your workspace</h2>
-          <p className="text-sm md:text-base">Select a page from the sidebar to start writing.</p>
-        </div>
-      </div>
-    </div>
+    <WorkspacePageClient breadcrumbItems={breadcrumbItems} />
   );
 }
