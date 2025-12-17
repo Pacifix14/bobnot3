@@ -236,8 +236,8 @@
   }
 
   /* Sidebar uses Inter font with increased weight and smaller size */
-  [data-sidebar],
-  [data-sidebar] *,
+  [data-sidebar]:not([data-sidebar="menu"]),
+  [data-sidebar]:not([data-sidebar="menu"]) *,
   .sidebar,
   .sidebar * {
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif !important;
@@ -246,14 +246,28 @@
   }
 
   /* Sidebar menu items specifically */
-  [data-sidebar] button,
-  [data-sidebar] a,
-  [data-sidebar] span,
+  [data-sidebar]:not([data-sidebar="menu"]) button,
+  [data-sidebar]:not([data-sidebar="menu"]) a,
+  [data-sidebar]:not([data-sidebar="menu"]) span,
   .sidebar button,
   .sidebar a,
   .sidebar span {
     font-weight: 500 !important;
     font-size: 0.8125rem !important;
+  }
+
+  /* Settings sidebar uses Crimson Pro font */
+  [data-sidebar="menu"],
+  [data-sidebar="menu"] * {
+    font-family: var(--font-crimson-pro), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+    font-weight: 400 !important;
+  }
+
+  /* Settings sidebar menu items specifically */
+  [data-sidebar="menu"] button,
+  [data-sidebar="menu"] a,
+  [data-sidebar="menu"] span {
+    font-weight: 400 !important;
   }
 }
 

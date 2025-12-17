@@ -16,7 +16,13 @@ function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const currentTab = searchParams.get("tab") || "general";
+  const serverTab = searchParams.get("tab") || "general";
+  
+  // Optimistic state management for tab switching
+  const [optimisticTab, setOptimisticTab] = useState<string | null>(null);
+  const [isSwitching, setIsSwitching] = useState(false);
+  
+  const currentTab = optimisticTab || serverTab;
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -41,14 +47,45 @@ function SettingsContent() {
           // Invalid referrer URL, ignore
         }
       }
+      
+      // Debug: Verify font is applied correctly
+      if (process.env.NODE_ENV === 'development') {
+        setTimeout(() => {
+          const sidebar = document.querySelector('aside[data-sidebar]');
+          if (sidebar) {
+            const computed = window.getComputedStyle(sidebar);
+            console.log('[Settings Sidebar Debug]', {
+              fontFamily: computed.fontFamily,
+              fontWeight: computed.fontWeight,
+              fontSize: computed.fontSize,
+              referrer: document.referrer,
+              hasDataSidebar: sidebar.hasAttribute('data-sidebar'),
+            });
+          }
+        }, 100);
+      }
     }
   }, []);
 
   const handleTabChange = (tab: string) => {
+    // Prevent clicks if already switching or if already selected
+    if (isSwitching) return;
+    if (currentTab === tab) return;
+    
+    // Optimistic update
+    setOptimisticTab(tab);
+    setIsSwitching(true);
+    
+    // Update URL
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tab);
-    // Use replace instead of push to avoid adding to history
     router.replace(`/dashboard/settings?${params.toString()}`);
+    
+    // Clear loading state after a brief delay (simulates smooth transition)
+    setTimeout(() => {
+      setIsSwitching(false);
+      setOptimisticTab(null);
+    }, 300);
   };
 
   const isValidDashboardRoute = (path: string): boolean => {
@@ -156,6 +193,7 @@ function SettingsContent() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar - Fixed width, scrolls independently */}
         <motion.aside 
+          data-sidebar="menu"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
@@ -171,7 +209,7 @@ function SettingsContent() {
               <h2 className="mb-2 px-1 text-sm font-semibold tracking-tight text-muted-foreground/70 uppercase">
                 Configuration
               </h2>
-              <SettingsNav activeTab={currentTab} onTabChange={handleTabChange} />
+              <SettingsNav activeTab={currentTab} onTabChange={handleTabChange} isSwitching={isSwitching} />
             </motion.div>
           </div>
         </motion.aside>
@@ -186,7 +224,7 @@ function SettingsContent() {
             <div className="max-w-4xl mx-auto p-6 md:p-10 lg:p-12 space-y-8">
               {/* Mobile Nav (visible only on small screens) */}
               <div className="md:hidden mb-8">
-                 <SettingsNav activeTab={currentTab} onTabChange={handleTabChange} />
+                 <SettingsNav activeTab={currentTab} onTabChange={handleTabChange} isSwitching={isSwitching} />
                  <Separator className="my-6" />
               </div>
 
