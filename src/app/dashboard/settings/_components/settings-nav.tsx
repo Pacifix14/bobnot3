@@ -47,8 +47,28 @@ export function SettingsNav({ activeTab, onTabChange, isSwitching = false }: Set
           <motion.button
             key={item.id}
             initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
+            animate={
+              isActive && isSwitching
+                ? {
+                    opacity: 1,
+                    x: 0,
+                    scale: [1, 1.01, 1],
+                  }
+                : { opacity: 1, x: 0 }
+            }
+            transition={
+              isActive && isSwitching
+                ? {
+                    scale: {
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
+                    opacity: { duration: 0.3, delay: index * 0.05 },
+                    x: { duration: 0.3, delay: index * 0.05 },
+                  }
+                : { duration: 0.3, delay: index * 0.05 }
+            }
             onClick={() => !item.disabled && !isSwitching && onTabChange(item.id)}
             disabled={item.disabled || isSwitching}
             className={cn(
@@ -62,25 +82,6 @@ export function SettingsNav({ activeTab, onTabChange, isSwitching = false }: Set
             )}
             whileHover={!item.disabled && !isActive && !isSwitching ? { scale: 1.01 } : {}}
             whileTap={!item.disabled && !isSwitching ? { scale: 0.98 } : {}}
-            initial={false}
-            animate={
-              isActive && isSwitching
-                ? {
-                    scale: [1, 1.01, 1],
-                  }
-                : {}
-            }
-            transition={
-              isActive && isSwitching
-                ? {
-                    scale: {
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    },
-                  }
-                : { duration: 0.15 }
-            }
           >
             {isActive && (
               <motion.div
