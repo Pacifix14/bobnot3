@@ -1,7 +1,7 @@
 "use client"
 
 import { signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 import {
   BadgeCheck,
@@ -45,6 +45,15 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+  const pathname = usePathname()
+
+  const handleSettingsClick = () => {
+    // Store current path as return path if not already on settings page
+    if (pathname && !pathname.startsWith('/dashboard/settings')) {
+      sessionStorage.setItem('settings-return-path', pathname)
+    }
+    router.push("/dashboard/settings")
+  }
 
   return (
     <SidebarMenu>
@@ -93,7 +102,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
+              <DropdownMenuItem onClick={handleSettingsClick}>
                 <Settings />
                 Settings
               </DropdownMenuItem>

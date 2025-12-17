@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SettingsNav } from "./_components/settings-nav";
 import AppearanceForm from "./_components/appearance-form";
 import GeneralSettings from "./_components/general-settings";
@@ -14,18 +14,82 @@ import { SmoothScrollContainer } from "@/components/smooth-scroll-container";
 function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const currentTab = searchParams.get("tab") || "general";
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     document.title = "Settings | bobnot3";
+    
+    // Store return path on first load if not already stored and we have a valid referrer
+    if (typeof window !== 'undefined') {
+      const storedPath = sessionStorage.getItem('settings-return-path');
+      const referrer = document.referrer;
+      
+      // If no stored path and we have a same-origin referrer that's not settings, store it
+      if (!storedPath && referrer && 
+          new URL(referrer).origin === window.location.origin &&
+          !referrer.includes('/dashboard/settings')) {
+        try {
+          const referrerPath = new URL(referrer).pathname;
+          if (referrerPath.startsWith('/dashboard/')) {
+            sessionStorage.setItem('settings-return-path', referrerPath);
+          }
+        } catch {
+          // Invalid referrer URL, ignore
+        }
+      }
+    }
   }, []);
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tab);
-    router.push(`/dashboard/settings?${params.toString()}`);
+    // Use replace instead of push to avoid adding to history
+    router.replace(`/dashboard/settings?${params.toString()}`);
+  };
+
+  const isValidDashboardRoute = (path: string): boolean => {
+    // Check if path is a valid dashboard route (not settings)
+    return path.startsWith('/dashboard/') && 
+           path !== '/dashboard/settings' &&
+           !path.startsWith('/dashboard/settings');
+  };
+
+  const getFallbackPath = (): string => {
+    // Try to extract workspaceId from referrer
+    // If we have a workspace context, return to workspace page
+    // Otherwise, return to dashboard root
+    if (typeof window !== 'undefined' && document.referrer) {
+      try {
+        const referrerPath = new URL(document.referrer).pathname;
+        const workspaceMatch = referrerPath.match(/^\/dashboard\/([^/]+)/);
+        if (workspaceMatch && workspaceMatch[1] !== 'settings') {
+          return `/dashboard/${workspaceMatch[1]}`;
+        }
+      } catch {
+        // Invalid referrer, continue to default
+      }
+    }
+    
+    return '/dashboard';
+  };
+
+  const handleBack = () => {
+    // Get stored return path
+    const returnPath = sessionStorage.getItem('settings-return-path');
+    
+    // Validate and use stored path
+    if (returnPath && isValidDashboardRoute(returnPath)) {
+      sessionStorage.removeItem('settings-return-path'); // Clean up
+      router.push(returnPath);
+      return;
+    }
+    
+    // Fallback: navigate to workspace or dashboard
+    const fallbackPath = getFallbackPath();
+    router.push(fallbackPath);
   };
 
   if (!isMounted) {
@@ -52,7 +116,7 @@ function SettingsContent() {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => router.back()}
+          onClick={handleBack}
           className="shrink-0 rounded-full hover:bg-muted"
         >
           <ArrowLeft className="h-5 w-5" />
