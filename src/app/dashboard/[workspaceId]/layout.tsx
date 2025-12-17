@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarV2ContentWrapper } from "@/components/sidebar-v2-content-wrapper";
 import { Inter } from "next/font/google";
 import { SidebarWrapper } from "./sidebar-wrapper";
+import { LoginAnimationWrapper } from "./login-animation-wrapper";
 
 export const dynamic = 'force-dynamic';
 
@@ -255,15 +256,17 @@ export default async function WorkspaceLayout({
           sharedFolders={formattedSharedFolders}
         />
         <SidebarInset className="bg-transparent">
-          {useSidebarV2 ? (
-            <SidebarV2ContentWrapper>
-              {children}
-            </SidebarV2ContentWrapper>
-          ) : (
-            <div className="flex-1 h-full w-full">
-              {children}
-            </div>
-          )}
+          <LoginAnimationWrapper>
+            {useSidebarV2 ? (
+              <SidebarV2ContentWrapper>
+                {children}
+              </SidebarV2ContentWrapper>
+            ) : (
+              <div className="flex-1 h-full w-full">
+                {children}
+              </div>
+            )}
+          </LoginAnimationWrapper>
         </SidebarInset>
       </SidebarProvider>
     </div>

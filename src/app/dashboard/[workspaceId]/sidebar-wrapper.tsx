@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppSidebarV2 } from "@/components/app-sidebar-v2";
@@ -26,18 +26,23 @@ export function SidebarWrapper({
   sharedPages,
   sharedFolders,
 }: SidebarWrapperProps) {
-  // Check sessionStorage synchronously on mount (client-side only)
-  const [isFromSettings] = useState(() => {
+  // Start with false to match server render, then check after hydration
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  // Check sessionStorage after mount to avoid hydration mismatch
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const fromSettings = sessionStorage.getItem('navigating-from-settings');
-      return fromSettings === 'true';
+      const fromSettings = sessionStorage.getItem('navigating-from-settings') === 'true';
+      const justLoggedIn = sessionStorage.getItem('just-logged-in') === 'true';
+      if (fromSettings || justLoggedIn) {
+        setShouldAnimate(true);
+      }
     }
-    return false;
-  });
+  }, []);
 
   return (
     <motion.div
-      initial={isFromSettings ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
+      initial={shouldAnimate ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="h-full"

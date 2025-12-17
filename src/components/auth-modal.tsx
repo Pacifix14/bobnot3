@@ -50,6 +50,10 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
     setIsLoading(true);
     setError(null);
     try {
+      // Set flag before redirect for login animation
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('just-logged-in', 'true');
+      }
       await signIn("google", {
         callbackUrl: "/dashboard",
         redirect: true,
@@ -57,6 +61,10 @@ export function AuthModal({ open, onOpenChange, defaultView = "signin" }: AuthMo
         } catch {
       setError("Failed to sign in with Google. Please try again.");
       setIsLoading(false);
+      // Remove flag on error
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('just-logged-in');
+      }
     }
   };
 

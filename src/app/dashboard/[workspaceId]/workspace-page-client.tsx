@@ -9,24 +9,44 @@ interface WorkspacePageClientProps {
 }
 
 export function WorkspacePageClient({ breadcrumbItems }: WorkspacePageClientProps) {
-  // Check sessionStorage synchronously on mount (client-side only)
-  const [isFromSettings] = useState(() => {
+  // Start with false to match server render, then check after hydration
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  // Check sessionStorage after mount to avoid hydration mismatch
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const fromSettings = sessionStorage.getItem('navigating-from-settings');
-      if (fromSettings === 'true') {
-        // Clean up after a delay
-        setTimeout(() => {
-          sessionStorage.removeItem('navigating-from-settings');
-        }, 500);
-        return true;
+      const fromSettings = sessionStorage.getItem('navigating-from-settings') === 'true';
+      const justLoggedIn = sessionStorage.getItem('just-logged-in') === 'true';
+      
+      if (fromSettings || justLoggedIn) {
+        setShouldAnimate(true);
+        
+        // Clean up after animation
+        const timers: NodeJS.Timeout[] = [];
+        if (fromSettings) {
+          const timer = setTimeout(() => {
+            sessionStorage.removeItem('navigating-from-settings');
+          }, 500);
+          timers.push(timer);
+        }
+        if (justLoggedIn) {
+          const timer = setTimeout(() => {
+            sessionStorage.removeItem('just-logged-in');
+          }, 500);
+          timers.push(timer);
+        }
+        
+        return () => {
+          timers.forEach(timer => clearTimeout(timer));
+        };
       }
     }
-    return false;
-  });
+  }, []);
 
   return (
     <motion.div
-      initial={isFromSettings ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+      key={shouldAnimate ? 'animate' : 'no-animate'}
+      initial={shouldAnimate ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
@@ -36,7 +56,7 @@ export function WorkspacePageClient({ breadcrumbItems }: WorkspacePageClientProp
     >
       <DashboardBreadcrumb items={breadcrumbItems} />
       <motion.div 
-        initial={isFromSettings ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
         className="flex items-center justify-center h-full text-muted-foreground px-4"
